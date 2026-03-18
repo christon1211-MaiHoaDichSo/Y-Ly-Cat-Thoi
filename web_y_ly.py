@@ -147,7 +147,7 @@ col_logo, col_title = st.columns([1, 15]) # Tạo 2 cột: Cột 1 rất nhỏ �
 
 with col_logo:
     # Bạn có thể thay đổi số 45 ở width để logo to ra hoặc nhỏ lại cho vừa mắt
-    st.image("logo.png", width=45) 
+    st.image("logo.png", width=90) 
 
 with col_title:
     # Dùng HTML để đẩy dòng chữ lên một chút cho thẳng hàng canh giữa với Logo
