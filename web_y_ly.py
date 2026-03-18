@@ -161,7 +161,7 @@ img_base64 = get_base64_of_bin_file('logo.png')
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <img src="data:image/png;base64,{img_base64}" width="70" style="margin-right: 15px; border-radius: 8px;">
+        <img src="data:image/png;base64,{img_base64}" width="90" style="margin-right: 10px; border-radius: 8px;">
         <h1 style="margin: 0; padding: 0; font-size: 32px;">Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>
     </div>
     """,
