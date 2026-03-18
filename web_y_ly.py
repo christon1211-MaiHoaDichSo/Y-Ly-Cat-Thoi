@@ -137,12 +137,22 @@ class YLyCatThoiEngine:
 # GIAO DIỆN WEB VỚI STREAMLIT (THAY THẾ APP CŨ)
 # ==============================================================================
 # 1. Cấu hình trang
-st.set_page_config(page_title="Y Lý Cát Thời", page_icon="☯️", layout="wide")
+st.set_page_config(page_title="Y Lý Cát Thời", page_icon="logo.png", layout="wide")
 
 import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán dòng import này nếu chưa có nhé
 
 # 2. Tiêu đề và Đồng hồ Client-side
-st.title("☯️ Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số ☯️")
+# --- KHU VỰC TIÊU ĐỀ MỚI CÓ LOGO TÙY CHỈNH ---
+col_logo, col_title = st.columns([1, 15]) # Tạo 2 cột: Cột 1 rất nhỏ để chứa logo, cột 2 rộng để chứa chữ
+
+with col_logo:
+    # Bạn có thể thay đổi số 45 ở width để logo to ra hoặc nhỏ lại cho vừa mắt
+    st.image("logo.png", width=45) 
+
+with col_title:
+    # Dùng HTML để đẩy dòng chữ lên một chút cho thẳng hàng canh giữa với Logo
+    st.markdown("<h1 style='margin-top: -15px;'>Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>", unsafe_allow_html=True)
+# ----------------------------------------------
 
 # Đây là đoạn mã HTML/JS nhúng thẳng vào web. 
 # Nó sẽ chạy trên trình duyệt của người dùng, lấy Múi Giờ và Thời Gian chính xác tại nơi họ đang đứng (từng giây một).
