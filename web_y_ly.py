@@ -3,6 +3,7 @@ import google.generativeai as genai
 import datetime
 import calendar
 import random
+import base64
 from lunarcalendar import Converter, Solar, Lunar
 
 # ==============================================================================
@@ -142,17 +143,32 @@ st.set_page_config(page_title="Y Lý Cát Thời", page_icon="logo.png", layout=
 import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán dòng import này nếu chưa có nhé
 
 # 2. Tiêu đề và Đồng hồ Client-side
-# --- KHU VỰC TIÊU ĐỀ MỚI CÓ LOGO TÙY CHỈNH ---
-col_logo, col_title = st.columns([0.5, 20]) # Tạo 2 cột: Cột 1 rất nhỏ để chứa logo, cột 2 rộng để chứa chữ
+# --- KHU VỰC TIÊU ĐỀ MỚI (CANH CHỈNH HOÀN HẢO 100%) ---
 
-with col_logo:
-    # Bạn có thể thay đổi số 45 ở width để logo to ra hoặc nhỏ lại cho vừa mắt
-    st.image("logo.png", width=90) 
+# 1. Hàm đọc và mã hóa file logo của bạn
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        return "" # Nếu không tìm thấy file, sẽ không bị sập web
 
-with col_title:
-    # Dùng HTML để đẩy dòng chữ lên một chút cho thẳng hàng canh giữa với Logo
-    st.markdown("<h1 style='margin-top: -15px;'>Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>", unsafe_allow_html=True)
-# ----------------------------------------------
+# Lấy mã của logo (Nhớ đảm bảo file tên là logo.png và để cùng thư mục)
+img_base64 = get_base64_of_bin_file('logo.png')
+
+# 2. Dùng Flexbox để khóa chặt Logo và Chữ trên cùng 1 trục ngang
+st.markdown(
+    f"""
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <img src="data:image/png;base64,{img_base64}" width="70" style="margin-right: 15px; border-radius: 8px;">
+        <h1 style="margin: 0; padding: 0; font-size: 32px;">Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown("---")
+# --------------------------------------------------------
 
 # Đây là đoạn mã HTML/JS nhúng thẳng vào web. 
 # Nó sẽ chạy trên trình duyệt của người dùng, lấy Múi Giờ và Thời Gian chính xác tại nơi họ đang đứng (từng giây một).
