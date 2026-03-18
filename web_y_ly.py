@@ -143,7 +143,7 @@ import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán 
 
 # 2. Tiêu đề và Đồng hồ Client-side
 # --- KHU VỰC TIÊU ĐỀ MỚI CÓ LOGO TÙY CHỈNH ---
-col_logo, col_title = st.columns([1, 15]) # Tạo 2 cột: Cột 1 rất nhỏ để chứa logo, cột 2 rộng để chứa chữ
+col_logo, col_title = st.columns([1, 20]) # Tạo 2 cột: Cột 1 rất nhỏ để chứa logo, cột 2 rộng để chứa chữ
 
 with col_logo:
     # Bạn có thể thay đổi số 45 ở width để logo to ra hoặc nhỏ lại cho vừa mắt
