@@ -90,29 +90,46 @@ class YLyCatThoiEngine:
         bo_phan = bo_phan.lower()
         chi_thang = self.CHI[(thang + 1) % 12]
 
+        # 1. TAM PHÁ (Xung khắc rủi ro)
         if ngay_chi == self.LUC_XUNG.get(nam): benh_an_tho.append(f"[Tuế Phá]: Ngày {ngay_chi} xung Năm {nam}.")
         if ngay_chi == self.LUC_XUNG.get(chi_thang): benh_an_tho.append(f"[Nguyệt Phá]: Ngày {ngay_chi} xung Tháng {chi_thang}.")
         if gio == self.LUC_XUNG.get(ngay_chi): benh_an_tho.append(f"[Nhật Phá]: Giờ {gio} xung Ngày {ngay_chi}.")
 
-        if gio in cac_gio_hoang_dao: benh_an_tho.append(f"[Hoàng Đạo]: Giờ {gio}.")
-        else: benh_an_tho.append(f"[Hắc Đạo]: Giờ {gio}.")
+        # 2. ĐẠI ĐẠO
+        if gio in cac_gio_hoang_dao: benh_an_tho.append(f"[Hoàng Đạo]: Giờ {gio} - Khí quang hanh thông.")
+        else: benh_an_tho.append(f"[Hắc Đạo]: Giờ {gio} - Trược khí cản trở.")
 
-        if ngay_chi == self.HUYET_KY.get(thang): benh_an_tho.append("[Huyết Kỵ]: Có mặt (Kỵ chảy máu).")
-        if ngay_chi == self.TU_KHI.get(thang): benh_an_tho.append("[Tử Khí]: Có mặt (Sinh khí cạn).")
-        if ngay_chi == self.THIEN_Y.get(thang): benh_an_tho.append("[Thiên Y]: Có mặt (Đại cát y tế).")
-        if ngay_chi == self.DIA_Y.get(thang): benh_an_tho.append("[Địa Y]: Có mặt (Tốt đông y).")
-        if gio == self.NHAT_Y.get(ngay_can): benh_an_tho.append(f"[Nhật Y]: Giờ {gio} cư ngụ.")
-        if ngay_chi == self.HUYET_CHI.get(thang): benh_an_tho.append("[Huyết Chi]: Có mặt (Da rỉ máu).")
-        if gio == self.BENH_PHU.get(nam): benh_an_tho.append("[Bệnh Phù]: Có mặt (Trược khí).")
+        # 3. TỨ ĐẠI HUNG TINH (Y Lý)
+        if ngay_chi == self.HUYET_KY.get(thang): benh_an_tho.append("[Huyết Kỵ]: Có mặt (Kỵ chảy máu, dao kéo rạch da).")
+        if ngay_chi == self.TU_KHI.get(thang): benh_an_tho.append("[Tử Khí]: Có mặt (Sinh khí cạn, kỵ can thiệp phẫu thuật nặng).")
+        if ngay_chi == self.HUYET_CHI.get(thang): benh_an_tho.append("[Huyết Chi]: Có mặt (Da rỉ máu, tụ máu bầm, xuất huyết).")
+        if gio == self.BENH_PHU.get(nam): benh_an_tho.append("[Bệnh Phù]: Có mặt (Trược khí hội tụ, dễ viêm nhiễm, lâu lành).")
 
-        vung_nhan_than = [(self.NT_NGAY.get(ngay_am, ""), f"Ngày Âm"), (self.NT_CAN.get(ngay_can, ""), f"Nhật Can"), (self.NT_CHI.get(ngay_chi, ""), f"Nhật Chi"), (self.NT_GIO.get(gio, ""), f"Thời/Giờ")]
-        for nt_text, nt_source in vung_nhan_than:
-            if nt_text and any(bp in nt_text.lower() or nt_text.lower() in bp for bp in bo_phan.split()):
-                benh_an_tho.append(f"[Phạm Nhân Thần theo {nt_source}]: Tại vị trí {nt_text.upper()}. Nguy cơ Thích Huyết/Thích Hại/Âm Thương.")
+        # 4. TAM ĐẠI CÁT THẦN (Y Khoa)
+        if ngay_chi == self.THIEN_Y.get(thang): benh_an_tho.append("[Thiên Y]: Có mặt (Đại cát y tế, dễ gặp thầy giỏi thuốc hay).")
+        if ngay_chi == self.DIA_Y.get(thang): benh_an_tho.append("[Địa Y]: Có mặt (Tốt cho đông y, bốc thuốc, điều dưỡng).")
+        if gio == self.NHAT_Y.get(ngay_can): benh_an_tho.append(f"[Nhật Y]: Giờ {gio} cư ngụ (Có Thần Y trợ lực, giải trừ tai ách).")
 
+        # 5. TAM SÁT NHÂN THẦN (Phân tách rõ ràng)
+        # Theo Y Lý: Phạm Ngày -> Thích Huyết Sát | Phạm Can/Chi -> Thích Hại Sát | Phạm Giờ -> Âm Thương Sát
+        nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
+        if nt_ngay_text and any(bp in nt_ngay_text.lower() or nt_ngay_text.lower() in bp for bp in bo_phan.split()):
+            benh_an_tho.append(f"[Thích Huyết Sát]: Phạm Nhân Thần Ngày tại {nt_ngay_text.upper()}. Tuyệt đối kỵ rạch da, Thích Huyết.")
+
+        nt_can_text = self.NT_CAN.get(ngay_can, "")
+        nt_chi_text = self.NT_CHI.get(ngay_chi, "")
+        if (nt_can_text and any(bp in nt_can_text.lower() or nt_can_text.lower() in bp for bp in bo_phan.split())) or \
+           (nt_chi_text and any(bp in nt_chi_text.lower() or nt_chi_text.lower() in bp for bp in bo_phan.split())):
+            benh_an_tho.append(f"[Thích Hại Sát]: Phạm Nhân Thần Can/Chi tại vùng {nt_can_text.upper()} - {nt_chi_text.upper()}. Nguy cơ tai biến nếu châm cứu (Thích Hại).")
+
+        nt_gio_text = self.NT_GIO.get(gio, "")
+        if nt_gio_text and any(bp in nt_gio_text.lower() or nt_gio_text.lower() in bp for bp in bo_phan.split()):
+            benh_an_tho.append(f"[Âm Thương Sát]: Phạm Thời Thần (Giờ) tại {nt_gio_text.upper()}. Nguy cơ tổn thương ngầm, nội thương cơ xương khớp.")
+
+        # 6. LƯU CHÚ KHÍ HUYẾT
         luu_chu_text = LUU_CHU_DETAILS.get(gio, "")
         if luu_chu_text and any(bp in luu_chu_text.lower() or luu_chu_text.lower() in bp for bp in bo_phan.split()):
-            benh_an_tho.append(f"[Phạm Lưu Chú]: Khí huyết đang dồn về.")
+            benh_an_tho.append(f"[Phạm Lưu Chú]: Khí huyết đang dồn về mãnh liệt. Cẩn thận sốc phản vệ hoặc xuất huyết cấp.")
 
         return "\n".join(benh_an_tho) if benh_an_tho else "[Bình Thường]: Không phạm sát tinh, không có cát thần."
 
@@ -292,7 +309,18 @@ if btn_phan_tich:
                 data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
             )
 
+            # --- THÊM ĐOẠN NÀY VÀO ĐỂ LƯƠNG Y KIỂM TRA THUẬT TOÁN ---
+            with st.expander("🛠️ Xem Cửu Sát Đồ & Báo Cáo Dịch Lý (Bản Thô)", expanded=False):
+                st.markdown("**Hệ thống đã tự động chạy rà soát các quy tắc:**")
+                st.markdown("- **Tam Phá:** Tuế Phá, Nguyệt Phá, Nhật Phá.")
+                st.markdown("- **Tứ Đại Hung Tinh:** Huyết Kỵ, Tử Khí, Huyết Chi, Bệnh Phù.")
+                st.markdown("- **Tam Sát Nhân Thần:** Thích Huyết Sát, Thích Hại Sát, Âm Thương Sát.")
+                st.markdown("- **Tam Đại Cát Thần:** Thiên Y, Địa Y, Nhật Y.")
+                st.text_area("Hồ sơ thô gửi cho A.I phân tích:", value=benh_an_tho, height=180, disabled=True)
+            # --------------------------------------------------------
+
             context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
+            # ... (Phần code xin_loi_khuyen_ai bên dưới giữ nguyên)
 
             # Gọi hàm AI (Nếu câu hỏi trùng, nó sẽ lấy từ Caching ra ngay lập tức)
             loi_khuyen = xin_loi_khuyen_ai(context)
