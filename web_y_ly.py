@@ -304,25 +304,17 @@ if btn_phan_tich:
         st.error("Lỗi: Lương y cần biết bạn muốn chữa/khám bộ phận nào.")
     else:
         with st.spinner("Đang chẩn đoán mạch và hội chẩn với A.I..."):
+            
+            # 1. Máy tính vẫn chạy ngầm và tính toán đủ 100% quy tắc
             benh_an_tho = engine.quet_benh_an(
                 data['chi_nam'], thang_am, data['can_ngay'], 
                 data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
             )
 
-            # --- THÊM ĐOẠN NÀY VÀO ĐỂ LƯƠNG Y KIỂM TRA THUẬT TOÁN ---
-            with st.expander("🛠️ Xem Cửu Sát Đồ & Báo Cáo Dịch Lý (Bản Thô)", expanded=False):
-                st.markdown("**Hệ thống đã tự động chạy rà soát các quy tắc:**")
-                st.markdown("- **Tam Phá:** Tuế Phá, Nguyệt Phá, Nhật Phá.")
-                st.markdown("- **Tứ Đại Hung Tinh:** Huyết Kỵ, Tử Khí, Huyết Chi, Bệnh Phù.")
-                st.markdown("- **Tam Sát Nhân Thần:** Thích Huyết Sát, Thích Hại Sát, Âm Thương Sát.")
-                st.markdown("- **Tam Đại Cát Thần:** Thiên Y, Địa Y, Nhật Y.")
-                st.text_area("Hồ sơ thô gửi cho A.I phân tích:", value=benh_an_tho, height=180, disabled=True)
-            # --------------------------------------------------------
-
+            # 2. Dữ liệu thô vẫn được bí mật nhét vào Prompt cho AI
             context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
-            # ... (Phần code xin_loi_khuyen_ai bên dưới giữ nguyên)
 
-            # Gọi hàm AI (Nếu câu hỏi trùng, nó sẽ lấy từ Caching ra ngay lập tức)
+            # 3. AI phân tích và trả về văn bản Lương Y
             loi_khuyen = xin_loi_khuyen_ai(context)
             
             if "Lỗi hệ thống" not in loi_khuyen:
