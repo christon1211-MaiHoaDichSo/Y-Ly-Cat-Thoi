@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import datetime
 import calendar
+import random
 from lunarcalendar import Converter, Solar, Lunar
 
 # ==============================================================================
@@ -239,15 +240,58 @@ with col_phai:
             with st.expander(f"{info['can_chi']} ({info['ten_dao']})"):
                 st.write(LUU_CHU_DETAILS.get(info['chi'], ""))
 
-# 6. Khu vực AI Trả Lời (Thay thế cho Threading cũ, Streamlit tự xử lý loading rất mượt)
+# 6. Khu vực AI Trả Lời
 st.markdown("---")
 st.subheader("📜 Thần Y Luận Giải")
 
+# ==============================================================================
+# TUYỆT CHIÊU CACHING: Bộ nhớ đệm giúp lưu lại các ca bệnh trùng nhau
+# ==============================================================================
+@st.cache_data(show_spinner=False, ttl=86400) # ttl=86400: Nhớ kết quả trong 1 ngày (24h)
+def xin_loi_khuyen_ai(context_text):
+    try:
+        # 1. Bốc thăm ngẫu nhiên 1 trong số các API Key bạn có trong két sắt
+        danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
+        key_duoc_chon = random.choice(danh_sach_keys)
+        
+        genai.configure(api_key=key_duoc_chon)
+        
+        # 2. Prompt Thần Y (Giữ nguyên)
+        prompt_bac_si = """
+        Bạn là một vị Lương Y uyên bác, am hiểu sâu sắc về Dịch Lý Y Khoa (Y Lý Cát Thời).
+        Nhiệm vụ của bạn là phân tích sự tương tác giữa khí huyết cơ thể và thời gian (Năm, Tháng, Ngày, Giờ) để đưa ra lời khuyên về THỜI ĐIỂM can thiệp y tế.
+        
+        NGUYÊN TẮC TỐI THƯỢNG (BẮT BUỘC TUÂN THỦ 100%):
+        1. BÁM SÁT DỮ LIỆU: Chỉ được phép luận giải dựa trên những Sát Tinh, Cát Thần và [Phạm Nhân Thần / Phạm Lưu Chú] CÓ TRONG "Kết quả Dịch Lý thô".
+        2. KHÔNG BỊA ĐẶT: Tuyệt đối không tự ý lôi thêm các kiến thức tử vi, phong thủy bên ngoài (ví dụ: Tam Nương, Nguyệt Kỵ, Kim Lâu, Không Vong...) vào để hù dọa bệnh nhân.
+        3. GIỚI HẠN CHUẨN ĐOÁN (Xử lý trạng thái [Bình Thường]):
+           - Bạn chỉ xem xét sự thuận lợi của "Thời Điểm", KHÔNG chẩn đoán mức độ nặng nhẹ của "Bệnh Lý".
+           - Nếu "Kết quả Dịch Lý thô" ghi là [Bình Thường]: Tuyệt đối KHÔNG được dùng từ "An toàn cho sức khỏe". Hãy kết luận chuẩn mực theo Dịch lý: "Thời điểm này khí huyết bình hòa, không vướng các cấm kỵ Sát tinh, là thời điểm trung tính, thuận lợi để tiến hành thăm khám hoặc trị liệu."
+        
+        BỐ CỤC TRÌNH BÀY BẮT BUỘC:
+        - ☯️ PHÂN TÍCH MẠCH LÝ DỊCH SỐ: Dựa đúng vào các dòng Sát/Cát trong kết quả thô để giải thích hiện tượng khí huyết (tụ hay tán, sinh hay khắc).
+        - ⚠️ LUẬN GIẢI THỦ THUẬT: Đọc kỹ phần [Phạm Nhân Thần] hoặc [Phạm Lưu Chú] để cảnh báo rõ ràng về các thao tác xâm lấn: Thích Huyết (rạch da, mổ), Thích Hại (châm cứu) hoặc Âm Thương (nội soi, nắn xương).
+        - 📝 CHỈ ĐỊNH CỦA LƯƠNG Y: Kết luận dứt khoát về mặt thời gian: THÍCH HỢP LÀM NGAY hay NÊN DỜI NGÀY KHÁC (nếu phạm quá nhiều Sát tinh).
+        - 🏥 KHUYẾN CÁO Y KHOA (In nghiêng ở cuối cùng): "Lưu ý: Luận giải trên chỉ áp dụng để chọn thời điểm tốt nhất theo Y Lý Á Đông. Nếu bạn đang trong tình trạng đau đớn cấp tính, chấn thương hoặc nguy kịch, hãy đến ngay phòng Cấp cứu (Emergency) gần nhất. Việc cứu người là tối thượng, tuyệt đối không trì hoãn để chờ đợi giờ tốt."
+        """
+        
+        config = genai.GenerationConfig(temperature=0.2, top_k=1)
+        
+        # 3. CHUYỂN SANG MÔ HÌNH FLASH SIÊU TỐC ĐỘ VÀ MIỄN PHÍ CAO
+        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
+        
+        response = model.generate_content(context_text)
+        return response.text
+    except Exception as e:
+        return f"Lỗi hệ thống A.I: {e}"
+
+# ==============================================================================
+# NÚT BẤM VÀ HIỂN THỊ
+# ==============================================================================
 if btn_phan_tich:
     if not bo_phan:
         st.error("Lỗi: Lương y cần biết bạn muốn chữa/khám bộ phận nào.")
     else:
-        # Bật vòng xoay loading
         with st.spinner("Đang chẩn đoán mạch và hội chẩn với A.I..."):
             benh_an_tho = engine.quet_benh_an(
                 data['chi_nam'], thang_am, data['can_ngay'], 
@@ -256,30 +300,11 @@ if btn_phan_tich:
 
             context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
 
-            try:
-                genai.configure(api_key=SECRET_API_KEY)
-                prompt_bac_si = """
-                Bạn là một vị Thần Y phân tích hồ sơ Dịch Lý Y Khoa.
-                
-                NGUYÊN TẮC TỐI THƯỢNG (BẮT BUỘC TUÂN THỦ 100%):
-                1. BÁM SÁT DỮ LIỆU: Chỉ được phép luận giải dựa trên những Sát Tinh, Cát Thần và Nhân Thần CÓ TRONG "Kết quả Dịch Lý thô".
-                2. KHÔNG BỊA ĐẶT: Tuyệt đối không tự ý lôi thêm các kiến thức tử vi, phong thủy bên ngoài (ví dụ: Tam Nương, Nguyệt Kỵ, Kim Lâu, Không Vong...) vào để hù dọa bệnh nhân.
-                3. KHÔNG SUY DIỄN: Nếu "Kết quả Dịch Lý thô" ghi là [Bình Thường], hãy mạnh dạn kết luận là an toàn, không được "vẽ rắn thêm chân".
-                
-                BỐ CỤC TRÌNH BÀY:
-                - PHÂN TÍCH MẠCH LÝ: Dựa đúng vào các dòng Sát/Cát trong kết quả thô để giải thích hiện tượng khí huyết.
-                - LUẬN GIẢI THỦ THUẬT: Đọc kỹ phần [Phạm Nhân Thần] hoặc [Phạm Lưu Chú] trong kết quả thô để cảnh báo rõ ràng về Thích Huyết (rạch da), Thích Hại (châm cứu) hoặc Âm Thương (nội soi/nắn xương).
-                - CHỈ ĐỊNH CỦA THẦN Y: Kết luận dứt khoát: LÀM ĐƯỢC hay DỜI NGÀY KHÁC.
-                - Câu kết thúc luôn nói là : Nếu bạn đang trong tình trạng nguy kịch hãy đến thẳng Emergency Cấp Cứu, tuyệt đối không chờ đợi thời gian TỐT.
-                """
-                
-                config = genai.GenerationConfig(temperature=0.2, top_k=1)
-                model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=prompt_bac_si, generation_config=config)
-                response = model.generate_content(context)
-                
-                # In kết quả ra màn hình
+            # Gọi hàm AI (Nếu câu hỏi trùng, nó sẽ lấy từ Caching ra ngay lập tức)
+            loi_khuyen = xin_loi_khuyen_ai(context)
+            
+            if "Lỗi hệ thống" not in loi_khuyen:
                 st.success("Hoàn tất luận giải!")
-                st.write(response.text)
-                
-            except Exception as e:
-                st.error(f"Lỗi hệ thống A.I: {e}")
+                st.write(loi_khuyen)
+            else:
+                st.error(loi_khuyen)
