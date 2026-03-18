@@ -7,7 +7,8 @@ from lunarcalendar import Converter, Solar, Lunar
 # ==============================================================================
 # BẠN HÃY DÁN API KEY CỦA MÌNH VÀO ĐÂY
 # ==============================================================================
-SECRET_API_KEY = "AIzaSyDBymKIOREh-zxADgLdvJjr53xOFOWrkHc"
+# Dán dòng mới này vào:
+SECRET_API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # ==============================================================================
 # BỘ DỮ LIỆU LOGIC (GIỮ NGUYÊN TỪ BẢN GỐC)
