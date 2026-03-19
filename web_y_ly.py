@@ -6,9 +6,6 @@ import random
 import base64
 from lunarcalendar import Converter, Solar, Lunar
 
-# ==============================================================================
-# BỘ DỮ LIỆU LOGIC (GIỮ NGUYÊN TỪ BẢN GỐC)
-# ==============================================================================
 CAN = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý']
 CHI = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi']
 GIO_HIENTHI = {
@@ -134,30 +131,22 @@ class YLyCatThoiEngine:
 
         return "\n".join(benh_an_tho) if benh_an_tho else "[Bình Thường]: Không phạm sát tinh, không có cát thần."
 
-# ==============================================================================
-# GIAO DIỆN WEB VỚI STREAMLIT (THAY THẾ APP CŨ)
-# ==============================================================================
 # 1. Cấu hình trang
 st.set_page_config(page_title="Y Lý Cát Thời", page_icon="logo.png", layout="wide")
 
 import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán dòng import này nếu chưa có nhé
 
 # 2. Tiêu đề và Đồng hồ Client-side
-# --- KHU VỰC TIÊU ĐỀ MỚI (CANH CHỈNH HOÀN HẢO 100%) ---
-
-# 1. Hàm đọc và mã hóa file logo của bạn
 def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
             data = f.read()
         return base64.b64encode(data).decode()
     except FileNotFoundError:
-        return "" # Nếu không tìm thấy file, sẽ không bị sập web
+        return "" 
 
-# Lấy mã của logo (Nhớ đảm bảo file tên là logo.png và để cùng thư mục)
 img_base64 = get_base64_of_bin_file('logo.png')
 
-# 2. Dùng Flexbox để khóa chặt Logo và Chữ trên cùng 1 trục ngang
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
@@ -169,9 +158,6 @@ st.markdown(
 )
 st.markdown("---")
 # --------------------------------------------------------
-
-# Đây là đoạn mã HTML/JS nhúng thẳng vào web. 
-# Nó sẽ chạy trên trình duyệt của người dùng, lấy Múi Giờ và Thời Gian chính xác tại nơi họ đang đứng (từng giây một).
 components.html("""
 <div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
     <div style="font-size: 16px;">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
@@ -200,19 +186,15 @@ now = datetime.datetime.now()
 dt_logic = now if now.hour < 23 else now + datetime.timedelta(days=1)
 lunar_now = Converter.Solar2Lunar(Solar(dt_logic.year, dt_logic.month, dt_logic.day))
 
-# 3. Chia màn hình làm 2 cột
 col_trai, col_phai = st.columns([1, 1.5])
 
 with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
-    # =========================================================================
-    # CSS CHUẨN XÁC: ĐỒNG BỘ 100% (VÀ TRẢ TỰ DO CHO Ô GIỜ KHÁM)
-    # =========================================================================
     st.markdown("""
     <style>
     /* =========================================================
-       1. ĐỒNG BỘ KÍCH THƯỚC (SIZE & BORDER) CHO 3 Ô DƯƠNG LỊCH
+       1. ĐỒNG BỘ KÍCH THƯỚC (SIZE & BORDER) 
        ========================================================= */
     .st-key-duong_nam [data-baseweb="select"] > div,
     .st-key-duong_thang [data-baseweb="select"] > div,
@@ -227,7 +209,7 @@ with col_trai:
     }
 
     /* =========================================================
-       2. ÉP MÀU CHỮ CAM (Sửa lỗi chữ đen do sai thẻ HTML)
+       2. ÉP MÀU CHỮ 
        ========================================================= */
     .st-key-duong_nam [data-baseweb="select"] > div > div > div,
     .st-key-duong_thang [data-baseweb="select"] > div > div > div,
@@ -252,11 +234,9 @@ with col_trai:
         border-color: #a9550f !important;
     }
     
-    /* KHÔNG CÒN BẤT KỲ DÒNG RESET NÀO CHO GIỜ KHÁM Ở ĐÂY NỮA */
     </style>
     """, unsafe_allow_html=True)
-
-    # 3.1 Khung nhập liệu Dương Lịch (Đã chuyển Năm sang Selectbox và cấp Key)
+ 
     c1, c2, c3 = st.columns(3)
     with c1:
         ds_nam = list(range(1900, 2036))
@@ -283,12 +263,10 @@ with col_trai:
             key="duong_ngay"
         )
 
-    # LÕI QUY ĐỔI ÂM LỊCH
     solar_date = Solar(int(nam_duong), thang_duong, ngay_duong)
     lunar_date = Converter.Solar2Lunar(solar_date)
     nam_am, thang_am, ngay_am = lunar_date.year, lunar_date.month, lunar_date.day
 
-    # 3.2 Khung hiển thị Âm Lịch
     c4, c5, c6 = st.columns(3)
     def ve_o_am_lich(tieu_de, gia_tri):
         return f'''
@@ -306,7 +284,6 @@ with col_trai:
 
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-    # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -319,18 +296,14 @@ with col_trai:
 
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
-    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date)
     st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
-# 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
     st.subheader("⏳ Bảng Cát Hung 12 Canh Giờ")
     
-    # Chia tiếp làm 2 cột cho Hoàng Đạo và Hắc Đạo
     col_hd, col_hac = st.columns(2)
     
-    # Chức năng Pop-up (Expander) của Streamlit thay thế cho Toplevel cũ
     with col_hd:
         st.markdown("### 🟢 Hoàng Đạo")
         for info in data['cac_gio']['Hoàng Đạo']:
@@ -347,19 +320,14 @@ with col_phai:
 st.markdown("---")
 st.subheader("📜 Thần Y Luận Giải")
 
-# ==============================================================================
-# TUYỆT CHIÊU CACHING: Bộ nhớ đệm giúp lưu lại các ca bệnh trùng nhau
-# ==============================================================================
 @st.cache_data(show_spinner=False, ttl=86400) # ttl=86400: Nhớ kết quả trong 1 ngày (24h)
 def xin_loi_khuyen_ai(context_text):
     try:
-        # 1. Bốc thăm ngẫu nhiên 1 trong số các API Key bạn có trong két sắt
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
         key_duoc_chon = random.choice(danh_sach_keys)
         
         genai.configure(api_key=key_duoc_chon)
         
-        # 2. Prompt Thần Y (Giữ nguyên)
         prompt_bac_si = """
         Bạn là một vị Lương Y uyên bác, am hiểu sâu sắc về Dịch Lý Y Khoa (Y Lý Cát Thời).
         Nhiệm vụ của bạn là phân tích sự tương tác giữa khí huyết cơ thể và thời gian (Năm, Tháng, Ngày, Giờ) để đưa ra lời khuyên về THỜI ĐIỂM can thiệp y tế.
@@ -380,7 +348,6 @@ def xin_loi_khuyen_ai(context_text):
         
         config = genai.GenerationConfig(temperature=0.2, top_k=1)
         
-        # 3. CHUYỂN SANG MÔ HÌNH FLASH SIÊU TỐC ĐỘ VÀ MIỄN PHÍ CAO
         model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
         
         response = model.generate_content(context_text)
@@ -388,22 +355,17 @@ def xin_loi_khuyen_ai(context_text):
     except Exception as e:
         return f"Lỗi hệ thống A.I: {e}"
 
-# ==============================================================================
-# NÚT BẤM VÀ HIỂN THỊ
-# ==============================================================================
 if btn_phan_tich:
     if not bo_phan:
         st.error("Lỗi: Lương y cần biết bạn muốn chữa/khám bộ phận nào.")
     else:
         with st.spinner("Đang chẩn đoán mạch và hội chẩn với A.I..."):
             
-            # 1. Máy tính vẫn chạy ngầm và tính toán đủ 100% quy tắc
             benh_an_tho = engine.quet_benh_an(
                 data['chi_nam'], thang_am, data['can_ngay'], 
                 data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
             )
 
-            # 2. Dữ liệu thô vẫn được bí mật nhét vào Prompt cho AI
             context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
 
             # 3. AI phân tích và trả về văn bản Lương Y
