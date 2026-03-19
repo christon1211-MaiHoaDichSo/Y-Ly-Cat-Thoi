@@ -207,54 +207,56 @@ with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
     # =========================================================================
-    # CSS CHUẨN XÁC SỬ DỤNG STREAMLIT KEYS (Giải pháp tối ưu)
+    # CSS CHUẨN XÁC: ĐỒNG BỘ 100% KÍCH THƯỚC VÀ MÀU SẮC DƯƠNG LỊCH = ÂM LỊCH
     # =========================================================================
     st.markdown("""
     <style>
     /* =========================================================
-       CHỈ STYLE 3 Ô DƯƠNG LỊCH: NĂM / THÁNG / NGÀY
+       1. ĐỒNG BỘ KÍCH THƯỚC (SIZE & BORDER) CHO 3 Ô DƯƠNG LỊCH
        ========================================================= */
     .st-key-duong_nam [data-baseweb="select"] > div,
     .st-key-duong_thang [data-baseweb="select"] > div,
     .st-key-duong_ngay [data-baseweb="select"] > div {
         background: #ffd6a8 !important;
-        border: 1.8px solid #d27a1f !important;
-        border-radius: 10px !important;
+        border: 2px solid #d27a1f !important;   /* Ép chuẩn 2px cho bằng Âm Lịch */
+        border-radius: 6px !important;          /* Ép chuẩn bo góc 6px cho bằng Âm Lịch */
+        height: 42px !important;                /* Khóa cứng chiều cao 42px */
         min-height: 42px !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        box-shadow: none !important;            /* Xóa bóng mờ để phẳng phiu như Âm Lịch */
         transition: all 0.2s ease !important;
     }
 
-    .st-key-duong_nam [data-baseweb="select"] span,
-    .st-key-duong_thang [data-baseweb="select"] span,
-    .st-key-duong_ngay [data-baseweb="select"] span {
-        color: #9a540c !important;
-        -webkit-text-fill-color: #9a540c !important;
-        font-weight: 600 !important;
+    /* =========================================================
+       2. ÉP MÀU CHỮ CAM (Sửa lỗi chữ đen do sai thẻ HTML)
+       ========================================================= */
+    /* Streamlit giấu chữ trong thẻ div lõi và input, không dùng span */
+    .st-key-duong_nam [data-baseweb="select"] > div > div > div,
+    .st-key-duong_thang [data-baseweb="select"] > div > div > div,
+    .st-key-duong_ngay [data-baseweb="select"] > div > div > div,
+    .st-key-duong_nam [data-baseweb="select"] input,
+    .st-key-duong_thang [data-baseweb="select"] input,
+    .st-key-duong_ngay [data-baseweb="select"] input {
+        color: #c26000 !important;
+        -webkit-text-fill-color: #c26000 !important;
+        font-weight: bold !important;
     }
 
+    /* MÀU MŨI TÊN XỔ XUỐNG */
     .st-key-duong_nam [data-baseweb="select"] svg,
     .st-key-duong_thang [data-baseweb="select"] svg,
     .st-key-duong_ngay [data-baseweb="select"] svg {
-        color: #b46012 !important;
+        color: #c26000 !important;
     }
 
-    .st-key-duong_nam [data-baseweb="select"] > div:hover,
-    .st-key-duong_thang [data-baseweb="select"] > div:hover,
-    .st-key-duong_ngay [data-baseweb="select"] > div:hover {
-        border-color: #b46012 !important;
-        box-shadow: 0 0 0 1px rgba(180, 96, 18, 0.08) !important;
-    }
-
+    /* HIỆU ỨNG KHI BẤM VÀO (FOCUS) */
     .st-key-duong_nam [data-baseweb="select"]:focus-within > div,
     .st-key-duong_thang [data-baseweb="select"]:focus-within > div,
     .st-key-duong_ngay [data-baseweb="select"]:focus-within > div {
         border-color: #a9550f !important;
-        box-shadow: 0 0 0 3px rgba(233, 146, 62, 0.18) !important;
     }
 
     /* =========================================================
-       RESET Ô GIỜ KHÁM VỀ GIAO DIỆN BÌNH THƯỜNG
+       3. RESET GIỜ KHÁM (GIỮ NGUYÊN MÀU XÁM MẶC ĐỊNH)
        ========================================================= */
     .st-key-gio_kham [data-baseweb="select"] > div {
         background: white !important;
@@ -263,7 +265,8 @@ with col_trai:
         box-shadow: none !important;
     }
 
-    .st-key-gio_kham [data-baseweb="select"] span {
+    .st-key-gio_kham [data-baseweb="select"] div,
+    .st-key-gio_kham [data-baseweb="select"] input {
         color: inherit !important;
         -webkit-text-fill-color: inherit !important;
         font-weight: 400 !important;
