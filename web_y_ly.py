@@ -452,4 +452,4 @@ if btn_phan_tich:
                     st.error(loi_khuyen)
 
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2026 Y Lý Cát Thời - Ứng dụng thuộc bản quyền tác giả Chris Nhật Tôn. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2025 Y Lý Cát - Thời Kinh Dịch Hội - Mai Hoa Dịch Số- Ứng dụng thuộc bản quyền tác giả Chris Nhật Tôn. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
