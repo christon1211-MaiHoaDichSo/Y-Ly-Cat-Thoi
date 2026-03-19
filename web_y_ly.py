@@ -356,12 +356,12 @@ def xin_loi_khuyen_ai(context_text):
         # 1. BẠN HÃY DÁN CHÍNH XÁC KẾT QUẢ KHO_SACH TRÊN MÀN HÌNH CỦA BẠN VÀO ĐÂY:
         # (Tôi chép lại từ ảnh của bạn, nhưng hãy kiểm tra kỹ và dán đè lên nếu sai số nhé)
         KHO_SACH = [
-            {'sach_1': 'files/820w8g3k822f', 'sach_2': 'files/q9y3z6y9q1m1'}, 
-            {'sach_1': 'files/j2j4z4y1m1w3', 'sach_2': 'files/77ofq442w8p1'}, 
-            {'sach_1': 'files/8p3x1w5y7n9m', 'sach_2': 'files/o7b1z5v0c5l7'}, 
-            {'sach_1': 'files/m9k4r2y8p1s6', 'sach_2': 'files/13z5v0c5l7q6'}, 
-            {'sach_1': 'files/n8u2t7e4w1b5', 'sach_2': 'files/v6b8n0m2a4s6'}, 
-            {'sach_1': 'files/c3x5z7a9s1d2', 'sach_2': 'files/l0z2x4c6v8b0'}
+            {'sach_1': 'files/0pzbr4m0wae0', 'sach_2': 'files/fz47su0gzjoe'}, 
+            {'sach_1': 'files/1kwmkt3etlek', 'sach_2': 'files/bkprcuui9g5c'}, 
+            {'sach_1': 'files/jv107wvo5auc', 'sach_2': 'files/95csms05o7a0'}, 
+            {'sach_1': 'files/0x3fuoozxrxf', 'sach_2': 'files/86y86uty4n2t'}, 
+            {'sach_1': 'files/8nmzbt9laul9', 'sach_2': 'files/x5mmhpihyqir'}, 
+            {'sach_1': 'files/20na9zs6i5wx', 'sach_2': 'files/7egu0negwpk2'}
         ]
 
         # 2. Thuật toán Load Balancing (Chia đều tải cho 6 Key)
