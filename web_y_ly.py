@@ -207,39 +207,43 @@ with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
     # =========================================================================
-    # BƠM CSS MỚI: CHỈ NHUỘM MÀU CÁC Ô NẰM TRONG CỘT NGANG (stHorizontalBlock)
+    # BƠM CSS MỚI: BẮT CHÍNH XÁC CỘT & XÓA LỖI NỀN TRẮNG
     # =========================================================================
     st.markdown("""
     <style>
-    /* [1] Nhuộm ô Năm Dương Lịch (Chỉ tác dụng khi nằm trong cột) */
-    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] div[data-baseweb="input"] {
+    /* [1] Nhuộm ô Năm Dương Lịch (Chỉ tác dụng cho ô nằm trong cột) */
+    div[data-testid="column"] div[data-testid="stNumberInput"] > div > div {
         background-color: #ffbc7b !important;
         border: 2px solid #c26000 !important;
         border-radius: 6px !important;
     }
-    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] input {
-        background-color: transparent !important;
+    /* Đổ màu nền cho chính ô gõ số bên trong để xóa khoảng trắng */
+    div[data-testid="column"] div[data-testid="stNumberInput"] input {
+        background-color: #ffbc7b !important; 
         color: #c26000 !important;
         -webkit-text-fill-color: #c26000 !important; 
         font-weight: bold !important;
     }
-    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
-        background-color: transparent !important;
+    div[data-testid="column"] div[data-testid="stNumberInput"] button {
         color: #c26000 !important;
+        background-color: transparent !important;
+    }
+    div[data-testid="column"] div[data-testid="stNumberInput"] button:hover {
+        background-color: #e5a053 !important;
     }
     
-    /* [2] Nhuộm ô Tháng & Ngày Dương Lịch (Chỉ tác dụng khi nằm trong cột) */
-    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    /* [2] Nhuộm ô Tháng & Ngày Dương Lịch (Chỉ tác dụng cho ô nằm trong cột) */
+    div[data-testid="column"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
         background-color: #ffbc7b !important;
         border: 2px solid #c26000 !important;
         border-radius: 6px !important;
     }
-    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+    div[data-testid="column"] div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
         color: #c26000 !important;
         -webkit-text-fill-color: #c26000 !important;
         font-weight: bold !important;
     }
-    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+    div[data-testid="column"] div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
         color: #c26000 !important;
     }
     </style>
@@ -261,6 +265,9 @@ with col_trai:
     lunar_date = Converter.Solar2Lunar(solar_date)
     nam_am, thang_am, ngay_am = lunar_date.year, lunar_date.month, lunar_date.day
 
+    # Tạo một khoảng cách nhỏ cho đẹp mắt giữa Dương và Âm
+    st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True) 
+
     # 3.2 Khung hiển thị Âm Lịch (Vẽ HTML chuẩn form 40px)
     c4, c5, c6 = st.columns(3)
     def ve_o_am_lich(tieu_de, gia_tri):
@@ -277,7 +284,10 @@ with col_trai:
     with c5: st.markdown(ve_o_am_lich("Tháng Âm Lịch", thang_am), unsafe_allow_html=True)
     with c6: st.markdown(ve_o_am_lich("Ngày Âm Lịch", ngay_am), unsafe_allow_html=True)
 
-    # 3.3 Nhóm các công cụ thao tác (Đã bỏ các khoảng trống thừa để khít lại tự nhiên)
+    # --- KHOẢNG TRỐNG QUAN TRỌNG ĐỂ TÁCH BIỆT GIỜ KHÁM ---
+    st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True)
+
+    # 3.3 Nhóm các công cụ thao tác
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -285,11 +295,13 @@ with col_trai:
         format_func=lambda x: GIO_HIENTHI[x] 
     )
     
+    st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
     bo_phan = st.text_input("Nhập bộ phận cơ thể cần khám (Mắt, Dạ dày, Răng...)")
 
+    st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
-    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ (Đã thêm Tháng)
+    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date)
     st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
