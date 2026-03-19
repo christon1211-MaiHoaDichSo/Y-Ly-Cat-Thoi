@@ -348,60 +348,37 @@ st.markdown("---")
 st.subheader("📜 Thần Y Luận Giải")
 
 # ==============================================================================
-# TUYỆT CHIÊU CACHING: Bộ nhớ đệm giúp lưu lại các ca bệnh trùng nhau
+# HÀM AI LUẬN GIẢI (BẢN PHỤC HỒI - CHỈ LUẬN GIẢI DỊCH LÝ)
 # ==============================================================================
 @st.cache_data(show_spinner=False, ttl=86400) 
 def xin_loi_khuyen_ai(context_text):
     try:
-        # 1. BẠN HÃY DÁN CHÍNH XÁC KẾT QUẢ KHO_SACH TRÊN MÀN HÌNH CỦA BẠN VÀO ĐÂY:
-        # (Tôi chép lại từ ảnh của bạn, nhưng hãy kiểm tra kỹ và dán đè lên nếu sai số nhé)
-        KHO_SACH = [
-            {'sach_1': 'files/6m7h5mzcla6o', 'sach_2': 'files/wvrmu24lhw25'}, 
-            {'sach_1': 'files/hrypf6tlgkp4', 'sach_2': 'files/r3nkl1434mqn'}, 
-            {'sach_1': 'files/q1sohg03iv88', 'sach_2': 'files/f4ulh9hvxxgg'}, 
-            {'sach_1': 'files/6votjwsavyu8', 'sach_2': 'files/pu2qwtowidn8'}, 
-            {'sach_1': 'files/ed41rho60qhm', 'sach_2': 'files/a9oo7h2jc3ln'}, 
-            {'sach_1': 'files/hym356yzhzoo', 'sach_2': 'files/q77wkt8b37wm'}
-        ]
-
-        # 2. Thuật toán Load Balancing (Chia đều tải cho 6 Key)
+        # 1. Thuật toán Load Balancing (Chia đều tải cho 6 Key)
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
-        index_chon = random.randint(0, len(danh_sach_keys) - 1) 
-        
-        key_duoc_chon = danh_sach_keys[index_chon]
-        ma_sach_1 = KHO_SACH[index_chon]["sach_1"]
-        ma_sach_2 = KHO_SACH[index_chon]["sach_2"]
-        
+        key_duoc_chon = random.choice(danh_sach_keys)
         genai.configure(api_key=key_duoc_chon)
         
-        # 3. Mở khóa 2 cuốn sách tương ứng với Key đang dùng
-        sach_1 = genai.get_file(ma_sach_1) 
-        sach_2 = genai.get_file(ma_sach_2) 
-
-        # 4. "VÒNG KIM CÔ" - ÉP A.I KHÔNG ĐƯỢC LÀM LANG BĂM
+        # 2. PROMPT THẦN Y DỊCH LÝ (Bản gốc)
         prompt_bac_si = """
-        Bạn là một vị Lương Y chân chính, bảo thủ và cực kỳ nghiêm ngặt về y lý.
-        Bạn đang có 2 cuốn y thư: "800 Danh Y" và "500 Bài Thuốc Đông Y".
+        Bạn là một vị Lương Y uyên bác, am hiểu Dịch Lý Y Khoa.
+        Nhiệm vụ: Dựa vào "Kết quả Dịch Lý thô" (Năm, Tháng, Ngày, Giờ) và Bộ phận cần khám, hãy đưa ra lời khuyên thời điểm khám chữa bệnh.
         
-        NGUYÊN TẮC HÀNH NGHỀ TỐI THƯỢNG (VI PHẠM SẼ GÂY HẠI TÍNH MẠNG BỆNH NHÂN):
-        1. PHÂN TÍCH THỜI ĐIỂM: Chỉ phân tích Sát Tinh/Cát Thần dựa trên "Kết quả Dịch Lý thô" được cung cấp. Khuyên rõ nên khám ngay hay dời lịch.
-        2. KÊ ĐƠN BỐC THUỐC: BẠN CHỈ ĐƯỢC PHÉP TRÍCH XUẤT bài thuốc CÓ SẴN trong 2 cuốn sách đính kèm. 
-        3. CẤM BỊA ĐẶT (HALLUCINATION): TUYỆT ĐỐI KHÔNG tự sáng tác bài thuốc, KHÔNG lấy kiến thức y khoa trên internet để khuyên bệnh nhân. 
-        4. NGUYÊN TẮC TRUNG THỰC: Nếu quét 2 cuốn sách mà KHÔNG TÌM THẤY bài thuốc nào khớp với bệnh của người dùng, bạn PHẢI thừa nhận: "Trong 2 cuốn y thư gia truyền hiện tại không có ghi chép cụ thể bài thuốc trị liệu cho tình trạng này, khuyên bạn nên thăm khám Tây Y".
-        5. GHI RÕ TRÍCH DẪN: Mọi bài thuốc đưa ra phải ghi rõ: "Trích từ cuốn [Tên Sách]..." để đảm bảo tính minh bạch.
+        NGUYÊN TẮC TỐI THƯỢNG:
+        1. LUẬN GIẢI THỜI ĐIỂM: Bám sát "Kết quả Dịch Lý thô" để khuyên nên khám ngay hay dời ngày (phân tích rõ các Sát tinh, Cát thần).
+        2. KHÔNG KÊ ĐƠN TÙY TIỆN: Đưa ra lời khuyên dưỡng sinh chung cho bộ phận đang bị bệnh, tuyệt đối không tự bịa ra bài thuốc Đông Y chuyên sâu.
+        3. TRUNG THỰC & AN TOÀN: Luôn khuyên bệnh nhân đến bệnh viện thăm khám Tây Y để có kết quả chính xác nhất.
         
-        BỐ CỤC BẮT BUỘC:
-        - ☯️ LUẬN GIẢI THỜI ĐIỂM KHÁM CHỮA BỆNH (Phân tích khí huyết, sát tinh)
-        - 📖 CẨM NANG ĐIỀU DƯỠNG (Trích xuất CHÍNH XÁC từ 2 file PDF)
-        - 🏥 LỜI DẶN CỦA LƯƠNG Y (Luôn khuyên bệnh nhân đến bệnh viện nếu có triệu chứng cấp tính, đau dữ dội. Không dùng thuốc nam thay thế cấp cứu).
+        BỐ CỤC TRÌNH BÀY:
+        - ☯️ LUẬN GIẢI DỊCH LÝ THỜI GIAN
+        - 📖 LỜI KHUYÊN DƯỠNG SINH CƠ BẢN
+        - 🏥 KHUYẾN CÁO Y KHOA
         """
         
-        # SIẾT CHẶT ĐỘ SÁNG TẠO (Temperature = 0.1 ép AI làm việc như máy scan, không bịa chuyện)
-        config = genai.GenerationConfig(temperature=0.1, top_k=1)
+        config = genai.GenerationConfig(temperature=0.2, top_k=1)
         model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
         
-        # 5. Khám bệnh kết hợp đọc sách
-        response = model.generate_content([sach_1, sach_2, context_text])
+        # 3. Phân tích Dịch lý siêu tốc
+        response = model.generate_content(context_text)
         
         return response.text
     except Exception as e:
@@ -434,7 +411,7 @@ if btn_phan_tich:
             """)
         else:
             # Nếu an toàn, tiếp tục phân tích Dịch Lý và gọi AI
-            with st.spinner("Đang chẩn đoán mạch và hội chẩn y thư..."):
+            with st.spinner("Đang chẩn đoán mạch và hội chẩn Dịch Lý..."):
                 
                 # 1. Thuật toán tính toán Dịch Lý
                 benh_an_tho = engine.quet_benh_an(
@@ -453,3 +430,6 @@ if btn_phan_tich:
                     st.write(loi_khuyen)
                 else:
                     st.error(loi_khuyen)
+
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2026 Y Lý Cát Thời - Ứng dụng thuộc bản quyền tác giả. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
