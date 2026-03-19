@@ -207,7 +207,7 @@ with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
     # =========================================================================
-    # CSS CHUẨN XÁC: ĐỒNG BỘ 100% KÍCH THƯỚC VÀ MÀU SẮC DƯƠNG LỊCH = ÂM LỊCH
+    # CSS CHUẨN XÁC: ĐỒNG BỘ 100% (VÀ TRẢ TỰ DO CHO Ô GIỜ KHÁM)
     # =========================================================================
     st.markdown("""
     <style>
@@ -218,18 +218,17 @@ with col_trai:
     .st-key-duong_thang [data-baseweb="select"] > div,
     .st-key-duong_ngay [data-baseweb="select"] > div {
         background: #ffd6a8 !important;
-        border: 2px solid #d27a1f !important;   /* Ép chuẩn 2px cho bằng Âm Lịch */
-        border-radius: 6px !important;          /* Ép chuẩn bo góc 6px cho bằng Âm Lịch */
-        height: 42px !important;                /* Khóa cứng chiều cao 42px */
+        border: 2px solid #d27a1f !important;
+        border-radius: 6px !important;
+        height: 42px !important;
         min-height: 42px !important;
-        box-shadow: none !important;            /* Xóa bóng mờ để phẳng phiu như Âm Lịch */
+        box-shadow: none !important;
         transition: all 0.2s ease !important;
     }
 
     /* =========================================================
        2. ÉP MÀU CHỮ CAM (Sửa lỗi chữ đen do sai thẻ HTML)
        ========================================================= */
-    /* Streamlit giấu chữ trong thẻ div lõi và input, không dùng span */
     .st-key-duong_nam [data-baseweb="select"] > div > div > div,
     .st-key-duong_thang [data-baseweb="select"] > div > div > div,
     .st-key-duong_ngay [data-baseweb="select"] > div > div > div,
@@ -241,40 +240,19 @@ with col_trai:
         font-weight: bold !important;
     }
 
-    /* MÀU MŨI TÊN XỔ XUỐNG */
     .st-key-duong_nam [data-baseweb="select"] svg,
     .st-key-duong_thang [data-baseweb="select"] svg,
     .st-key-duong_ngay [data-baseweb="select"] svg {
         color: #c26000 !important;
     }
 
-    /* HIỆU ỨNG KHI BẤM VÀO (FOCUS) */
     .st-key-duong_nam [data-baseweb="select"]:focus-within > div,
     .st-key-duong_thang [data-baseweb="select"]:focus-within > div,
     .st-key-duong_ngay [data-baseweb="select"]:focus-within > div {
         border-color: #a9550f !important;
     }
-
-    /* =========================================================
-       3. RESET GIỜ KHÁM (GIỮ NGUYÊN MÀU XÁM MẶC ĐỊNH)
-       ========================================================= */
-    .st-key-gio_kham [data-baseweb="select"] > div {
-        background: white !important;
-        border: 1px solid #d9d9d9 !important;
-        border-radius: 8px !important;
-        box-shadow: none !important;
-    }
-
-    .st-key-gio_kham [data-baseweb="select"] div,
-    .st-key-gio_kham [data-baseweb="select"] input {
-        color: inherit !important;
-        -webkit-text-fill-color: inherit !important;
-        font-weight: 400 !important;
-    }
-
-    .st-key-gio_kham [data-baseweb="select"] svg {
-        color: inherit !important;
-    }
+    
+    /* KHÔNG CÒN BẤT KỲ DÒNG RESET NÀO CHO GIỜ KHÁM Ở ĐÂY NỮA */
     </style>
     """, unsafe_allow_html=True)
 
