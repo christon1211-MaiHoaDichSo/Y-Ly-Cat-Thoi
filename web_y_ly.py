@@ -208,29 +208,38 @@ with col_trai:
     
     # =========================================================================
     # =========================================================================
+    # =========================================================================
     # BƠM CSS ĐỂ NHUỘM MÀU CHỈ RIÊNG 3 Ô DƯƠNG LỊCH (TRÁNH GIỜ KHÁM)
     # =========================================================================
     st.markdown("""
     <style>
-    /* Chỉ áp dụng cho NumberInput nằm sâu trong cột con (c1) */
-    div[data-testid="column"] div[data-testid="column"] div[data-testid="stNumberInput"] input {
+    /* 1. Nhuộm toàn diện ô Năm Dương Lịch (Number Input) */
+    div[data-testid="stNumberInput"] > div > div {
+        background-color: #ffbc7b !important;
+        border: 2px solid #c26000 !important;
+        border-radius: 6px !important;
+    }
+    div[data-testid="stNumberInput"] > div > div > input {
         background-color: #ffbc7b !important;
         color: #c26000 !important;
-        border: 2px solid #c26000 !important;
-        border-radius: 6px;
-        font-weight: bold;
+        font-weight: bold !important;
     }
-    /* Chỉ áp dụng cho Selectbox nằm sâu trong cột con (c2, c3) */
-    div[data-testid="column"] div[data-testid="column"] div[data-testid="stSelectbox"] div[role="combobox"] {
+    div[data-testid="stNumberInput"] button {
+        color: #c26000 !important;
+    }
+
+    /* 2. Nhuộm toàn diện ô Tháng & Ngày (Selectbox nằm lồng trong 2 lớp stColumn) */
+    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] > div > div > div {
         background-color: #ffbc7b !important;
-        color: #c26000 !important;
         border: 2px solid #c26000 !important;
-        border-radius: 6px;
-        font-weight: bold;
+        border-radius: 6px !important;
     }
-    /* Đổi màu chữ hiển thị bên trong ô chọn Dương Lịch */
-    div[data-testid="column"] div[data-testid="column"] div[data-testid="stSelectbox"] div[role="combobox"] span {
+    
+    /* 3. Chỉnh màu chữ bên trong Selectbox Dương Lịch */
+    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] span,
+    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] div[role="combobox"] {
         color: #c26000 !important;
+        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
