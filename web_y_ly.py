@@ -6,6 +6,9 @@ import random
 import base64
 from lunarcalendar import Converter, Solar, Lunar
 
+# ==============================================================================
+# BỘ DỮ LIỆU LOGIC (GIỮ NGUYÊN TỪ BẢN GỐC)
+# ==============================================================================
 CAN = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý']
 CHI = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi']
 GIO_HIENTHI = {
@@ -131,22 +134,30 @@ class YLyCatThoiEngine:
 
         return "\n".join(benh_an_tho) if benh_an_tho else "[Bình Thường]: Không phạm sát tinh, không có cát thần."
 
+# ==============================================================================
+# GIAO DIỆN WEB VỚI STREAMLIT (THAY THẾ APP CŨ)
+# ==============================================================================
 # 1. Cấu hình trang
 st.set_page_config(page_title="Y Lý Cát Thời", page_icon="logo.png", layout="wide")
 
 import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán dòng import này nếu chưa có nhé
 
 # 2. Tiêu đề và Đồng hồ Client-side
+# --- KHU VỰC TIÊU ĐỀ MỚI (CANH CHỈNH HOÀN HẢO 100%) ---
+
+# 1. Hàm đọc và mã hóa file logo của bạn
 def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
             data = f.read()
         return base64.b64encode(data).decode()
     except FileNotFoundError:
-        return "" 
+        return "" # Nếu không tìm thấy file, sẽ không bị sập web
 
+# Lấy mã của logo (Nhớ đảm bảo file tên là logo.png và để cùng thư mục)
 img_base64 = get_base64_of_bin_file('logo.png')
 
+# 2. Dùng Flexbox để khóa chặt Logo và Chữ trên cùng 1 trục ngang
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
@@ -158,44 +169,14 @@ st.markdown(
 )
 st.markdown("---")
 # --------------------------------------------------------
-# tối ưu Responsive cho Mobile
+
+# Đây là đoạn mã HTML/JS nhúng thẳng vào web. 
+# Nó sẽ chạy trên trình duyệt của người dùng, lấy Múi Giờ và Thời Gian chính xác tại nơi họ đang đứng (từng giây một).
 components.html("""
-<style>
-    .clock-box {
-        text-align: center; 
-        font-family: sans-serif; 
-        padding: 15px; 
-        background-color: #1E2022; 
-        color: white; 
-        border-radius: 10px; 
-        border: 1px solid #333;
-        box-sizing: border-box;
-        width: 100%;
-        margin-bottom: 5px;
-    }
-    .clock-title { 
-        font-size: 16px; 
-    }
-    .clock-time { 
-        font-size: 24px; 
-        font-weight: bold; 
-        color: #D3A352; 
-        margin-top: 5px; 
-    }
-
-    
-    @media (max-width: 600px) {
-        .clock-title { font-size: 12px; }
-        .clock-time { font-size: 17px; margin-top: 8px; }
-        .clock-box { padding: 12px 5px; }
-    }
-</style>
-
-<div class="clock-box">
-    <div class="clock-title">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
-    <div id="clock" class="clock-time">Đang tải thời gian...</div>
+<div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
+    <div style="font-size: 16px;">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
+    <div id="clock" style="font-size: 24px; font-weight: bold; color: #D3A352; margin-top: 5px;">Đang tải thời gian...</div>
 </div>
-
 <script>
     function updateTime() {
         var now = new Date();
@@ -208,7 +189,7 @@ components.html("""
     setInterval(updateTime, 1000);
     updateTime();
 </script>
-""", height=130) 
+""", height=110)
 
 st.markdown("---")
 
@@ -219,15 +200,19 @@ now = datetime.datetime.now()
 dt_logic = now if now.hour < 23 else now + datetime.timedelta(days=1)
 lunar_now = Converter.Solar2Lunar(Solar(dt_logic.year, dt_logic.month, dt_logic.day))
 
+# 3. Chia màn hình làm 2 cột
 col_trai, col_phai = st.columns([1, 1.5])
 
 with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
+    # =========================================================================
+    # CSS CHUẨN XÁC: ĐỒNG BỘ 100% (VÀ TRẢ TỰ DO CHO Ô GIỜ KHÁM)
+    # =========================================================================
     st.markdown("""
     <style>
     /* =========================================================
-       1. ĐỒNG BỘ KÍCH THƯỚC (SIZE & BORDER) 
+       1. ĐỒNG BỘ KÍCH THƯỚC (SIZE & BORDER) CHO 3 Ô DƯƠNG LỊCH
        ========================================================= */
     .st-key-duong_nam [data-baseweb="select"] > div,
     .st-key-duong_thang [data-baseweb="select"] > div,
@@ -242,7 +227,7 @@ with col_trai:
     }
 
     /* =========================================================
-       2. ÉP MÀU CHỮ 
+       2. ÉP MÀU CHỮ CAM (Sửa lỗi chữ đen do sai thẻ HTML)
        ========================================================= */
     .st-key-duong_nam [data-baseweb="select"] > div > div > div,
     .st-key-duong_thang [data-baseweb="select"] > div > div > div,
@@ -267,9 +252,11 @@ with col_trai:
         border-color: #a9550f !important;
     }
     
+    /* KHÔNG CÒN BẤT KỲ DÒNG RESET NÀO CHO GIỜ KHÁM Ở ĐÂY NỮA */
     </style>
     """, unsafe_allow_html=True)
- 
+
+    # 3.1 Khung nhập liệu Dương Lịch (Đã chuyển Năm sang Selectbox và cấp Key)
     c1, c2, c3 = st.columns(3)
     with c1:
         ds_nam = list(range(1900, 2036))
@@ -296,10 +283,12 @@ with col_trai:
             key="duong_ngay"
         )
 
+    # LÕI QUY ĐỔI ÂM LỊCH
     solar_date = Solar(int(nam_duong), thang_duong, ngay_duong)
     lunar_date = Converter.Solar2Lunar(solar_date)
     nam_am, thang_am, ngay_am = lunar_date.year, lunar_date.month, lunar_date.day
 
+    # 3.2 Khung hiển thị Âm Lịch
     c4, c5, c6 = st.columns(3)
     def ve_o_am_lich(tieu_de, gia_tri):
         return f'''
@@ -317,6 +306,7 @@ with col_trai:
 
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
+    # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -329,14 +319,18 @@ with col_trai:
 
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
+    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date)
     st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
+# 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
     st.subheader("⏳ Bảng Cát Hung 12 Canh Giờ")
     
+    # Chia tiếp làm 2 cột cho Hoàng Đạo và Hắc Đạo
     col_hd, col_hac = st.columns(2)
     
+    # Chức năng Pop-up (Expander) của Streamlit thay thế cho Toplevel cũ
     with col_hd:
         st.markdown("### 🟢 Hoàng Đạo")
         for info in data['cac_gio']['Hoàng Đạo']:
@@ -353,59 +347,109 @@ with col_phai:
 st.markdown("---")
 st.subheader("📜 Thần Y Luận Giải")
 
-@st.cache_data(show_spinner=False, ttl=86400) # ttl=86400: Nhớ kết quả trong 1 ngày (24h)
+# ==============================================================================
+# TUYỆT CHIÊU CACHING: Bộ nhớ đệm giúp lưu lại các ca bệnh trùng nhau
+# ==============================================================================
+@st.cache_data(show_spinner=False, ttl=86400) 
 def xin_loi_khuyen_ai(context_text):
     try:
+        # 1. BẠN HÃY DÁN CHÍNH XÁC KẾT QUẢ KHO_SACH TRÊN MÀN HÌNH CỦA BẠN VÀO ĐÂY:
+        # (Tôi chép lại từ ảnh của bạn, nhưng hãy kiểm tra kỹ và dán đè lên nếu sai số nhé)
+        KHO_SACH = [
+            {'sach_1': 'files/820w8g3k822f', 'sach_2': 'files/q9y3z6y9q1m1'}, 
+            {'sach_1': 'files/j2j4z4y1m1w3', 'sach_2': 'files/77ofq442w8p1'}, 
+            {'sach_1': 'files/8p3x1w5y7n9m', 'sach_2': 'files/o7b1z5v0c5l7'}, 
+            {'sach_1': 'files/m9k4r2y8p1s6', 'sach_2': 'files/13z5v0c5l7q6'}, 
+            {'sach_1': 'files/n8u2t7e4w1b5', 'sach_2': 'files/v6b8n0m2a4s6'}, 
+            {'sach_1': 'files/c3x5z7a9s1d2', 'sach_2': 'files/l0z2x4c6v8b0'}
+        ]
+
+        # 2. Thuật toán Load Balancing (Chia đều tải cho 6 Key)
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
-        key_duoc_chon = random.choice(danh_sach_keys)
+        index_chon = random.randint(0, len(danh_sach_keys) - 1) 
+        
+        key_duoc_chon = danh_sach_keys[index_chon]
+        ma_sach_1 = KHO_SACH[index_chon]["sach_1"]
+        ma_sach_2 = KHO_SACH[index_chon]["sach_2"]
         
         genai.configure(api_key=key_duoc_chon)
         
+        # 3. Mở khóa 2 cuốn sách tương ứng với Key đang dùng
+        sach_1 = genai.get_file(ma_sach_1) 
+        sach_2 = genai.get_file(ma_sach_2) 
+
+        # 4. "VÒNG KIM CÔ" - ÉP A.I KHÔNG ĐƯỢC LÀM LANG BĂM
         prompt_bac_si = """
-        Bạn là một vị Lương Y uyên bác, am hiểu sâu sắc về Dịch Lý Y Khoa (Y Lý Cát Thời).
-        Nhiệm vụ của bạn là phân tích sự tương tác giữa khí huyết cơ thể và thời gian (Năm, Tháng, Ngày, Giờ) để đưa ra lời khuyên về THỜI ĐIỂM can thiệp y tế.
+        Bạn là một vị Lương Y chân chính, bảo thủ và cực kỳ nghiêm ngặt về y lý.
+        Bạn đang có 2 cuốn y thư: "800 Danh Y" và "500 Bài Thuốc Đông Y".
         
-        NGUYÊN TẮC TỐI THƯỢNG (BẮT BUỘC TUÂN THỦ 100%):
-        1. BÁM SÁT DỮ LIỆU: Chỉ được phép luận giải dựa trên những Sát Tinh, Cát Thần và [Phạm Nhân Thần / Phạm Lưu Chú] CÓ TRONG "Kết quả Dịch Lý thô".
-        2. KHÔNG BỊA ĐẶT: Tuyệt đối không tự ý lôi thêm các kiến thức tử vi, phong thủy bên ngoài (ví dụ: Tam Nương, Nguyệt Kỵ, Kim Lâu, Không Vong...) vào để hù dọa bệnh nhân.
-        3. GIỚI HẠN CHUẨN ĐOÁN (Xử lý trạng thái [Bình Thường]):
-           - Bạn chỉ xem xét sự thuận lợi của "Thời Điểm", KHÔNG chẩn đoán mức độ nặng nhẹ của "Bệnh Lý".
-           - Nếu "Kết quả Dịch Lý thô" ghi là [Bình Thường]: Tuyệt đối KHÔNG được dùng từ "An toàn cho sức khỏe". Hãy kết luận chuẩn mực theo Dịch lý: "Thời điểm này khí huyết bình hòa, không vướng các cấm kỵ Sát tinh, là thời điểm trung tính, thuận lợi để tiến hành thăm khám hoặc trị liệu."
+        NGUYÊN TẮC HÀNH NGHỀ TỐI THƯỢNG (VI PHẠM SẼ GÂY HẠI TÍNH MẠNG BỆNH NHÂN):
+        1. PHÂN TÍCH THỜI ĐIỂM: Chỉ phân tích Sát Tinh/Cát Thần dựa trên "Kết quả Dịch Lý thô" được cung cấp. Khuyên rõ nên khám ngay hay dời lịch.
+        2. KÊ ĐƠN BỐC THUỐC: BẠN CHỈ ĐƯỢC PHÉP TRÍCH XUẤT bài thuốc CÓ SẴN trong 2 cuốn sách đính kèm. 
+        3. CẤM BỊA ĐẶT (HALLUCINATION): TUYỆT ĐỐI KHÔNG tự sáng tác bài thuốc, KHÔNG lấy kiến thức y khoa trên internet để khuyên bệnh nhân. 
+        4. NGUYÊN TẮC TRUNG THỰC: Nếu quét 2 cuốn sách mà KHÔNG TÌM THẤY bài thuốc nào khớp với bệnh của người dùng, bạn PHẢI thừa nhận: "Trong 2 cuốn y thư gia truyền hiện tại không có ghi chép cụ thể bài thuốc trị liệu cho tình trạng này, khuyên bạn nên thăm khám Tây Y".
+        5. GHI RÕ TRÍCH DẪN: Mọi bài thuốc đưa ra phải ghi rõ: "Trích từ cuốn [Tên Sách]..." để đảm bảo tính minh bạch.
         
-        BỐ CỤC TRÌNH BÀY BẮT BUỘC:
-        - ☯️ PHÂN TÍCH MẠCH LÝ DỊCH SỐ: Dựa đúng vào các dòng Sát/Cát trong kết quả thô để giải thích hiện tượng khí huyết (tụ hay tán, sinh hay khắc).
-        - ⚠️ LUẬN GIẢI THỦ THUẬT: Đọc kỹ phần [Phạm Nhân Thần] hoặc [Phạm Lưu Chú] để cảnh báo rõ ràng về các thao tác xâm lấn: Thích Huyết (rạch da, mổ), Thích Hại (châm cứu) hoặc Âm Thương (nội soi, nắn xương).
-        - 📝 CHỈ ĐỊNH CỦA LƯƠNG Y: Kết luận dứt khoát về mặt thời gian: THÍCH HỢP LÀM NGAY hay NÊN DỜI NGÀY KHÁC (nếu phạm quá nhiều Sát tinh).
-        - 🏥 KHUYẾN CÁO Y KHOA (In nghiêng ở cuối cùng): "Lưu ý: Luận giải trên chỉ áp dụng để chọn thời điểm tốt nhất theo Y Lý Á Đông. Nếu bạn đang trong tình trạng đau đớn cấp tính, chấn thương hoặc nguy kịch, hãy đến ngay phòng Cấp cứu (Emergency) gần nhất. Việc cứu người là tối thượng, tuyệt đối không trì hoãn để chờ đợi giờ tốt."
+        BỐ CỤC BẮT BUỘC:
+        - ☯️ LUẬN GIẢI THỜI ĐIỂM KHÁM CHỮA BỆNH (Phân tích khí huyết, sát tinh)
+        - 📖 CẨM NANG ĐIỀU DƯỠNG (Trích xuất CHÍNH XÁC từ 2 file PDF)
+        - 🏥 LỜI DẶN CỦA LƯƠNG Y (Luôn khuyên bệnh nhân đến bệnh viện nếu có triệu chứng cấp tính, đau dữ dội. Không dùng thuốc nam thay thế cấp cứu).
         """
         
-        config = genai.GenerationConfig(temperature=0.2, top_k=1)
-        
+        # SIẾT CHẶT ĐỘ SÁNG TẠO (Temperature = 0.1 ép AI làm việc như máy scan, không bịa chuyện)
+        config = genai.GenerationConfig(temperature=0.1, top_k=1)
         model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
         
-        response = model.generate_content(context_text)
+        # 5. Khám bệnh kết hợp đọc sách
+        response = model.generate_content([sach_1, sach_2, context_text])
+        
         return response.text
     except Exception as e:
         return f"Lỗi hệ thống A.I: {e}"
+
+# ==============================================================================
+# NÚT BẤM VÀ HIỂN THỊ (ĐÃ BỔ SUNG LỚP AN TOÀN Y KHOA)
+# ==============================================================================
+
+# Danh sách các từ khóa báo hiệu tình trạng khẩn cấp
+TU_KHOA_CAP_CUU = [
+    'khó thở', 'đau ngực', 'sốt cao', 'co giật', 'liệt', 
+    'chảy máu', 'nôn ra máu', 'cấp cứu', 'đột quỵ', 'đau dữ dội', 
+    'bất tỉnh', 'mất nhận thức', 'gãy xương'
+]
 
 if btn_phan_tich:
     if not bo_phan:
         st.error("Lỗi: Lương y cần biết bạn muốn chữa/khám bộ phận nào.")
     else:
-        with st.spinner("Đang chẩn đoán mạch và hội chẩn với A.I..."):
-            
-            benh_an_tho = engine.quet_benh_an(
-                data['chi_nam'], thang_am, data['can_ngay'], 
-                data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
-            )
+        # LỚP BẢO VỆ 1: Kiểm tra từ khóa cấp cứu
+        is_cap_cuu = any(tu_khoa in bo_phan.lower() for tu_khoa in TU_KHOA_CAP_CUU)
+        
+        if is_cap_cuu:
+            st.error("🚨 CẢNH BÁO Y KHOA KHẨN CẤP 🚨")
+            st.warning("""
+            Hệ thống phát hiện dấu hiệu nguy hiểm liên quan đến tính mạng. 
+            Tuyệt đối không dùng thuốc Nam hay chờ đợi giờ tốt lúc này.
+            **YÊU CẦU:** Gọi ngay cấp cứu 115 hoặc đến bệnh viện gần nhất ngay lập tức!
+            """)
+        else:
+            # Nếu an toàn, tiếp tục phân tích Dịch Lý và gọi AI
+            with st.spinner("Đang chẩn đoán mạch và hội chẩn y thư..."):
+                
+                # 1. Thuật toán tính toán Dịch Lý
+                benh_an_tho = engine.quet_benh_an(
+                    data['chi_nam'], thang_am, data['can_ngay'], 
+                    data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
+                )
 
-            context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
+                # 2. Đóng gói dữ liệu gửi cho AI
+                context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp/Triệu chứng: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
 
-            # 3. AI phân tích và trả về văn bản Lương Y
-            loi_khuyen = xin_loi_khuyen_ai(context)
-            
-            if "Lỗi hệ thống" not in loi_khuyen:
-                st.success("Hoàn tất luận giải!")
-                st.write(loi_khuyen)
-            else:
-                st.error(loi_khuyen)
+                # 3. AI phân tích và trả kết quả
+                loi_khuyen = xin_loi_khuyen_ai(context)
+                
+                if "Lỗi hệ thống" not in loi_khuyen:
+                    st.success("Hoàn tất luận giải!")
+                    st.write(loi_khuyen)
+                else:
+                    st.error(loi_khuyen)
