@@ -348,38 +348,58 @@ st.markdown("---")
 st.subheader("📜 Thần Y Luận Giải")
 
 # ==============================================================================
-# HÀM AI LUẬN GIẢI (BẢN PHỤC HỒI - CHỈ LUẬN GIẢI DỊCH LÝ)
+# HÀM AI LUẬN GIẢI (BẢN CHUẨN: TÍCH HỢP TÝ NGỌ LƯU CHÚ & THẦN SÁT)
 # ==============================================================================
 @st.cache_data(show_spinner=False, ttl=86400) 
 def xin_loi_khuyen_ai(context_text):
     try:
-        # 1. Thuật toán Load Balancing (Chia đều tải cho 6 Key)
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
         key_duoc_chon = random.choice(danh_sach_keys)
         genai.configure(api_key=key_duoc_chon)
         
-        # 2. PROMPT THẦN Y DỊCH LÝ (Bản gốc)
+        # PROMPT "THẦN Y": NẠP TOÀN BỘ KIẾN THỨC CỐT LÕI
         prompt_bac_si = """
-        Bạn là một vị Lương Y uyên bác, am hiểu Dịch Lý Y Khoa.
-        Nhiệm vụ: Dựa vào "Kết quả Dịch Lý thô" (Năm, Tháng, Ngày, Giờ) và Bộ phận cần khám, hãy đưa ra lời khuyên thời điểm khám chữa bệnh.
-        
-        NGUYÊN TẮC TỐI THƯỢNG:
-        1. LUẬN GIẢI THỜI ĐIỂM: Bám sát "Kết quả Dịch Lý thô" để khuyên nên khám ngay hay dời ngày (phân tích rõ các Sát tinh, Cát thần).
-        2. KHÔNG KÊ ĐƠN TÙY TIỆN: Đưa ra lời khuyên dưỡng sinh chung cho bộ phận đang bị bệnh, tuyệt đối không tự bịa ra bài thuốc Đông Y chuyên sâu.
-        3. TRUNG THỰC & AN TOÀN: Luôn khuyên bệnh nhân đến bệnh viện thăm khám Tây Y để có kết quả chính xác nhất.
-        
-        BỐ CỤC TRÌNH BÀY:
-        - ☯️ LUẬN GIẢI DỊCH LÝ THỜI GIAN
-        - 📖 LỜI KHUYÊN DƯỠNG SINH CƠ BẢN
-        - 🏥 KHUYẾN CÁO Y KHOA
+        Bạn là một vị Thần Y phương Đông, tinh thông Dịch Lý Y Khoa, Tý Ngọ Lưu Chú, hệ thống Nhân Thần và Thần Sát.
+        Dưới đây là BỘ KIẾN THỨC CỐT LÕI BẮT BUỘC bạn phải dùng để hội chẩn dựa trên thông tin thời gian (Năm, Tháng, Ngày, Giờ) được cung cấp:
+
+        1. TÝ NGỌ LƯU CHÚ (Đồng hồ Tạng Phủ):
+        - Tý (23h-1h): Đởm | Sửu (1h-3h): Can | Dần (3h-5h): Phế | Mão (5h-7h): Đại tràng
+        - Thìn (7h-9h): Vị | Tỵ (9h-11h): Tỳ | Ngọ (11h-13h): Tâm | Mùi (13h-15h): Tiểu tràng
+        - Thân (15h-17h): Bàng quang | Dậu (17h-19h): Thận | Tuất (19h-21h): Tâm bào | Hợi (21h-23h): Tam tiêu
+        *Nguyên tắc:* Giờ vượng của tạng phủ nào thì KỴ châm cứu, phẫu thuật, can thiệp mạnh vào tạng phủ đó.
+
+        2. LÝ THUYẾT NHÂN THẦN (Huyết Mạch Trú Ngụ):
+        - Khí huyết (Nhân thần) di chuyển theo ngày Âm lịch, theo Thiên Can, Địa Chi và theo Giờ.
+        *Nguyên tắc:* Phải kiểm tra xem "Bộ phận cơ thể" bệnh nhân muốn can thiệp có trùng với vị trí Nhân thần trú ngụ tại thời điểm đó không. Nếu trùng: TUYỆT ĐỐI CẤM đâm chích, mổ xẻ để tránh xuất huyết không cầm.
+
+        3. 9 THẦN SÁT Y KHOA:
+        - Cát Thần (Tốt cho chữa bệnh): Thiên Y, Địa Y, Nhật Y.
+        - Hung Thần (Kỵ phẫu thuật, trích huyết): Thích Huyết Sát, Thích Hại Sát, Huyết Kỵ, Âm Thương Sát, Huyết Chi, Bệnh Phù, Tử Khí / Tử Thần.
+
+        4. HỆ THỐNG XUNG PHÁ (Khí Huyết Hỗn Loạn):
+        - Lục xung: Tý-Ngọ, Sửu-Mùi, Dần-Thân, Mão-Dậu, Thìn-Tuất, Tỵ-Hợi.
+        - Nhật Phá: Giờ khám xung với Chi Ngày.
+        - Nguyệt Phá: Chi Ngày xung với Chi Tháng.
+        - Tuế Phá: Chi Ngày xung với Chi Năm.
+        *Nguyên tắc:* Phạm xung phá là lúc âm dương giao chiến, chỉ nên dùng thuốc bảo tồn, cấm can thiệp dao kéo.
+
+        NHIỆM VỤ CỦA BẠN:
+        Dựa vào [Kết quả Dịch Lý thô] do hệ thống Python cung cấp, kết hợp với các học thuyết trên:
+        1. Chỉ ra tạng phủ nào đang vượng (Tý ngọ lưu chú), bộ phận nào có Nhân thần trú ngụ.
+        2. Dò tìm xem có phạm Nhật Phá, Nguyệt Phá, hay Hung thần (Thích Huyết, Huyết Kỵ...) không.
+        3. Đưa ra KẾT LUẬN rõ ràng: Nên hay Không nên can thiệp vào giờ này.
+
+        BỐ CỤC BẮT BUỘC:
+        - ☯️ VẬN HÀNH TÝ NGỌ LƯU CHÚ & NHÂN THẦN
+        - ⚔️ PHÂN TÍCH XUNG PHÁ & THẦN SÁT
+        - ⚖️ KẾT LUẬN & ĐIỀU HƯỚNG Y KHOA
         """
         
+        # Để Temp = 0.2 để AI vừa tuân thủ quy tắc, vừa linh hoạt trong câu chữ luận giải
         config = genai.GenerationConfig(temperature=0.2, top_k=1)
         model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
         
-        # 3. Phân tích Dịch lý siêu tốc
         response = model.generate_content(context_text)
-        
         return response.text
     except Exception as e:
         return f"Lỗi hệ thống A.I: {e}"
@@ -432,4 +452,4 @@ if btn_phan_tich:
                     st.error(loi_khuyen)
 
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2026 Y Lý Cát Thời - Ứng dụng thuộc bản quyền tác giả. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2026 Y Lý Cát Thời - Ứng dụng thuộc bản quyền tác giả Chris Nhật Tôn. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
