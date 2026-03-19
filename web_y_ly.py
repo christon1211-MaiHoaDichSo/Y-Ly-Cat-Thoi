@@ -207,52 +207,43 @@ with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
     # =========================================================================
-    # =========================================================================
-    # =========================================================================
-    # =========================================================================
-    # =========================================================================
-    # BƠM CSS VỚI TUYỆT CHIÊU "MỎ NEO TÀNG HÌNH" (CHỈ NHẮM ĐÚNG 3 Ô DƯƠNG LỊCH)
+    # BƠM CSS MỚI: CHỈ NHUỘM MÀU CÁC Ô NẰM TRONG CỘT NGANG (stHorizontalBlock)
     # =========================================================================
     st.markdown("""
     <style>
-    /* [1] Ô NĂM DƯƠNG LỊCH (Input số) - Nhắm đúng khối sau mỏ neo */
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] div[data-baseweb="input"] {
+    /* [1] Nhuộm ô Năm Dương Lịch (Chỉ tác dụng khi nằm trong cột) */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] div[data-baseweb="input"] {
         background-color: #ffbc7b !important;
         border: 2px solid #c26000 !important;
         border-radius: 6px !important;
     }
-    /* Xuyên thủng lớp lõi để ép màu chữ (Khắc phục viền trắng và chữ đen) */
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] input {
+    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] input {
         background-color: transparent !important;
         color: #c26000 !important;
         -webkit-text-fill-color: #c26000 !important; 
         font-weight: bold !important;
     }
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
+    div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
         background-color: transparent !important;
         color: #c26000 !important;
     }
     
-    /* [2] Ô THÁNG & NGÀY DƯƠNG LỊCH (Selectbox) */
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    /* [2] Nhuộm ô Tháng & Ngày Dương Lịch (Chỉ tác dụng khi nằm trong cột) */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
         background-color: #ffbc7b !important;
         border: 2px solid #c26000 !important;
         border-radius: 6px !important;
     }
-    /* Ép màu chữ hiển thị và mũi tên (Khắc phục chữ đen) */
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
         color: #c26000 !important;
         -webkit-text-fill-color: #c26000 !important;
         font-weight: bold !important;
     }
-    #duong-lich-anchor + div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
         color: #c26000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
-
-    # Đặt mỏ neo tàng hình để CSS nhận diện (BẮT BUỘC PHẢI CÓ DÒNG NÀY)
-    st.markdown('<div id="duong-lich-anchor"></div>', unsafe_allow_html=True)
 
     # 3.1 Khung nhập liệu Dương Lịch 
     c1, c2, c3 = st.columns(3)
@@ -264,9 +255,6 @@ with col_trai:
         max_days_duong = calendar.monthrange(int(nam_duong), thang_duong)[1]
         default_day = min(now.day, max_days_duong) 
         ngay_duong = st.selectbox("Ngày Dương Lịch", range(1, max_days_duong + 1), index=default_day - 1)
-
-    # -- TẠO KHOẢNG TRỐNG ĐỂ CÁC Ô KHÔNG BỊ DÍNH VÀO NHAU --
-    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
     # LÕI QUY ĐỔI ÂM LỊCH
     solar_date = Solar(int(nam_duong), thang_duong, ngay_duong)
@@ -289,10 +277,7 @@ with col_trai:
     with c5: st.markdown(ve_o_am_lich("Tháng Âm Lịch", thang_am), unsafe_allow_html=True)
     with c6: st.markdown(ve_o_am_lich("Ngày Âm Lịch", ngay_am), unsafe_allow_html=True)
 
-    # -- TẠO KHOẢNG TRỐNG TÁCH BIỆT GIỮA LỊCH VÀ GIỜ KHÁM --
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-
-    # Ô Giờ khám giờ đây sẽ hoàn toàn độc lập, giữ nguyên màu xám mặc định
+    # 3.3 Nhóm các công cụ thao tác (Đã bỏ các khoảng trống thừa để khít lại tự nhiên)
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -300,18 +285,13 @@ with col_trai:
         format_func=lambda x: GIO_HIENTHI[x] 
     )
     
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-    bo_phan = st.text_input("Nhập bộ phận cơ thể cần khám(Mắt, Dạ dày, Răng...)")
+    bo_phan = st.text_input("Nhập bộ phận cơ thể cần khám (Mắt, Dạ dày, Răng...)")
 
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
-# 4. Tính toán Dịch Lý chạy ẩn phía sau
-solar_date = Converter.Lunar2Solar(Lunar(nam_am, thang_am, ngay_am))
-data = tinh_can_chi_tu_ngay_duong(solar_date)
-
-with col_trai:
-    st.info(f"**Năm:** {data['nam']} | **Ngày:** {data['ngay']}")
+    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ (Đã thêm Tháng)
+    data = tinh_can_chi_tu_ngay_duong(solar_date)
+    st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
 # 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
