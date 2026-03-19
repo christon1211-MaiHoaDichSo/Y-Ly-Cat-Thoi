@@ -381,7 +381,7 @@ def xin_loi_khuyen_ai(context_text):
         config = genai.GenerationConfig(temperature=0.2, top_k=1)
         
         # 3. CHUYỂN SANG MÔ HÌNH FLASH SIÊU TỐC ĐỘ VÀ MIỄN PHÍ CAO
-        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
+        model = genai.GenerativeModel('gemini-3.0-flash', system_instruction=prompt_bac_si, generation_config=config)
         
         response = model.generate_content(context_text)
         return response.text
