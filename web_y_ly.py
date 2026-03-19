@@ -158,11 +158,44 @@ st.markdown(
 )
 st.markdown("---")
 # --------------------------------------------------------
+# tối ưu Responsive cho Mobile
 components.html("""
-<div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
-    <div style="font-size: 16px;">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
-    <div id="clock" style="font-size: 24px; font-weight: bold; color: #D3A352; margin-top: 5px;">Đang tải thời gian...</div>
+<style>
+    .clock-box {
+        text-align: center; 
+        font-family: sans-serif; 
+        padding: 15px; 
+        background-color: #1E2022; 
+        color: white; 
+        border-radius: 10px; 
+        border: 1px solid #333;
+        box-sizing: border-box;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .clock-title { 
+        font-size: 16px; 
+    }
+    .clock-time { 
+        font-size: 24px; 
+        font-weight: bold; 
+        color: #D3A352; 
+        margin-top: 5px; 
+    }
+
+    
+    @media (max-width: 600px) {
+        .clock-title { font-size: 12px; }
+        .clock-time { font-size: 17px; margin-top: 8px; }
+        .clock-box { padding: 12px 5px; }
+    }
+</style>
+
+<div class="clock-box">
+    <div class="clock-title">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
+    <div id="clock" class="clock-time">Đang tải thời gian...</div>
 </div>
+
 <script>
     function updateTime() {
         var now = new Date();
@@ -175,7 +208,7 @@ components.html("""
     setInterval(updateTime, 1000);
     updateTime();
 </script>
-""", height=110)
+""", height=130) 
 
 st.markdown("---")
 
