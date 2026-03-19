@@ -207,75 +207,114 @@ with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
     # =========================================================================
-    # BƠM CSS MỚI: BẮT ĐÚNG LỚP CLASS GỐC CỦA STREAMLIT (XUYÊN THỦNG MỌI CONTAINER)
+    # CSS CHUẨN XÁC SỬ DỤNG STREAMLIT KEYS (Giải pháp tối ưu)
     # =========================================================================
     st.markdown("""
     <style>
-    /* [1] Nhuộm Ô Năm Dương Lịch (Bắt trực tiếp class .stNumberInput) */
-    .stNumberInput > div > div {
-        background-color: #ffbc7b !important;
-        border: 2px solid #c26000 !important;
-        border-radius: 6px !important;
-    }
-    .stNumberInput input {
-        background-color: transparent !important;
-        color: #c26000 !important;
-        -webkit-text-fill-color: #c26000 !important;
-        font-weight: bold !important;
-    }
-    .stNumberInput button {
-        color: #c26000 !important;
-        background-color: transparent !important;
-    }
-    .stNumberInput button:hover {
-        background-color: #e5a053 !important;
+    /* =========================================================
+       CHỈ STYLE 3 Ô DƯƠNG LỊCH: NĂM / THÁNG / NGÀY
+       ========================================================= */
+    .st-key-duong_nam [data-baseweb="select"] > div,
+    .st-key-duong_thang [data-baseweb="select"] > div,
+    .st-key-duong_ngay [data-baseweb="select"] > div {
+        background: #ffd6a8 !important;
+        border: 1.8px solid #d27a1f !important;
+        border-radius: 10px !important;
+        min-height: 42px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s ease !important;
     }
 
-    /* [2] Nhuộm Ô Tháng & Ngày Dương Lịch */
-    /* Bắt tất cả Selectbox nằm TRONG cột ngang (.stHorizontalBlock). Tuyệt đối bỏ qua Giờ Khám (đứng ngoài cột) */
-    [data-testid="stHorizontalBlock"] .stSelectbox [data-baseweb="select"] > div,
-    [data-testid="column"] .stSelectbox [data-baseweb="select"] > div {
-        background-color: #ffbc7b !important;
-        border: 2px solid #c26000 !important;
-        border-radius: 6px !important;
+    .st-key-duong_nam [data-baseweb="select"] span,
+    .st-key-duong_thang [data-baseweb="select"] span,
+    .st-key-duong_ngay [data-baseweb="select"] span {
+        color: #9a540c !important;
+        -webkit-text-fill-color: #9a540c !important;
+        font-weight: 600 !important;
     }
-    [data-testid="stHorizontalBlock"] .stSelectbox [data-baseweb="select"] span,
-    [data-testid="column"] .stSelectbox [data-baseweb="select"] span {
-        color: #c26000 !important;
-        -webkit-text-fill-color: #c26000 !important;
-        font-weight: bold !important;
+
+    .st-key-duong_nam [data-baseweb="select"] svg,
+    .st-key-duong_thang [data-baseweb="select"] svg,
+    .st-key-duong_ngay [data-baseweb="select"] svg {
+        color: #b46012 !important;
     }
-    [data-testid="stHorizontalBlock"] .stSelectbox [data-baseweb="select"] svg,
-    [data-testid="column"] .stSelectbox [data-baseweb="select"] svg {
-        color: #c26000 !important;
+
+    .st-key-duong_nam [data-baseweb="select"] > div:hover,
+    .st-key-duong_thang [data-baseweb="select"] > div:hover,
+    .st-key-duong_ngay [data-baseweb="select"] > div:hover {
+        border-color: #b46012 !important;
+        box-shadow: 0 0 0 1px rgba(180, 96, 18, 0.08) !important;
+    }
+
+    .st-key-duong_nam [data-baseweb="select"]:focus-within > div,
+    .st-key-duong_thang [data-baseweb="select"]:focus-within > div,
+    .st-key-duong_ngay [data-baseweb="select"]:focus-within > div {
+        border-color: #a9550f !important;
+        box-shadow: 0 0 0 3px rgba(233, 146, 62, 0.18) !important;
+    }
+
+    /* =========================================================
+       RESET Ô GIỜ KHÁM VỀ GIAO DIỆN BÌNH THƯỜNG
+       ========================================================= */
+    .st-key-gio_kham [data-baseweb="select"] > div {
+        background: white !important;
+        border: 1px solid #d9d9d9 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+
+    .st-key-gio_kham [data-baseweb="select"] span {
+        color: inherit !important;
+        -webkit-text-fill-color: inherit !important;
+        font-weight: 400 !important;
+    }
+
+    .st-key-gio_kham [data-baseweb="select"] svg {
+        color: inherit !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # 3.1 Khung nhập liệu Dương Lịch 
+    # 3.1 Khung nhập liệu Dương Lịch (Đã chuyển Năm sang Selectbox và cấp Key)
     c1, c2, c3 = st.columns(3)
     with c1:
-        nam_duong = st.number_input("Năm Dương Lịch", min_value=1900, max_value=2035, value=now.year, step=1)
+        ds_nam = list(range(1900, 2036))
+        nam_duong = st.selectbox(
+            "Năm Dương Lịch",
+            ds_nam,
+            index=ds_nam.index(now.year),
+            key="duong_nam"
+        )
     with c2:
-        thang_duong = st.selectbox("Tháng Dương Lịch", range(1, 13), index=now.month - 1)
+        thang_duong = st.selectbox(
+            "Tháng Dương Lịch",
+            list(range(1, 13)),
+            index=now.month - 1,
+            key="duong_thang"
+        )
     with c3:
         max_days_duong = calendar.monthrange(int(nam_duong), thang_duong)[1]
-        default_day = min(now.day, max_days_duong) 
-        ngay_duong = st.selectbox("Ngày Dương Lịch", range(1, max_days_duong + 1), index=default_day - 1)
+        default_day = min(now.day, max_days_duong)
+        ngay_duong = st.selectbox(
+            "Ngày Dương Lịch",
+            list(range(1, max_days_duong + 1)),
+            index=default_day - 1,
+            key="duong_ngay"
+        )
 
     # LÕI QUY ĐỔI ÂM LỊCH
     solar_date = Solar(int(nam_duong), thang_duong, ngay_duong)
     lunar_date = Converter.Solar2Lunar(solar_date)
     nam_am, thang_am, ngay_am = lunar_date.year, lunar_date.month, lunar_date.day
 
-    # 3.2 Khung hiển thị Âm Lịch (Vẽ HTML)
+    # 3.2 Khung hiển thị Âm Lịch
     c4, c5, c6 = st.columns(3)
     def ve_o_am_lich(tieu_de, gia_tri):
         return f'''
         <div style="font-size: 14px; margin-bottom: 6px; color: inherit; margin-top: 10px;">{tieu_de}</div>
         <div style="background-color: #9fcaff; border: 2px solid #004ccb; color: #004ccb; 
                     border-radius: 6px; padding: 0 12px; font-size: 15px; font-weight: bold;
-                    height: 40px; display: flex; align-items: center; cursor: not-allowed; box-sizing: border-box;">
+                    height: 42px; display: flex; align-items: center; cursor: not-allowed; box-sizing: border-box;">
             {gia_tri}
         </div>
         '''
@@ -284,21 +323,22 @@ with col_trai:
     with c5: st.markdown(ve_o_am_lich("Tháng Âm Lịch", thang_am), unsafe_allow_html=True)
     with c6: st.markdown(ve_o_am_lich("Ngày Âm Lịch", ngay_am), unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True) # Chỉ giữ lại 1 mốc duy nhất để tách biệt Lịch và Giờ Khám
+    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-    # 3.3 Nhóm các công cụ thao tác (Các "khoảng trống rác" HTML đã bị dọn sạch để mọi thứ bám sát vào Giờ Khám)
+    # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
         index=((now.hour + 1) // 2) % 12,
-        format_func=lambda x: GIO_HIENTHI[x] 
+        format_func=lambda x: GIO_HIENTHI[x],
+        key="gio_kham"
     )
     
     bo_phan = st.text_input("Nhập bộ phận cơ thể cần khám (Mắt, Dạ dày, Răng...)")
 
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
-    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ (Đã bổ sung Tháng Âm chuẩn xác)
+    # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date)
     st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
