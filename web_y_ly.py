@@ -209,37 +209,67 @@ with col_trai:
     # =========================================================================
     # =========================================================================
     # =========================================================================
-    # BƠM CSS ĐỂ NHUỘM MÀU CHỈ RIÊNG 3 Ô DƯƠNG LỊCH (TRÁNH GIỜ KHÁM)
+    # =========================================================================
+    # BƠM CSS ĐỂ NHUỘM MÀU CHỈ RIÊNG 3 Ô DƯƠNG LỊCH & CHUẨN UX
     # =========================================================================
     st.markdown("""
     <style>
-    /* 1. Nhuộm toàn diện ô Năm Dương Lịch (Number Input) */
-    div[data-testid="stNumberInput"] > div > div {
+    /* 1. KHẮC PHỤC SỰ CỐ TÁCH RỜI Ô NĂM DƯƠNG LỊCH */
+    /* Bọc toàn bộ container thành 1 khối liền mạch, bo tròn viền ngoài cùng */
+    div[data-testid="stNumberInputContainer"] {
+        background-color: #ffbc7b !important;
+        border: 2px solid #c26000 !important;
+        border-radius: 6px !important;
+        overflow: hidden !important; 
+    }
+    /* Làm trong suốt lõi gõ số để ăn theo màu khối ngoài, xóa viền rác */
+    div[data-testid="stNumberInputContainer"] input {
+        background-color: transparent !important;
+        color: #c26000 !important;
+        font-weight: bold !important;
+        border: none !important;
+    }
+    /* Làm trong suốt 2 nút bấm + / - để không bị lởm chởm */
+    div[data-testid="stNumberInputContainer"] button {
+        background-color: transparent !important;
+        color: #c26000 !important;
+        border: none !important;
+    }
+    /* Hiệu ứng đậm màu hơn một chút khi di chuột vào nút + / - */
+    div[data-testid="stNumberInputContainer"] button:hover {
+        background-color: #e5a053 !important;
+    }
+
+    /* 2. CHUẨN HÓA Ô THÁNG & NGÀY DƯƠNG LỊCH (Liền mạch 1 khối) */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
         background-color: #ffbc7b !important;
         border: 2px solid #c26000 !important;
         border-radius: 6px !important;
     }
-    div[data-testid="stNumberInput"] > div > div > input {
-        background-color: #ffbc7b !important;
+    /* Màu chữ hiển thị trong ô */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
         color: #c26000 !important;
         font-weight: bold !important;
     }
-    div[data-testid="stNumberInput"] button {
+    /* Mũi tên xổ xuống */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
         color: #c26000 !important;
     }
 
-    /* 2. Nhuộm toàn diện ô Tháng & Ngày (Selectbox nằm lồng trong 2 lớp stColumn) */
-    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] > div > div > div {
+    /* 3. ĐỒNG BỘ MÀU MENU KHI BẤM XỔ XUỐNG (DROPDOWN LIST) */
+    /* Nhuộm màu nền của bảng chọn */
+    div[data-baseweb="popover"] ul {
         background-color: #ffbc7b !important;
-        border: 2px solid #c26000 !important;
-        border-radius: 6px !important;
     }
-    
-    /* 3. Chỉnh màu chữ bên trong Selectbox Dương Lịch */
-    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] span,
-    div[data-testid="stColumn"] div[data-testid="stColumn"] div[data-testid="stSelectbox"] div[role="combobox"] {
+    /* Nhuộm màu chữ của từng dòng (1, 2, 3...) */
+    div[data-baseweb="popover"] ul li {
         color: #c26000 !important;
         font-weight: bold !important;
+        font-size: 15px !important;
+    }
+    /* Đổi màu highlight khi rê chuột vào từng dòng */
+    div[data-baseweb="popover"] ul li:hover {
+        background-color: #e5a053 !important;
     }
     </style>
     """, unsafe_allow_html=True)
