@@ -206,37 +206,79 @@ col_trai, col_phai = st.columns([1, 1.5])
 with col_trai:
     st.subheader("📋 Thông Tin Thời Gian")
     
-    # 3.1 Khung nhập liệu Dương Lịch (Bỏ tiêu đề, đổi tên nhãn)
+    # =========================================================================
+    # =========================================================================
+    # BƠM CSS ĐỂ NHUỘM MÀU CHỈ RIÊNG 3 Ô DƯƠNG LỊCH (TRÁNH GIỜ KHÁM)
+    # =========================================================================
+    st.markdown("""
+    <style>
+    /* Chỉ áp dụng cho NumberInput nằm sâu trong cột con (c1) */
+    div[data-testid="column"] div[data-testid="column"] div[data-testid="stNumberInput"] input {
+        background-color: #ffbc7b !important;
+        color: #c26000 !important;
+        border: 2px solid #c26000 !important;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    /* Chỉ áp dụng cho Selectbox nằm sâu trong cột con (c2, c3) */
+    div[data-testid="column"] div[data-testid="column"] div[data-testid="stSelectbox"] div[role="combobox"] {
+        background-color: #ffbc7b !important;
+        color: #c26000 !important;
+        border: 2px solid #c26000 !important;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    /* Đổi màu chữ hiển thị bên trong ô chọn Dương Lịch */
+    div[data-testid="column"] div[data-testid="column"] div[data-testid="stSelectbox"] div[role="combobox"] span {
+        color: #c26000 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # 3.1 Khung nhập liệu Dương Lịch 
     c1, c2, c3 = st.columns(3)
     with c1:
-        nam_duong = st.selectbox("Năm Dương Lịch", range(2024, 2036), index=now.year - 2024)
+        # Thay selectbox bằng number_input để tự gõ, khóa tối đa năm 2035
+        nam_duong = st.number_input("Năm Dương Lịch", min_value=1900, max_value=2035, value=now.year, step=1)
     with c2:
         thang_duong = st.selectbox("Tháng Dương Lịch", range(1, 13), index=now.month - 1)
     with c3:
-        max_days_duong = calendar.monthrange(nam_duong, thang_duong)[1]
+        max_days_duong = calendar.monthrange(int(nam_duong), thang_duong)[1]
         default_day = min(now.day, max_days_duong) 
         ngay_duong = st.selectbox("Ngày Dương Lịch", range(1, max_days_duong + 1), index=default_day - 1)
 
     # =========================================================================
     # LÕI QUY ĐỔI: Chuyển Dương sang Âm 
     # =========================================================================
-    solar_date = Solar(nam_duong, thang_duong, ngay_duong)
+    solar_date = Solar(int(nam_duong), thang_duong, ngay_duong)
     lunar_date = Converter.Solar2Lunar(solar_date)
 
     nam_am = lunar_date.year
     thang_am = lunar_date.month
     ngay_am = lunar_date.day
 
-    # 3.2 Khung hiển thị Âm Lịch
+    # =========================================================================
+    # 3.2 Khung hiển thị Âm Lịch (Dùng HTML vẽ khối hộp để triệt tiêu mũi tên)
+    # =========================================================================
     c4, c5, c6 = st.columns(3)
+    
+    # Hàm vẽ ô Âm lịch chuẩn màu XANH 004ccb
+    def ve_o_am_lich(tieu_de, gia_tri):
+        return f'''
+        <div style="font-size: 14px; margin-bottom: 6px; color: inherit;">{tieu_de}</div>
+        <div style="background-color: #9fcaff; border: 2px solid #004ccb; color: #004ccb; 
+                    border-radius: 6px; padding: 8px 12px; font-size: 15px; font-weight: bold;
+                    height: 39px; display: flex; align-items: center; cursor: not-allowed;">
+            {gia_tri}
+        </div>
+        '''
+
     with c4:
-        # Mẹo: Dùng selectbox với 1 giá trị duy nhất trong danh sách [ ]
-        # Ô sẽ giữ nguyên màu sắc bình thường, click được nhưng không thể đổi giá trị
-        st.selectbox("Năm Âm Lịch", [nam_am])
+        st.markdown(ve_o_am_lich("Năm Âm Lịch", nam_am), unsafe_allow_html=True)
     with c5:
-        st.selectbox("Tháng Âm Lịch", [thang_am])
+        st.markdown(ve_o_am_lich("Tháng Âm Lịch", thang_am), unsafe_allow_html=True)
     with c6:
-        st.selectbox("Ngày Âm Lịch", [ngay_am])
+        st.markdown(ve_o_am_lich("Ngày Âm Lịch", ngay_am), unsafe_allow_html=True)
 
     # ĐÃ CẬP NHẬT: Dùng format_func để gán bộ từ điển GIO_HIENTHI vào dropdown
     gio_kham = st.selectbox(
