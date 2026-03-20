@@ -580,7 +580,7 @@ THỨ TỰ LUẬN GIẢI BẮT BUỘC:
   "10. Cát Thần: Địa Y - bổ trợ ..."
 - Chỉ giải thích tác dụng thực tế, không nói dài
 
-11. Kết Luận Cuối Cùng
+➥ Kết Luận Cuối Cùng
 - Phải đưa ra kết luận dứt khoát, không mập mờ
 - Không được chỉ chép lại dữ liệu
 - Phải phân tích logic toàn bộ rồi quyết định
@@ -595,8 +595,8 @@ QUY TẮC RA QUYẾT ĐỊNH:
 - Cát thần chỉ bổ trợ, không được lật ngược hung nặng
 
 CUỐI CÙNG PHẢI VIẾT ĐÚNG 2 DÒNG:
-- Nên: ...
-- Không Nên: ...
+✅ Nên: ...
+⛔ Không Nên: ...
 
 MẪU VĂN PHONG:
 1. Nhật Phá: Không Phạm
@@ -610,15 +610,15 @@ MẪU VĂN PHONG:
 9. Hung Thần: Không Phạm
 10. Cát Thần: Không Có
 
-11. Kết Luận Cuối Cùng
-- Nên: ...
-- Không Nên: ...
+➥ Kết Luận Cuối Cùng
+✅ Nên: ...
+⛔ Không Nên: ...
 
 Không được viết lại câu hỏi. Không được dài dòng. Phải đưa ra quyết định thật sự.
 """
 
         config = genai.GenerationConfig(
-            temperature=0.1,
+            temperature=0.2,
             top_k=1,
             top_p=0.8
         )
