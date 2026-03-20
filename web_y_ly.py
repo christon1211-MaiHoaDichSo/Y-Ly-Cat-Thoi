@@ -85,6 +85,7 @@ def tinh_can_chi_tu_ngay_duong(solar_date, gio_hien_tai=12):
     return {
         'nam': f"{CAN[can_nam_idx]} {CHI[chi_nam_idx]}", 'thang': f"{CAN[can_thang_idx]} {CHI[chi_thang_idx]}",
         'ngay': f"{CAN[can_ngay_idx]} {CHI[chi_ngay_idx]}", 'chi_ngay': CHI[chi_ngay_idx], 'chi_nam': CHI[chi_nam_idx], 
+        'chi_thang': CHI[chi_thang_idx], # <--- THÊM DÒNG NÀY ĐỂ XUẤT CHI THÁNG
         'can_ngay': CAN[can_ngay_idx], 'thang_am_so': lunar.month, 'ngay_am_so': lunar.day,
         'cac_gio': cac_gio, 'hoang_dao_list': [g['chi'] for g in cac_gio['Hoàng Đạo']]
     }
@@ -198,7 +199,11 @@ class YLyCatThoiEngine:
             "muc_do": "chưa xác định"
         }
 
-    def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
+    def lap_bao_cao_chi_tiet(self, nam_chi, chi_thang, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
+        
+        # Sửa lỗi ẩn: Phải phân loại thủ thuật trước khi dùng để tính toán ở dưới
+        phan_loai = self.phan_loai_thu_tuc(bo_phan)
+        
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
         nt_can_text = self.NT_CAN.get(ngay_can, "")
         nt_chi_text = self.NT_CHI.get(ngay_chi, "")
@@ -783,6 +788,7 @@ if btn_phan_tich:
             with st.spinner("Đang chẩn đoán mạch và hội chẩn Dịch Lý..."):
                 bao_cao = engine.lap_bao_cao_chi_tiet(
                     data['chi_nam'],
+                    data['chi_thang'], # <--- TRUYỀN CHI THÁNG VÀO ĐÂY
                     thang_am,
                     data['can_ngay'],
                     data['chi_ngay'],
