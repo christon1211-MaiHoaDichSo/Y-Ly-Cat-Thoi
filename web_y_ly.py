@@ -48,6 +48,20 @@ LUU_CHU_DETAILS = {
     'Tuất': "Giờ Tuất (19h-21h) - TÂM BÀO:\nKhí huyết dồn về Màng bao tim (hệ thống màng bảo vệ tim và mạch máu ngoại vi).",
     'Hợi': "Giờ Hợi (21h-23h) - TAM TIÊU:\nKhí huyết dồn về hệ thống Nội tiết và các màng khoang bụng/ngực. Cơ thể cần nghỉ ngơi hoàn toàn."
 }
+LUU_CHU_TARGETS = {
+    'Tý': ['mật', 'đởm'],
+    'Sửu': ['gan'],
+    'Dần': ['phổi'],
+    'Mão': ['ruột già', 'đại trường'],
+    'Thìn': ['dạ dày', 'vị'],
+    'Tỵ': ['tỳ', 'lá lách', 'tụy'],
+    'Ngọ': ['tim', 'tâm'],
+    'Mùi': ['ruột non', 'tiểu trường'],
+    'Thân': ['bàng quang', 'bọng đái', 'lưng'],
+    'Dậu': ['thận'],
+    'Tuất': ['tâm bào', 'mạch ngoại vi'],
+    'Hợi': ['tam tiêu', 'nội tiết', 'ngực', 'bụng']
+}
 
 def tinh_can_chi_tu_ngay_duong(solar_date, gio_hien_tai=12):
     dt_thoi_diem = datetime.datetime(solar_date.year, solar_date.month, solar_date.day, gio_hien_tai, 0)
@@ -185,29 +199,12 @@ class YLyCatThoiEngine:
         }
 
     def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
-        chi_thang = self.CHI[(thang_am + 1) % 12]
-        phan_loai = self.phan_loai_thu_tuc(bo_phan)
-
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
         nt_can_text = self.NT_CAN.get(ngay_can, "")
         nt_chi_text = self.NT_CHI.get(ngay_chi, "")
         nt_gio_text = self.NT_GIO.get(gio, "")
+        luu_chu_text = LUU_CHU_DETAILS.get(gio, "")
         luu_chu_targets = LUU_CHU_TARGETS.get(gio, [])
-        pham_luu_chu = any(self._match_body_part(bo_phan, target) for target in luu_chu_targets)
-        LUU_CHU_TARGETS = {
-            'Tý': ['mật', 'đởm'],
-            'Sửu': ['gan'],
-            'Dần': ['phổi'],
-            'Mão': ['ruột già', 'đại trường'],
-            'Thìn': ['dạ dày', 'vị'],
-            'Tỵ': ['tỳ', 'lá lách', 'tụy'],
-            'Ngọ': ['tim', 'tâm'],
-            'Mùi': ['ruột non', 'tiểu trường'],
-            'Thân': ['bàng quang', 'bọng đái', 'lưng'],
-            'Dậu': ['thận'],
-            'Tuất': ['tâm bào', 'mạch ngoại vi'],
-            'Hợi': ['tam tiêu', 'nội tiết', 'ngực', 'bụng']
-        }
 
         nhat_pha = gio == self.LUC_XUNG.get(ngay_chi)
         nguyet_pha = ngay_chi == self.LUC_XUNG.get(chi_thang)
