@@ -395,7 +395,7 @@ def xin_loi_khuyen_ai(context_text):
         
         # Để Temp = 0.2 để AI vừa tuân thủ quy tắc, vừa linh hoạt trong câu chữ luận giải
         config = genai.GenerationConfig(temperature=0.2, top_k=1)
-        model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=prompt_bac_si, generation_config=config)
+        model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=prompt_bac_si, generation_config=config)
         
         response = model.generate_content(context_text)
         return response.text
