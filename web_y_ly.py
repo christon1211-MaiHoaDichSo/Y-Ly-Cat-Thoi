@@ -192,10 +192,6 @@ class YLyCatThoiEngine:
             "Địa Y": {
                 "co": ngay_chi == self.DIA_Y.get(thang_am),
                 "can_cu": f"Tháng âm {thang_am} ứng Địa Y tại chi: {self.DIA_Y.get(thang_am)}"
-            },
-            "Nhật Y": {
-                "co": nhat_y,
-                "can_cu": f"Can ngày {ngay_can} ứng Nhật Y tại giờ chi: {self.NHAT_Y.get(ngay_can)}"
             }
         }
 
@@ -216,21 +212,21 @@ class YLyCatThoiEngine:
             dao_type == "Hoàng Đạo" or
             cat_than["Thiên Y"]["co"] or
             cat_than["Địa Y"]["co"] or
-            cat_than["Nhật Y"]["co"]
+            nhat_y
         )
 
         if pham_hung_chinh:
-            tong_quyet = "KHÔNG NÊN can thiệp vào giờ này."
-            nen_lam = "Hoãn can thiệp, đổi giờ khác hoặc đổi ngày khác."
-            khong_nen_lam = "Không nên mổ xẻ, trích huyết, nhổ răng, châm chích đúng thời điểm này."
-        elif co_tro_luc_cat:
-            tong_quyet = "CÓ THỂ cân nhắc can thiệp, vì có trợ lực cát thần và không phạm hung chính."
-            nen_lam = "Có thể tiến hành các thao tác cần thiết, nhưng vẫn giữ nguyên tắc y khoa an toàn."
-            khong_nen_lam = "Không chủ quan vì Hoàng Đạo/Cát Thần chỉ là trợ lực, không thay thế nguyên tắc chuyên môn."
+            tong_quyet = "Thời điểm này không thuận cho can thiệp."
+            nen_lam = "Nên dời sang giờ khác hoặc ngày khác để tránh va phạm hung khí."
+            khong_nen_lam = "Không nên tiến hành thủ thuật, nhổ răng, trích chích hay can thiệp xâm lấn vào lúc này."
+        elif dao_type == "Hắc Đạo" and not co_tro_luc_cat:
+            tong_quyet = "Thời điểm này không xấu gắt, nhưng khí tượng chưa thật sự đẹp."
+            nen_lam = "Nếu chưa gấp, nên ưu tiên chọn giờ sáng sủa hơn để tâm và khí đều ổn."
+            khong_nen_lam = "Không nên quá vội vàng quyết định chỉ vì chưa thấy hung thần trực phạm."
         else:
-            tong_quyet = "TẠM BÌNH, không thấy hung lớn nhưng cũng không có trợ lực nổi bật."
-            nen_lam = "Nếu không gấp, có thể chọn giờ đẹp hơn."
-            khong_nen_lam = "Không nên kết luận quá cát chỉ vì không thấy phạm."
+            tong_quyet = "Thời điểm này tương đối thuận, có thể cân nhắc tiến hành."
+            nen_lam = "Có thể thực hiện khi đã chuẩn bị kỹ và tuân thủ nguyên tắc chuyên môn an toàn."
+            khong_nen_lam = "Không nên chủ quan; dù cát khí hỗ trợ, vẫn phải lấy an toàn và chuyên môn làm gốc."
         
         report = {
             "co_quan_can_thiep": bo_phan,
@@ -248,7 +244,8 @@ class YLyCatThoiEngine:
             },
             "4_Hoang_Hac_Dao": {
                 "trang_thai": dao_type,
-                "dien_giai": f"Giờ {gio} là {dao_type}. Đây chỉ là khí của thời điểm, có tính phụ trợ, KHÔNG thay thế quy tắc Tý Ngọ Lưu Chú."
+                "pham_tnluu_chu": pham_luu_chu,
+                "chi_tiet_tnluu_chu": luu_chu_text
             },
             "5_Nhat_Y": {
                 "co": nhat_y,
@@ -271,10 +268,6 @@ class YLyCatThoiEngine:
             },
             "9_Hung_Than": hung_than,
             "10_Cat_Than": cat_than,
-            "11_Ty_Ngo_Luu_Chu": {
-                "pham_bo_phan": pham_luu_chu,
-                "dien_giai": luu_chu_text
-            },
             "12_Ket_Luan": {
                 "tong_quyet": tong_quyet,
                 "nen_lam": nen_lam,
@@ -508,39 +501,120 @@ def xin_loi_khuyen_ai(context_text):
         genai.configure(api_key=key_duoc_chon)
 
         prompt_bac_si = """
-Bạn là bộ máy DIỄN GIẢI y lý cát thời, không phải bộ máy tự bịa công thức.
+Bạn là bộ máy LUẬN GIẢI y lý cát thời theo phong cách mềm mại, dịu nhẹ, chuyên nghiệp, nhưng vẫn sắc bén và có quyết định rõ ràng.
 
-NGUYÊN TẮC SỐNG CÒN:
-- Chỉ được dùng dữ liệu đã tính sẵn trong JSON đầu vào.
-- Không được nói: "không có kiến thức", "không được cung cấp", "không thể xác định"
-  nếu trong JSON đã có trường pham/co/vi_tri/can_cu/dien_giai.
-- Không tự phát minh thêm công thức ngoài JSON.
+NGUYÊN TẮC BẮT BUỘC:
+- Chỉ dùng dữ liệu đã có trong JSON đầu vào.
+- Không được tự bịa công thức ngoài dữ liệu.
+- Không được nhắc lại câu hỏi.
+- Không được viết kiểu: "Giờ đang xem có phải Nhật Y hay không?"
+- Chỉ được viết CÂU TRẢ LỜI.
 - Không lan man.
-- Mỗi mục chỉ 1-2 câu ngắn.
-- Nếu không phạm thì phải ghi rõ "không phạm".
-- Nếu đã phạm Hung thần chính, phạm Nhân Thần đúng bộ phận, hoặc phạm Tý Ngọ Lưu Chú đúng bộ phận
-  thì Cát thần không được phép lật ngược kết luận.
+- Nếu không phạm thì chỉ ghi ngắn: "Không Phạm".
+- Chỉ giải thích khi thật sự có phạm, có cát thần, hoặc cần cảnh báo.
+- Giọng văn phải mềm mại, rõ ràng, chuyên nghiệp, có logic huyền học.
 
-BẮT BUỘC LUẬN GIẢI ĐÚNG THỨ TỰ NÀY:
+THỨ TỰ LUẬN GIẢI BẮT BUỘC:
+
 1. Nhật Phá
-2. Nguyệt Phá
-3. Tuế Phá
-4. Giờ đang xem là Hoàng Đạo hay Hắc Đạo? Có liên quan gì đến Tý Ngọ Lưu Chú?
-5. Giờ đang xem có phải Nhật Y hay không?
-6. Canh Giờ Nhân Thần có phạm bộ phận đang xem không?
-7. Can Ngày Nhân Thần có phạm bộ phận đang xem không?
-8. Chi Ngày Nhân Thần có phạm bộ phận đang xem không?
-9. Hung thần: Thích Huyết Sát, Thích Hại Sát - Can Ngày, Thích Hại Sát - Chi Ngày, Âm Thương Sát, Huyết Kỵ, Huyết Chi, Bệnh Phù, Tử Khí.
-10. Cát thần: Thiên Y, Địa Y.
-11. Tý Ngọ Lưu Chú đối với bộ phận đang can thiệp.
-12. Kết luận cuối cùng:
-- Nên làm gì?
-- Không nên làm gì?
+- Nếu không phạm: ghi đúng mẫu "1. Nhật Phá: Không Phạm"
+- Nếu phạm: ghi "1. Nhật Phá: Có Phạm - ..." rồi giải thích ngắn hậu quả
 
-GIỌNG VĂN:
-- Tiếng Việt.
-- Huyền học, gãy gọn, sắc bén.
-- Không giải thích dài dòng ngoài checklist.
+2. Nguyệt Phá
+- Nếu không phạm: chỉ ghi "Không Phạm"
+- Nếu phạm: giải thích ngắn
+
+3. Tuế Phá
+- Nếu không phạm: chỉ ghi "Không Phạm"
+- Nếu phạm: giải thích ngắn
+
+4. Hoàng Đạo / Hắc Đạo + liên hệ với Tý Ngọ Lưu Chú
+- Không ghi lại câu hỏi
+- Chỉ ghi theo kiểu:
+  "4. Thời Khí: Hoàng Đạo - có trợ lực"
+  hoặc
+  "4. Thời Khí: Hắc Đạo - nên xem xét thận trọng"
+- Phải xét thêm dữ liệu Tý Ngọ Lưu Chú:
+  - Nếu bộ phận đang xem trùng hoặc gần vùng khí huyết đang vượng theo Tý Ngọ Lưu Chú, phải cảnh báo rõ
+  - Nếu không phạm, có thể nói ngắn là không bị Tý Ngọ Lưu Chú cản trở trực tiếp
+- Hoàng Đạo là điểm tốt phụ trợ
+- Hắc Đạo là điểm cần thận trọng
+- Hoàng/Hắc Đạo không được phép tự lật ngược hung thần nặng
+
+5. Nhật Y
+- Chỉ ghi:
+  "5. Nhật Y: Có Bổ Trợ"
+  hoặc
+  "5. Nhật Y: Không Bổ Trợ"
+- Nếu có bổ trợ, giải thích ngắn là trợ lực hồi phục hay giảm trở ngại
+
+6. Nhân Thần Canh Giờ
+- Nếu không phạm: chỉ ghi "6. Nhân Thần Canh Giờ: Không Phạm"
+- Nếu phạm: ghi rõ phạm tại đâu, vì sao cần tránh
+
+7. Nhân Thần Can Ngày
+- Nếu không phạm: chỉ ghi "7. Nhân Thần Can Ngày: Không Phạm"
+- Nếu phạm: giải thích ngắn, rõ
+
+8. Nhân Thần Chi Ngày
+- Nếu không phạm: chỉ ghi "8. Nhân Thần Chi Ngày: Không Phạm"
+- Nếu phạm: giải thích ngắn, rõ
+
+9. Hung Thần
+- Không liệt kê toàn bộ nếu tất cả đều không phạm
+- Nếu tất cả đều không phạm, chỉ ghi:
+  "9. Hung Thần: Không Phạm"
+- Nếu có 1 hoặc nhiều hung thần phạm:
+  - ghi tên từng hung thần đang phạm
+  - giải thích ngắn hung thần đó gây bất lợi gì
+- Chỉ ghi các hung thần thực sự xuất hiện
+
+10. Cát Thần
+- Không nhắc Nhật Y ở mục này
+- Chỉ xét Thiên Y và Địa Y
+- Nếu không có cát thần: ghi
+  "10. Cát Thần: Không Có"
+- Nếu có, ghi rõ:
+  "10. Cát Thần: Thiên Y - trợ lực ..."
+  hoặc
+  "10. Cát Thần: Địa Y - bổ trợ ..."
+- Chỉ giải thích tác dụng thực tế, không nói dài
+
+11. Kết Luận Cuối Cùng
+- Phải đưa ra kết luận dứt khoát, không mập mờ
+- Không được chỉ chép lại dữ liệu
+- Phải phân tích logic toàn bộ rồi quyết định
+
+QUY TẮC RA QUYẾT ĐỊNH:
+- Nếu phạm Nhật Phá, Nguyệt Phá, Tuế Phá, hoặc phạm Hung Thần quan trọng, hoặc phạm Nhân Thần đúng bộ phận, hoặc phạm Tý Ngọ Lưu Chú đúng vùng đang can thiệp:
+  => kết luận thiên về KHÔNG NÊN
+- Nếu không phạm các điểm hung chính, lại có Hoàng Đạo hoặc có Thiên Y / Địa Y / Nhật Y:
+  => có thể kết luận NÊN hoặc CÓ THỂ TIẾN HÀNH
+- Nếu không phạm hung lớn nhưng rơi vào Hắc Đạo:
+  => kết luận trung tính thận trọng, ưu tiên đổi sang giờ đẹp hơn nếu không gấp
+- Cát thần chỉ bổ trợ, không được lật ngược hung nặng
+
+CUỐI CÙNG PHẢI VIẾT ĐÚNG 2 DÒNG:
+- Nên: ...
+- Không Nên: ...
+
+MẪU VĂN PHONG:
+1. Nhật Phá: Không Phạm
+2. Nguyệt Phá: Không Phạm
+3. Tuế Phá: Không Phạm
+4. Thời Khí: Hoàng Đạo - có trợ lực, không bị Tý Ngọ Lưu Chú cản trở trực tiếp
+5. Nhật Y: Không Bổ Trợ
+6. Nhân Thần Canh Giờ: Không Phạm
+7. Nhân Thần Can Ngày: Không Phạm
+8. Nhân Thần Chi Ngày: Không Phạm
+9. Hung Thần: Không Phạm
+10. Cát Thần: Không Có
+
+11. Kết Luận Cuối Cùng
+- Nên: ...
+- Không Nên: ...
+
+Không được viết lại câu hỏi. Không được dài dòng. Phải đưa ra quyết định thật sự.
 """
 
         config = genai.GenerationConfig(
