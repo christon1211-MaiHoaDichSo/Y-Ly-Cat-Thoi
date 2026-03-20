@@ -4,6 +4,7 @@ import datetime
 import calendar
 import random
 import base64
+import json
 from lunarcalendar import Converter, Solar, Lunar
 
 # ==============================================================================
@@ -24,6 +25,10 @@ GIO_HIENTHI = {
     'Dậu': 'Dậu (5 P.M - 7 P.M)',
     'Tuất': 'Tuất (7 P.M - 9 P.M)',
     'Hợi': 'Hợi (9 P.M - 11 P.M)'
+}
+CHI_TO_HOUR = {
+    'Tý': 23, 'Sửu': 1, 'Dần': 3, 'Mão': 5, 'Thìn': 7, 'Tỵ': 9,
+    'Ngọ': 11, 'Mùi': 13, 'Thân': 15, 'Dậu': 17, 'Tuất': 19, 'Hợi': 21
 }
 DAO_NAMES = ['Thanh Long', 'Minh Đường', 'Thiên Hình', 'Chu Tước', 'Kim Quỹ', 'Bảo Quang', 'Bạch Hổ', 'Ngọc Đường', 'Thiên Lao', 'Nguyên Vũ', 'Tư Mệnh', 'Câu Trận']
 DAO_TYPES = ['Hoàng Đạo', 'Hoàng Đạo', 'Hắc Đạo', 'Hắc Đạo', 'Hoàng Đạo', 'Hoàng Đạo', 'Hắc Đạo', 'Hoàng Đạo', 'Hắc Đạo', 'Hắc Đạo', 'Hoàng Đạo', 'Hắc Đạo']
@@ -86,53 +91,198 @@ class YLyCatThoiEngine:
         self.NT_CHI = {'Tý': 'Mắt', 'Sửu': 'Tai', 'Dần': 'Ngực', 'Mão': 'Mũi', 'Thìn': 'Eo Lưng', 'Tỵ': 'Tay', 'Ngọ': 'Tim Bụng', 'Mùi': 'Chân', 'Thân': 'Đầu', 'Dậu': 'Lưng', 'Tuất': 'Đầu Họng', 'Hợi': 'Cổ Gáy'}
         self.NT_GIO = {'Tý': 'Mắt Cá', 'Sửu': 'Đầu', 'Dần': 'Tai', 'Mão': 'Mặt', 'Thìn': 'Cổ Gáy Hạng', 'Tỵ': 'Vú Ngực', 'Ngọ': 'Ngực', 'Mùi': 'Bụng', 'Thân': 'Tim', 'Dậu': 'Gối Lưng', 'Tuất': 'Eo Âm bộ', 'Hợi': 'Đùi'}
 
-    def quet_benh_an(self, nam, thang, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
-        benh_an_tho = []
-        bo_phan = bo_phan.lower()
-        chi_thang = self.CHI[(thang + 1) % 12]
+        def _normalize_text(self, text):
+        return (text or "").strip().lower()
 
-        # 1. TAM PHÁ (Xung khắc rủi ro)
-        if ngay_chi == self.LUC_XUNG.get(nam): benh_an_tho.append(f"[Tuế Phá]: Ngày {ngay_chi} xung Năm {nam}.")
-        if ngay_chi == self.LUC_XUNG.get(chi_thang): benh_an_tho.append(f"[Nguyệt Phá]: Ngày {ngay_chi} xung Tháng {chi_thang}.")
-        if gio == self.LUC_XUNG.get(ngay_chi): benh_an_tho.append(f"[Nhật Phá]: Giờ {gio} xung Ngày {ngay_chi}.")
+    def _match_body_part(self, bo_phan_input, mo_ta_tham_chieu):
+        a = self._normalize_text(bo_phan_input)
+        b = self._normalize_text(mo_ta_tham_chieu)
 
-        # 2. ĐẠI ĐẠO
-        if gio in cac_gio_hoang_dao: benh_an_tho.append(f"[Hoàng Đạo]: Giờ {gio} - Khí quang hanh thông.")
-        else: benh_an_tho.append(f"[Hắc Đạo]: Giờ {gio} - Trược khí cản trở.")
+        if not a or not b:
+            return False
 
-        # 3. TỨ ĐẠI HUNG TINH (Y Lý)
-        if ngay_chi == self.HUYET_KY.get(thang): benh_an_tho.append("[Huyết Kỵ]: Có mặt (Kỵ chảy máu, dao kéo rạch da).")
-        if ngay_chi == self.TU_KHI.get(thang): benh_an_tho.append("[Tử Khí]: Có mặt (Sinh khí cạn, kỵ can thiệp phẫu thuật nặng).")
-        if ngay_chi == self.HUYET_CHI.get(thang): benh_an_tho.append("[Huyết Chi]: Có mặt (Da rỉ máu, tụ máu bầm, xuất huyết).")
-        if gio == self.BENH_PHU.get(nam): benh_an_tho.append("[Bệnh Phù]: Có mặt (Trược khí hội tụ, dễ viêm nhiễm, lâu lành).")
+        if a in b or b in a:
+            return True
 
-        # 4. TAM ĐẠI CÁT THẦN (Y Khoa)
-        if ngay_chi == self.THIEN_Y.get(thang): benh_an_tho.append("[Thiên Y]: Có mặt (Đại cát y tế, dễ gặp thầy giỏi thuốc hay).")
-        if ngay_chi == self.DIA_Y.get(thang): benh_an_tho.append("[Địa Y]: Có mặt (Tốt cho đông y, bốc thuốc, điều dưỡng).")
-        if gio == self.NHAT_Y.get(ngay_can): benh_an_tho.append(f"[Nhật Y]: Giờ {gio} cư ngụ (Có Thần Y trợ lực, giải trừ tai ách).")
+        nhom_dong_nghia = [
+            {"răng", "nướu", "lợi", "hàm", "răng khôn"},
+            {"mắt", "nhãn", "mí mắt", "nhãn cầu"},
+            {"tai"},
+            {"mũi", "xoang"},
+            {"miệng", "môi", "lưỡi", "họng", "cổ họng"},
+            {"đầu", "đầu mặt"},
+            {"cổ", "cổ gáy", "gáy"},
+            {"ngực", "vú"},
+            {"bụng", "dạ dày", "vị", "tỳ"},
+            {"tim", "tâm"},
+            {"tay", "bàn tay", "cổ tay", "cánh tay"},
+            {"lưng", "eo", "eo lưng"},
+            {"chân", "bàn chân", "gót chân", "cẳng chân", "đùi", "gối", "đầu gối"},
+            {"âm bộ", "bụng dưới"},
+        ]
 
-        # 5. TAM SÁT NHÂN THẦN (Phân tách rõ ràng)
-        # Theo Y Lý: Phạm Ngày -> Thích Huyết Sát | Phạm Can/Chi -> Thích Hại Sát | Phạm Giờ -> Âm Thương Sát
+        for nhom in nhom_dong_nghia:
+            if any(x in a for x in nhom) and any(x in b for x in nhom):
+                return True
+
+        return False
+
+    def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
+        chi_thang = self.CHI[(thang_am + 1) % 12]
+
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
-        if nt_ngay_text and any(bp in nt_ngay_text.lower() or nt_ngay_text.lower() in bp for bp in bo_phan.split()):
-            benh_an_tho.append(f"[Thích Huyết Sát]: Phạm Nhân Thần Ngày tại {nt_ngay_text.upper()}. Tuyệt đối kỵ rạch da, Thích Huyết.")
-
         nt_can_text = self.NT_CAN.get(ngay_can, "")
         nt_chi_text = self.NT_CHI.get(ngay_chi, "")
-        if (nt_can_text and any(bp in nt_can_text.lower() or nt_can_text.lower() in bp for bp in bo_phan.split())) or \
-           (nt_chi_text and any(bp in nt_chi_text.lower() or nt_chi_text.lower() in bp for bp in bo_phan.split())):
-            benh_an_tho.append(f"[Thích Hại Sát]: Phạm Nhân Thần Can/Chi tại vùng {nt_can_text.upper()} - {nt_chi_text.upper()}. Nguy cơ tai biến nếu châm cứu (Thích Hại).")
-
         nt_gio_text = self.NT_GIO.get(gio, "")
-        if nt_gio_text and any(bp in nt_gio_text.lower() or nt_gio_text.lower() in bp for bp in bo_phan.split()):
-            benh_an_tho.append(f"[Âm Thương Sát]: Phạm Thời Thần (Giờ) tại {nt_gio_text.upper()}. Nguy cơ tổn thương ngầm, nội thương cơ xương khớp.")
-
-        # 6. LƯU CHÚ KHÍ HUYẾT
         luu_chu_text = LUU_CHU_DETAILS.get(gio, "")
-        if luu_chu_text and any(bp in luu_chu_text.lower() or luu_chu_text.lower() in bp for bp in bo_phan.split()):
-            benh_an_tho.append(f"[Phạm Lưu Chú]: Khí huyết đang dồn về mãnh liệt. Cẩn thận sốc phản vệ hoặc xuất huyết cấp.")
 
-        return "\n".join(benh_an_tho) if benh_an_tho else "[Bình Thường]: Không phạm sát tinh, không có cát thần."
+        nhat_pha = gio == self.LUC_XUNG.get(ngay_chi)
+        nguyet_pha = ngay_chi == self.LUC_XUNG.get(chi_thang)
+        tue_pha = ngay_chi == self.LUC_XUNG.get(nam_chi)
+
+        dao_type = "Hoàng Đạo" if gio in cac_gio_hoang_dao else "Hắc Đạo"
+        nhat_y = gio == self.NHAT_Y.get(ngay_can)
+
+        pham_nt_gio = self._match_body_part(bo_phan, nt_gio_text)
+        pham_nt_can = self._match_body_part(bo_phan, nt_can_text)
+        pham_nt_chi = self._match_body_part(bo_phan, nt_chi_text)
+        pham_nt_ngay = self._match_body_part(bo_phan, nt_ngay_text)
+        pham_luu_chu = self._match_body_part(bo_phan, luu_chu_text)
+
+        hung_than = {
+            "Thích Huyết Sát": {
+                "pham": pham_nt_ngay,
+                "can_cu": f"Nhân Thần Ngày trú tại: {nt_ngay_text}"
+            },
+            "Thích Hại Sát - Can Ngày": {
+                "pham": pham_nt_can,
+                "can_cu": f"Nhân Thần theo Can Ngày trú tại: {nt_can_text}"
+            },
+            "Thích Hại Sát - Chi Ngày": {
+                "pham": pham_nt_chi,
+                "can_cu": f"Nhân Thần theo Chi Ngày trú tại: {nt_chi_text}"
+            },
+            "Âm Thương Sát": {
+                "pham": pham_nt_gio,
+                "can_cu": f"Nhân Thần theo Canh Giờ trú tại: {nt_gio_text}"
+            },
+            "Huyết Kỵ": {
+                "pham": ngay_chi == self.HUYET_KY.get(thang_am),
+                "can_cu": f"Tháng âm {thang_am} ứng Huyết Kỵ tại chi: {self.HUYET_KY.get(thang_am)}"
+            },
+            "Huyết Chi": {
+                "pham": ngay_chi == self.HUYET_CHI.get(thang_am),
+                "can_cu": f"Tháng âm {thang_am} ứng Huyết Chi tại chi: {self.HUYET_CHI.get(thang_am)}"
+            },
+            "Bệnh Phù": {
+                "pham": gio == self.BENH_PHU.get(nam_chi),
+                "can_cu": f"Năm chi {nam_chi} ứng Bệnh Phù tại giờ chi: {self.BENH_PHU.get(nam_chi)}"
+            },
+            "Tử Khí": {
+                "pham": ngay_chi == self.TU_KHI.get(thang_am),
+                "can_cu": f"Tháng âm {thang_am} ứng Tử Khí tại chi: {self.TU_KHI.get(thang_am)}"
+            }
+        }
+
+        cat_than = {
+            "Thiên Y": {
+                "co": ngay_chi == self.THIEN_Y.get(thang_am),
+                "can_cu": f"Tháng âm {thang_am} ứng Thiên Y tại chi: {self.THIEN_Y.get(thang_am)}"
+            },
+            "Địa Y": {
+                "co": ngay_chi == self.DIA_Y.get(thang_am),
+                "can_cu": f"Tháng âm {thang_am} ứng Địa Y tại chi: {self.DIA_Y.get(thang_am)}"
+            },
+            "Nhật Y": {
+                "co": nhat_y,
+                "can_cu": f"Can ngày {ngay_can} ứng Nhật Y tại giờ chi: {self.NHAT_Y.get(ngay_can)}"
+            }
+        }
+
+        pham_hung_chinh = (
+            nhat_pha or nguyet_pha or tue_pha or
+            hung_than["Thích Huyết Sát"]["pham"] or
+            hung_than["Thích Hại Sát - Can Ngày"]["pham"] or
+            hung_than["Thích Hại Sát - Chi Ngày"]["pham"] or
+            hung_than["Âm Thương Sát"]["pham"] or
+            hung_than["Huyết Kỵ"]["pham"] or
+            hung_than["Huyết Chi"]["pham"] or
+            hung_than["Bệnh Phù"]["pham"] or
+            hung_than["Tử Khí"]["pham"] or
+            pham_luu_chu
+        )
+
+        co_tro_luc_cat = (
+            dao_type == "Hoàng Đạo" or
+            cat_than["Thiên Y"]["co"] or
+            cat_than["Địa Y"]["co"] or
+            cat_than["Nhật Y"]["co"]
+        )
+
+        if pham_hung_chinh:
+            tong_quyet = "KHÔNG NÊN can thiệp vào giờ này."
+            nen_lam = "Hoãn can thiệp, đổi giờ khác hoặc đổi ngày khác."
+            khong_nen_lam = "Không nên mổ xẻ, trích huyết, nhổ răng, châm chích đúng thời điểm này."
+        elif co_tro_luc_cat:
+            tong_quyet = "CÓ THỂ cân nhắc can thiệp, vì có trợ lực cát thần và không phạm hung chính."
+            nen_lam = "Có thể tiến hành các thao tác cần thiết, nhưng vẫn giữ nguyên tắc y khoa an toàn."
+            khong_nen_lam = "Không chủ quan vì Hoàng Đạo/Cát Thần chỉ là trợ lực, không thay thế nguyên tắc chuyên môn."
+        else:
+            tong_quyet = "TẠM BÌNH, không thấy hung lớn nhưng cũng không có trợ lực nổi bật."
+            nen_lam = "Nếu không gấp, có thể chọn giờ đẹp hơn."
+            khong_nen_lam = "Không nên kết luận quá cát chỉ vì không thấy phạm."
+        
+        report = {
+            "co_quan_can_thiep": bo_phan,
+            "1_Nhat_Pha": {
+                "pham": nhat_pha,
+                "dien_giai": f"Giờ {gio} {'xung' if nhat_pha else 'không xung'} Ngày {ngay_chi}."
+            },
+            "2_Nguyet_Pha": {
+                "pham": nguyet_pha,
+                "dien_giai": f"Ngày {ngay_chi} {'xung' if nguyet_pha else 'không xung'} Tháng {chi_thang}."
+            },
+            "3_Tue_Pha": {
+                "pham": tue_pha,
+                "dien_giai": f"Ngày {ngay_chi} {'xung' if tue_pha else 'không xung'} Năm {nam_chi}."
+            },
+            "4_Hoang_Hac_Dao": {
+                "trang_thai": dao_type,
+                "dien_giai": f"Giờ {gio} là {dao_type}. Đây chỉ là khí của thời điểm, có tính phụ trợ, KHÔNG thay thế quy tắc Tý Ngọ Lưu Chú."
+            },
+            "5_Nhat_Y": {
+                "co": nhat_y,
+                "dien_giai": f"Giờ {gio} {'là' if nhat_y else 'không phải'} Nhật Y theo Can ngày {ngay_can}."
+            },
+            "6_Nhan_Than_Canh_Gio": {
+                "vi_tri": nt_gio_text,
+                "pham_bo_phan": pham_nt_gio,
+                "dien_giai": f"Nhân Thần Canh Giờ trú tại {nt_gio_text}."
+            },
+            "7_Nhan_Than_Can_Ngay": {
+                "vi_tri": nt_can_text,
+                "pham_bo_phan": pham_nt_can,
+                "dien_giai": f"Nhân Thần Can Ngày trú tại {nt_can_text}."
+            },
+            "8_Nhan_Than_Chi_Ngay": {
+                "vi_tri": nt_chi_text,
+                "pham_bo_phan": pham_nt_chi,
+                "dien_giai": f"Nhân Thần Chi Ngày trú tại {nt_chi_text}."
+            },
+            "9_Hung_Than": hung_than,
+            "10_Cat_Than": cat_than,
+            "11_Ty_Ngo_Luu_Chu": {
+                "pham_bo_phan": pham_luu_chu,
+                "dien_giai": luu_chu_text
+            },
+            "12_Ket_Luan": {
+                "tong_quyet": tong_quyet,
+                "nen_lam": nen_lam,
+                "khong_nen_lam": khong_nen_lam
+            }
+        }
+
+        return report
 
 # ==============================================================================
 # GIAO DIỆN WEB VỚI STREAMLIT (THAY THẾ APP CŨ)
@@ -320,7 +470,7 @@ with col_trai:
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
     # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
-    data = tinh_can_chi_tu_ngay_duong(solar_date)
+    data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
     st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
 
 # 5. Khung Cột Phải (Bảng 12 Giờ)
@@ -351,54 +501,64 @@ st.subheader("📜 Thần Y Luận Giải")
 # HÀM AI LUẬN GIẢI (BẢN CHUẨN: TÍCH HỢP TÝ NGỌ LƯU CHÚ & THẦN SÁT)
 # ==============================================================================
 @st.cache_data(show_spinner=False, ttl=86400) 
+@st.cache_data(show_spinner=False, ttl=86400)
 def xin_loi_khuyen_ai(context_text):
     try:
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
         key_duoc_chon = random.choice(danh_sach_keys)
         genai.configure(api_key=key_duoc_chon)
-        
-        # PROMPT "THẦN Y": NẠP TOÀN BỘ KIẾN THỨC CỐT LÕI VÀ BẢNG TRA CỨU
+
         prompt_bac_si = """
-        Bạn là một vị Thần Y phương Đông, tinh thông Dịch Lý Y Khoa, Tý Ngọ Lưu Chú, hệ thống Nhân Thần và Thần Sát.
-        Dưới đây là BỘ KIẾN THỨC CỐT LÕI BẮT BUỘC bạn phải dùng để hội chẩn:
+Bạn là bộ máy DIỄN GIẢI y lý cát thời, không phải bộ máy tự bịa công thức.
 
-        1. TÝ NGỌ LƯU CHÚ (Đồng hồ Tạng Phủ):
-        - Tý (23h-1h): Đởm | Sửu (1h-3h): Can | Dần (3h-5h): Phế | Mão (5h-7h): Đại tràng
-        - Thìn (7h-9h): Vị | Tỵ (9h-11h): Tỳ | Ngọ (11h-13h): Tâm | Mùi (13h-15h): Tiểu tràng
-        - Thân (15h-17h): Bàng quang | Dậu (17h-19h): Thận | Tuất (19h-21h): Tâm bào | Hợi (21h-23h): Tam tiêu
-        *Nguyên tắc:* Giờ vượng của tạng phủ nào thì KỴ châm cứu, phẫu thuật vào tạng phủ đó.
+NGUYÊN TẮC SỐNG CÒN:
+- Chỉ được dùng dữ liệu đã tính sẵn trong JSON đầu vào.
+- Không được nói: "không có kiến thức", "không được cung cấp", "không thể xác định"
+  nếu trong JSON đã có trường pham/co/vi_tri/can_cu/dien_giai.
+- Không tự phát minh thêm công thức ngoài JSON.
+- Không lan man.
+- Mỗi mục chỉ 1-2 câu ngắn.
+- Nếu không phạm thì phải ghi rõ "không phạm".
+- Nếu đã phạm Hung thần chính, phạm Nhân Thần đúng bộ phận, hoặc phạm Tý Ngọ Lưu Chú đúng bộ phận
+  thì Cát thần không được phép lật ngược kết luận.
 
-        2. LÝ THUYẾT NHÂN THẦN (Huyết Mạch Trú Ngụ):
-        Khí huyết di chuyển và trú ngụ tại các bộ phận theo Can, Chi và Giờ. Phải đối chiếu bộ phận bệnh nhân muốn khám với bảng sau. Nếu trùng: TUYỆT ĐỐI CẤM đâm chích, mổ xẻ để tránh xuất huyết không cầm.
-        - Nhân thần theo 10 Thiên Can: Giáp (Đầu), Ất (Cổ họng), Bính (Vai), Đinh (Ngực), Mậu (Bụng), Kỷ (Tỳ, Vị), Canh (Rốn), Tân (Đùi), Nhâm (Cẳng chân), Quý (Bàn chân).
-        - Nhân thần theo 12 Địa Chi: Tý (Đầu), Sửu (Mắt, Tai, Mũi), Dần (Môi, Răng), Mão (Ngực, Lưng), Thìn (Bụng), Tỵ (Bàn tay), Ngọ (Tim, Ngực), Mùi (Dạ dày, Tỳ), Thân (Lưng, Đùi), Dậu (Đầu gối), Tuất (Cẳng chân), Hợi (Bàn chân).
-        - Nhân thần theo 12 Canh Giờ: Tý (Mắt cá ngoài), Sửu (Mép, Răng, Hông), Dần (Lỗ tai), Mão (Mặt, Trán), Thìn (Ngực, Cổ tay), Tỵ (Bàn tay), Ngọ (Ngực, Rốn), Mùi (Gót chân), Thân (Lưng, Đùi), Dậu (Đầu gối, Mắt cá trong), Tuất (Bụng dưới, Âm bộ), Hợi (Bắp chân).
+BẮT BUỘC LUẬN GIẢI ĐÚNG THỨ TỰ NÀY:
+1. Nhật Phá
+2. Nguyệt Phá
+3. Tuế Phá
+4. Giờ đang xem là Hoàng Đạo hay Hắc Đạo? Có liên quan gì đến Tý Ngọ Lưu Chú?
+5. Giờ đang xem có phải Nhật Y hay không?
+6. Canh Giờ Nhân Thần có phạm bộ phận đang xem không?
+7. Can Ngày Nhân Thần có phạm bộ phận đang xem không?
+8. Chi Ngày Nhân Thần có phạm bộ phận đang xem không?
+9. Hung thần: Thích Huyết Sát, Thích Hại Sát - Can Ngày, Thích Hại Sát - Chi Ngày, Âm Thương Sát, Huyết Kỵ, Huyết Chi, Bệnh Phù, Tử Khí.
+10. Cát thần: Thiên Y, Địa Y.
+11. Tý Ngọ Lưu Chú đối với bộ phận đang can thiệp.
+12. Kết luận cuối cùng:
+- Nên làm gì?
+- Không nên làm gì?
 
-        3. 9 THẦN SÁT Y KHOA:
-        - Cát Thần (Nên làm): Thiên Y, Địa Y, Nhật Y.
-        - Hung Thần (Kỵ dao kéo, trích huyết): Thích Huyết Sát, Thích Hại Sát, Huyết Kỵ, Âm Thương Sát, Huyết Chi, Bệnh Phù, Tử Khí / Tử Thần.
+GIỌNG VĂN:
+- Tiếng Việt.
+- Huyền học, gãy gọn, sắc bén.
+- Không giải thích dài dòng ngoài checklist.
+"""
 
-        4. HỆ THỐNG XUNG PHÁ (Khí Huyết Hỗn Loạn):
-        - Nhật Phá (Giờ xung Ngày), Nguyệt Phá (Ngày xung Tháng), Tuế Phá (Ngày xung Năm).
-        *Nguyên tắc:* Phạm xung phá là lúc âm dương giao chiến, cấm can thiệp dao kéo.
+        config = genai.GenerationConfig(
+            temperature=0.1,
+            top_k=1,
+            top_p=0.8
+        )
 
-        NHIỆM VỤ CỦA BẠN:
-        Dựa vào [Kết quả Dịch Lý thô], rà soát ĐẦY ĐỦ 4 mục trên đối với "Cơ quan can thiệp". 
-        - Trình bày rõ Nhân thần theo Can/Chi/Giờ hiện tại đang ở đâu, có phạm vào cơ quan cần khám không.
-        - Tổng hợp thành KẾT LUẬN rõ ràng: Nên hay Không nên can thiệp vào giờ này.
+        model = genai.GenerativeModel(
+            'gemini-2.5-flash',
+            system_instruction=prompt_bac_si,
+            generation_config=config
+        )
 
-        BỐ CỤC BẮT BUỘC:
-        - ☯️ VẬN HÀNH TÝ NGỌ LƯU CHÚ & NHÂN THẦN
-        - ⚔️ PHÂN TÍCH XUNG PHÁ & THẦN SÁT
-        - ⚖️ KẾT LUẬN & ĐIỀU HƯỚNG Y KHOA
-        """
-        
-        # Để Temp = 0.2 để AI vừa tuân thủ quy tắc, vừa linh hoạt trong câu chữ luận giải
-        config = genai.GenerationConfig(temperature=0.2, top_k=1)
-        model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=prompt_bac_si, generation_config=config)
-        
         response = model.generate_content(context_text)
         return response.text
+
     except Exception as e:
         return f"Lỗi hệ thống A.I: {e}"
 
@@ -431,21 +591,42 @@ if btn_phan_tich:
             # Nếu an toàn, tiếp tục phân tích Dịch Lý và gọi AI
             with st.spinner("Đang chẩn đoán mạch và hội chẩn Dịch Lý..."):
                 
-                # 1. Thuật toán tính toán Dịch Lý
-                benh_an_tho = engine.quet_benh_an(
-                    data['chi_nam'], thang_am, data['can_ngay'], 
-                    data['chi_ngay'], gio_kham, ngay_am, bo_phan, data['hoang_dao_list']
+                                bao_cao = engine.lap_bao_cao_chi_tiet(
+                    data['chi_nam'],
+                    thang_am,
+                    data['can_ngay'],
+                    data['chi_ngay'],
+                    gio_kham,
+                    ngay_am,
+                    bo_phan,
+                    data['hoang_dao_list']
                 )
 
-                # 2. Đóng gói dữ liệu gửi cho AI
-                context = f"Thông tin Khám: Tháng {thang_am} Âm, Ngày {data['ngay']}, Giờ {gio_kham}.\nCơ quan can thiệp/Triệu chứng: {bo_phan}\nKết quả Dịch Lý thô:\n{benh_an_tho}"
+                context = json.dumps(
+                    {
+                        "thong_tin_kham": {
+                            "nam": data['nam'],
+                            "thang": data['thang'],
+                            "ngay": data['ngay'],
+                            "thang_am": thang_am,
+                            "ngay_am": ngay_am,
+                            "gio_kham": gio_kham,
+                            "bo_phan": bo_phan
+                        },
+                        "bao_cao_ylct": bao_cao
+                    },
+                    ensure_ascii=False,
+                    indent=2
+                )
 
-                # 3. AI phân tích và trả kết quả
                 loi_khuyen = xin_loi_khuyen_ai(context)
-                
+
                 if "Lỗi hệ thống" not in loi_khuyen:
                     st.success("Hoàn tất luận giải!")
                     st.write(loi_khuyen)
+
+                    with st.expander("Xem dữ liệu logic thô"):
+                        st.json(bao_cao)
                 else:
                     st.error(loi_khuyen)
 
