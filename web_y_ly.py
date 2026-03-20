@@ -192,7 +192,22 @@ class YLyCatThoiEngine:
         nt_can_text = self.NT_CAN.get(ngay_can, "")
         nt_chi_text = self.NT_CHI.get(ngay_chi, "")
         nt_gio_text = self.NT_GIO.get(gio, "")
-        luu_chu_text = LUU_CHU_DETAILS.get(gio, "")
+        luu_chu_targets = LUU_CHU_TARGETS.get(gio, [])
+        pham_luu_chu = any(self._match_body_part(bo_phan, target) for target in luu_chu_targets)
+        LUU_CHU_TARGETS = {
+            'Tý': ['mật', 'đởm'],
+            'Sửu': ['gan'],
+            'Dần': ['phổi'],
+            'Mão': ['ruột già', 'đại trường'],
+            'Thìn': ['dạ dày', 'vị'],
+            'Tỵ': ['tỳ', 'lá lách', 'tụy'],
+            'Ngọ': ['tim', 'tâm'],
+            'Mùi': ['ruột non', 'tiểu trường'],
+            'Thân': ['bàng quang', 'bọng đái', 'lưng'],
+            'Dậu': ['thận'],
+            'Tuất': ['tâm bào', 'mạch ngoại vi'],
+            'Hợi': ['tam tiêu', 'nội tiết', 'ngực', 'bụng']
+        }
 
         nhat_pha = gio == self.LUC_XUNG.get(ngay_chi)
         nguyet_pha = ngay_chi == self.LUC_XUNG.get(chi_thang)
@@ -205,7 +220,7 @@ class YLyCatThoiEngine:
         pham_nt_can = self._match_body_part(bo_phan, nt_can_text)
         pham_nt_chi = self._match_body_part(bo_phan, nt_chi_text)
         pham_nt_ngay = self._match_body_part(bo_phan, nt_ngay_text)
-        pham_luu_chu = self._match_body_part(bo_phan, luu_chu_text)
+        pham_luu_chu = any(self._match_body_part(bo_phan, target) for target in luu_chu_targets)
 
         hung_than = {
             "Thích Huyết Sát": {
@@ -263,7 +278,7 @@ class YLyCatThoiEngine:
             hung_than["Huyết Chi"]["pham"] or
             hung_than["Bệnh Phù"]["pham"] or
             hung_than["Tử Khí"]["pham"] or
-            pham_luu_chu
+            (pham_luu_chu and phan_loai["loai"] in ["xam_lan_nhe", "xam_lan_manh"])
         )
 
         co_tro_luc_cat = (
@@ -333,6 +348,7 @@ class YLyCatThoiEngine:
             "4_Hoang_Hac_Dao": {
                 "trang_thai": dao_type,
                 "pham_tnluu_chu": pham_luu_chu,
+                "vung_luu_chu": luu_chu_targets,
                 "chi_tiet_tnluu_chu": luu_chu_text
             },
             "5_Nhat_Y": {
@@ -694,6 +710,10 @@ Nếu là hoạt động thăm khám hoặc chẩn đoán hình ảnh:
 - Tự nhiên, dịu, sáng nghĩa
 - Nhưng phải có quyết định rõ
 - Không được chỉ lặp lại dữ liệu
+- Sau 10 mục chính, viết thêm 1 đoạn tổng hợp 3 đến 5 câu theo giọng bác sĩ:
+  bình tĩnh, tự nhiên, sáng nghĩa, giúp người đọc hiểu bản chất của thời điểm đó.
+- Với hoạt động thăm khám hoặc chẩn đoán hình ảnh, không dùng giọng cấm đoán như phẫu thuật.
+- Với hoạt động xâm lấn, mới được nhấn mạnh mức độ kiêng kỵ.
 
 QUY TẮC RA QUYẾT ĐỊNH:
 - Nếu phạm Nhật Phá, Nguyệt Phá, Tuế Phá, hoặc phạm Hung Thần quan trọng, hoặc phạm Nhân Thần đúng bộ phận, hoặc phạm Tý Ngọ Lưu Chú đúng vùng đang can thiệp:
