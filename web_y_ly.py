@@ -91,7 +91,7 @@ class YLyCatThoiEngine:
         self.NT_CHI = {'Tý': 'Mắt', 'Sửu': 'Tai', 'Dần': 'Ngực', 'Mão': 'Mũi', 'Thìn': 'Eo Lưng', 'Tỵ': 'Tay', 'Ngọ': 'Tim Bụng', 'Mùi': 'Chân', 'Thân': 'Đầu', 'Dậu': 'Lưng', 'Tuất': 'Đầu Họng', 'Hợi': 'Cổ Gáy'}
         self.NT_GIO = {'Tý': 'Mắt Cá', 'Sửu': 'Đầu', 'Dần': 'Tai', 'Mão': 'Mặt', 'Thìn': 'Cổ Gáy Hạng', 'Tỵ': 'Vú Ngực', 'Ngọ': 'Ngực', 'Mùi': 'Bụng', 'Thân': 'Tim', 'Dậu': 'Gối Lưng', 'Tuất': 'Eo Âm bộ', 'Hợi': 'Đùi'}
 
-        def _normalize_text(self, text):
+    def _normalize_text(self, text):
         return (text or "").strip().lower()
 
     def _match_body_part(self, bo_phan_input, mo_ta_tham_chieu):
@@ -501,7 +501,6 @@ st.subheader("📜 Thần Y Luận Giải")
 # HÀM AI LUẬN GIẢI (BẢN CHUẨN: TÍCH HỢP TÝ NGỌ LƯU CHÚ & THẦN SÁT)
 # ==============================================================================
 @st.cache_data(show_spinner=False, ttl=86400) 
-@st.cache_data(show_spinner=False, ttl=86400)
 def xin_loi_khuyen_ai(context_text):
     try:
         danh_sach_keys = st.secrets["GEMINI_API_KEYS"]
@@ -590,8 +589,7 @@ if btn_phan_tich:
         else:
             # Nếu an toàn, tiếp tục phân tích Dịch Lý và gọi AI
             with st.spinner("Đang chẩn đoán mạch và hội chẩn Dịch Lý..."):
-                
-                                bao_cao = engine.lap_bao_cao_chi_tiet(
+                bao_cao = engine.lap_bao_cao_chi_tiet(
                     data['chi_nam'],
                     thang_am,
                     data['can_ngay'],
