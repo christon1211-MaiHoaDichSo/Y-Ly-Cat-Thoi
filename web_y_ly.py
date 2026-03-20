@@ -120,6 +120,61 @@ class YLyCatThoiEngine:
             {"chân", "bàn chân", "gót chân", "cẳng chân", "đùi", "gối", "đầu gối"},
             {"âm bộ", "bụng dưới"},
         ]
+    
+    def phan_loai_thu_tuc(self, bo_phan):
+        text = (bo_phan or "").strip().lower()
+
+        nhom_kham = [
+            "khám", "khám tổng quát", "khám định kỳ", "thăm khám", "kiểm tra", "tái khám"
+        ]
+
+        nhom_chan_doan_hinh_anh = [
+            "xray", "x-ray", "mri", "ct", "ct scan", "siêu âm", "nội soi chẩn đoán",
+            "chụp", "chụp phim", "chụp cắt lớp", "chụp cộng hưởng từ"
+        ]
+
+        nhom_xam_lan_nhe = [
+            "lấy máu", "xét nghiệm máu", "tiêm", "chích", "trích", "bấm sinh thiết",
+            "nhổ răng", "cạo vôi", "rạch nhỏ", "đốt"
+        ]
+
+        nhom_xam_lan_manh = [
+            "phẫu thuật", "mổ", "mổ xẻ", "can thiệp", "tiểu phẫu", "đại phẫu"
+        ]
+
+        if any(k in text for k in nhom_xam_lan_manh):
+            return {
+                "loai": "xam_lan_manh",
+                "ten_goi": "Thủ thuật / phẫu thuật xâm lấn",
+                "muc_do": "cao"
+            }
+
+        if any(k in text for k in nhom_xam_lan_nhe):
+            return {
+                "loai": "xam_lan_nhe",
+                "ten_goi": "Thủ thuật xâm lấn nhẹ",
+                "muc_do": "vừa"
+            }
+
+        if any(k in text for k in nhom_chan_doan_hinh_anh):
+            return {
+                "loai": "chan_doan_hinh_anh",
+                "ten_goi": "Chẩn đoán hình ảnh / khảo sát",
+                "muc_do": "thấp"
+            }
+
+        if any(k in text for k in nhom_kham):
+            return {
+                "loai": "tham_kham",
+                "ten_goi": "Thăm khám / kiểm tra tổng quát",
+                "muc_do": "rất thấp"
+            }
+
+        return {
+            "loai": "khac",
+            "ten_goi": "Hoạt động y khoa chưa phân nhóm rõ",
+            "muc_do": "chưa xác định"
+        }
 
         for nhom in nhom_dong_nghia:
             if any(x in a for x in nhom) and any(x in b for x in nhom):
@@ -129,6 +184,7 @@ class YLyCatThoiEngine:
 
     def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
         chi_thang = self.CHI[(thang_am + 1) % 12]
+        phan_loai = self.phan_loai_thu_tuc(bo_phan)
 
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
         nt_can_text = self.NT_CAN.get(ngay_can, "")
@@ -215,21 +271,51 @@ class YLyCatThoiEngine:
             nhat_y
         )
 
-        if pham_hung_chinh:
-            tong_quyet = "Thời điểm này không thuận cho can thiệp."
-            nen_lam = "Nên dời sang giờ khác hoặc ngày khác để tránh va phạm hung khí."
-            khong_nen_lam = "Không nên tiến hành thủ thuật, nhổ răng, trích chích hay can thiệp xâm lấn vào lúc này."
-        elif dao_type == "Hắc Đạo" and not co_tro_luc_cat:
-            tong_quyet = "Thời điểm này không xấu gắt, nhưng khí tượng chưa thật sự đẹp."
-            nen_lam = "Nếu chưa gấp, nên ưu tiên chọn giờ sáng sủa hơn để tâm và khí đều ổn."
-            khong_nen_lam = "Không nên quá vội vàng quyết định chỉ vì chưa thấy hung thần trực phạm."
+        if phan_loai["loai"] in ["tham_kham", "chan_doan_hinh_anh"]:
+            if pham_hung_chinh:
+                tong_quyet = "Thời điểm này không quá lý tưởng cho việc thăm khám hoặc khảo sát."
+                nen_lam = "Nếu việc khám hoặc chụp chưa gấp, nên chọn thời điểm sáng sủa hơn để dễ thuận cho việc phát hiện và kết luận."
+                khong_nen_lam = "Không nên quá chủ quan với kết quả đầu tiên; nếu lâm sàng còn nghi ngờ, nên đọc kỹ hoặc tái kiểm tra."
+            elif dao_type == "Hắc Đạo" and not co_tro_luc_cat:
+                tong_quyet = "Đây là thời điểm có thể đi khám hoặc chụp, nhưng khí tượng chưa thật sự hanh thông."
+                nen_lam = "Vẫn có thể tiến hành, nhất là với khám tổng quát, X-ray, MRI, CT hoặc siêu âm; nên giữ hồ sơ rõ ràng và trao đổi kỹ với bác sĩ đọc kết quả."
+                khong_nen_lam = "Không nên kỳ vọng quá nhiều vào một lần khảo sát duy nhất nếu triệu chứng còn mơ hồ hoặc kéo dài."
+            else:
+                tong_quyet = "Thời điểm này tương đối thuận cho việc thăm khám và khảo sát."
+                nen_lam = "Có thể tiến hành khám, chụp hoặc kiểm tra; nếu có cát khí hỗ trợ thì ý nghĩa thiên về phát hiện sớm, nhìn bệnh rõ hơn và dễ chốt hướng theo dõi."
+                khong_nen_lam = "Không nên vì giờ đẹp mà chủ quan bỏ qua việc đối chiếu triệu chứng, phim chụp và ý kiến chuyên môn."
+
+        elif phan_loai["loai"] in ["xam_lan_nhe", "xam_lan_manh"]:
+            if pham_hung_chinh:
+                tong_quyet = "Thời điểm này không thuận cho thủ thuật hoặc can thiệp xâm lấn."
+                nen_lam = "Nên dời sang giờ khác hoặc ngày khác để tránh va phạm hung khí."
+                khong_nen_lam = "Không nên tiến hành nhổ, chích, rạch, mổ hay can thiệp xâm lấn vào lúc này."
+            elif dao_type == "Hắc Đạo" and not co_tro_luc_cat:
+                tong_quyet = "Thời điểm này không xấu gắt, nhưng chưa phải khí tượng đẹp cho can thiệp."
+                nen_lam = "Nếu chưa gấp, nên ưu tiên đổi sang giờ thuận hơn."
+                khong_nen_lam = "Không nên quyết nhanh chỉ vì thấy chưa phạm đại hung."
+            else:
+                tong_quyet = "Thời điểm này tương đối thuận cho can thiệp khi cần thiết."
+                nen_lam = "Có thể tiến hành nếu đã chuẩn bị kỹ và tuân thủ nguyên tắc chuyên môn an toàn."
+                khong_nen_lam = "Không nên chủ quan; cát khí chỉ hỗ trợ, không thay thế kỹ thuật và vô khuẩn."
+
         else:
-            tong_quyet = "Thời điểm này tương đối thuận, có thể cân nhắc tiến hành."
-            nen_lam = "Có thể thực hiện khi đã chuẩn bị kỹ và tuân thủ nguyên tắc chuyên môn an toàn."
-            khong_nen_lam = "Không nên chủ quan; dù cát khí hỗ trợ, vẫn phải lấy an toàn và chuyên môn làm gốc."
-        
+            if pham_hung_chinh:
+                tong_quyet = "Thời điểm này có dấu hiệu chưa thuận."
+                nen_lam = "Nên cân nhắc kỹ mục đích thực hiện và ưu tiên đổi thời điểm nếu có thể."
+                khong_nen_lam = "Không nên quyết định vội khi còn yếu tố hung chưa được hóa giải."
+            elif dao_type == "Hắc Đạo" and not co_tro_luc_cat:
+                tong_quyet = "Thời điểm này tạm dùng được, nhưng chưa thật sự đẹp."
+                nen_lam = "Có thể làm nếu cần, song nên giữ hướng theo dõi cẩn thận."
+                khong_nen_lam = "Không nên kết luận quá cát."
+            else:
+                tong_quyet = "Thời điểm này tương đối ổn."
+                nen_lam = "Có thể tiến hành trong khuôn khổ an toàn và hợp lý."
+                khong_nen_lam = "Không nên chủ quan."
+
         report = {
             "co_quan_can_thiep": bo_phan,
+            "phan_loai_thu_tuc": phan_loai,
             "1_Nhat_Pha": {
                 "pham": nhat_pha,
                 "dien_giai": f"Giờ {gio} {'xung' if nhat_pha else 'không xung'} Ngày {ngay_chi}."
@@ -501,7 +587,7 @@ def xin_loi_khuyen_ai(context_text):
         genai.configure(api_key=key_duoc_chon)
 
         prompt_bac_si = """
-Bạn là bộ máy LUẬN GIẢI y lý cát thời theo phong cách mềm mại, dịu nhẹ, chuyên nghiệp, nhưng vẫn sắc bén và có quyết định rõ ràng.
+Bạn là bộ máy luận giải y lý cát thời với giọng văn tự nhiên, mềm mại, chuyên nghiệp, giống một bác sĩ hiểu huyền học chứ không phải máy đọc checklist.
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ dùng dữ liệu đã có trong JSON đầu vào.
@@ -513,7 +599,14 @@ NGUYÊN TẮC BẮT BUỘC:
 - Nếu không phạm thì chỉ ghi ngắn: "Không Phạm".
 - Chỉ giải thích khi thật sự có phạm, có cát thần, hoặc cần cảnh báo.
 - Giọng văn phải mềm mại, rõ ràng, chuyên nghiệp, có logic huyền học.
-
+- Không viết cứng đơ kiểu máy móc.
+- Vẫn phải có logic rõ, nhưng diễn đạt tự nhiên như đang giải thích cho bệnh nhân.
+- Không được cực đoan hóa mọi trường hợp thành “nên” hoặc “không nên can thiệp”.
+- Phải phân biệt rõ:
+  + thăm khám / khám tổng quát
+  + chẩn đoán hình ảnh / chụp khảo sát
+  + thủ thuật xâm lấn nhẹ
+  + can thiệp / phẫu thuật xâm lấn
 THỨ TỰ LUẬN GIẢI BẮT BUỘC:
 
 1. Nhật Phá
@@ -580,10 +673,25 @@ THỨ TỰ LUẬN GIẢI BẮT BUỘC:
   "10. Cát Thần: Địa Y - bổ trợ ..."
 - Chỉ giải thích tác dụng thực tế, không nói dài
 
+Lưu ý 
+Nếu là hoạt động thăm khám hoặc chẩn đoán hình ảnh:
+- Không dùng giọng quá nặng như phẫu thuật.
+- Nếu giờ đẹp, có thể nói theo hướng:
+  "thuận cho việc phát hiện sớm, nhìn bệnh rõ hơn, dễ chốt hướng điều trị hơn"
+- Nếu giờ xấu hoặc Hắc Đạo:
+  "không phải cấm đi khám/chụp, nhưng nên thận trọng hơn trong việc đọc kết quả, đối chiếu triệu chứng, và tái kiểm nếu cần"
+- Tuyệt đối không viết kiểu vô lý như cấm khám tổng quát chỉ vì giờ xấu.
+. Nếu là thủ thuật hoặc can thiệp xâm lấn:
+- Lúc đó mới được dùng giọng thận trọng mạnh hơn.
+
 ➥ Kết Luận Cuối Cùng
 - Phải đưa ra kết luận dứt khoát, không mập mờ
 - Không được chỉ chép lại dữ liệu
 - Phải phân tích logic toàn bộ rồi quyết định
+- Viết như bác sĩ đang khuyên bệnh nhân
+- Tự nhiên, dịu, sáng nghĩa
+- Nhưng phải có quyết định rõ
+- Không được chỉ lặp lại dữ liệu
 
 QUY TẮC RA QUYẾT ĐỊNH:
 - Nếu phạm Nhật Phá, Nguyệt Phá, Tuế Phá, hoặc phạm Hung Thần quan trọng, hoặc phạm Nhân Thần đúng bộ phận, hoặc phạm Tý Ngọ Lưu Chú đúng vùng đang can thiệp:
@@ -599,16 +707,7 @@ CUỐI CÙNG PHẢI VIẾT ĐÚNG 2 DÒNG:
 ⛔ Không Nên: ...
 
 MẪU VĂN PHONG:
-1. Nhật Phá: Không Phạm
-2. Nguyệt Phá: Không Phạm
-3. Tuế Phá: Không Phạm
-4. Thời Khí: Hoàng Đạo - có trợ lực, không bị Tý Ngọ Lưu Chú cản trở trực tiếp
-5. Nhật Y: Không Bổ Trợ
-6. Nhân Thần Canh Giờ: Không Phạm
-7. Nhân Thần Can Ngày: Không Phạm
-8. Nhân Thần Chi Ngày: Không Phạm
-9. Hung Thần: Không Phạm
-10. Cát Thần: Không Có
+"Xét tổng thể, thời điểm này không phạm các hung điểm lớn. Với một việc mang tính thăm khám hoặc chẩn đoán, giờ này không tạo trở ngại trực tiếp. Nếu đi vào thời khí thuận, ý nghĩa thiên về dễ phát hiện vấn đề sớm hơn, thuận cho việc đọc dấu hiệu và định hướng theo dõi. Nếu rơi vào giờ khí tượng kém hơn, vẫn có thể tiến hành, nhưng nên đọc kết quả kỹ và đối chiếu triệu chứng cẩn thận."
 
 ➥ Kết Luận Cuối Cùng
 ✅ Nên: ...
@@ -618,9 +717,9 @@ Không được viết lại câu hỏi. Không được dài dòng. Phải đư
 """
 
         config = genai.GenerationConfig(
-            temperature=0.2,
-            top_k=1,
-            top_p=0.8
+            temperature=0.25,
+            top_k=8,
+            top_p=0.9
         )
 
         model = genai.GenerativeModel(
