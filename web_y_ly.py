@@ -105,7 +105,7 @@ class YLyCatThoiEngine:
             return True
 
         nhom_dong_nghia = [
-            {"răng", "nướu", "lợi", "hàm", "răng khôn"},
+            {"răng", "nướu", "lợi", "hàm", "răng khôn", "răng miệng", "miệng"},
             {"mắt", "nhãn", "mí mắt", "nhãn cầu"},
             {"tai"},
             {"mũi", "xoang"},
@@ -119,8 +119,16 @@ class YLyCatThoiEngine:
             {"lưng", "eo", "eo lưng"},
             {"chân", "bàn chân", "gót chân", "cẳng chân", "đùi", "gối", "đầu gối"},
             {"âm bộ", "bụng dưới"},
+            {"gan"},
+            {"thận"},
         ]
-    
+
+        for nhom in nhom_dong_nghia:
+            if any(x in a for x in nhom) and any(x in b for x in nhom):
+                return True
+
+        return False
+
     def phan_loai_thu_tuc(self, bo_phan):
         text = (bo_phan or "").strip().lower()
 
@@ -135,7 +143,7 @@ class YLyCatThoiEngine:
 
         nhom_xam_lan_nhe = [
             "lấy máu", "xét nghiệm máu", "tiêm", "chích", "trích", "bấm sinh thiết",
-            "nhổ răng", "cạo vôi", "rạch nhỏ", "đốt"
+            "nhổ răng", "cạo vôi", "rạch nhỏ", "đốt", "deep clean", "vệ sinh răng miệng"
         ]
 
         nhom_xam_lan_manh = [
@@ -175,12 +183,6 @@ class YLyCatThoiEngine:
             "ten_goi": "Hoạt động y khoa chưa phân nhóm rõ",
             "muc_do": "chưa xác định"
         }
-
-        for nhom in nhom_dong_nghia:
-            if any(x in a for x in nhom) and any(x in b for x in nhom):
-                return True
-
-        return False
 
     def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
         chi_thang = self.CHI[(thang_am + 1) % 12]
@@ -795,6 +797,18 @@ if btn_phan_tich:
                 if "Lỗi hệ thống" not in loi_khuyen:
                     st.success("Hoàn tất luận giải!")
                     st.write(loi_khuyen)
+
+                    st.markdown("""
+                    <div style="
+                        font-size: 12px;
+                        font-style: italic;
+                        color: #b8c0cc;
+                        margin-top: 8px;
+                        line-height: 1.6;
+                    ">
+                    🚨Khuyến cáo y tế: Nếu có các dấu hiệu nguy cấp như khó thở, đau ngực dữ dội, sốt cao liên tục, chảy máu không cầm, ngất, co giật, méo miệng, yếu liệt, đau bụng dữ dội, nôn ra máu hoặc bất kỳ biểu hiện bất thường nghiêm trọng nào, cần đi cấp cứu ngay hoặc gọi 115, không chờ Ngày - Giờ Tốt.
+                    </div>
+                    """, unsafe_allow_html=True)
 
                     with st.expander("Xem dữ liệu logic thô"):
                         st.json(bao_cao)
