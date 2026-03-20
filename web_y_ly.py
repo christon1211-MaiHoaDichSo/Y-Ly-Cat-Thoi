@@ -806,7 +806,7 @@ if btn_phan_tich:
                         margin-top: 8px;
                         line-height: 1.6;
                     ">
-                    🚨Khuyến cáo y tế: Nếu có các dấu hiệu nguy cấp như khó thở, đau ngực dữ dội, sốt cao liên tục, chảy máu không cầm, ngất, co giật, méo miệng, yếu liệt, đau bụng dữ dội, nôn ra máu hoặc bất kỳ biểu hiện bất thường nghiêm trọng nào, cần đi cấp cứu ngay hoặc gọi 115, không chờ Ngày - Giờ Tốt.
+                    🚨Khuyến cáo y tế: Nếu có các dấu hiệu nguy cấp như khó thở, đau ngực dữ dội, sốt cao liên tục, chảy máu không cầm, ngất, co giật, méo miệng, yếu liệt, đau bụng dữ dội, nôn ra máu hoặc bất kỳ biểu hiện bất thường nghiêm trọng nào, cần đi cấp cứu ngay hoặc gọi số Cấp Cứu Khẩn Cấp, không chờ Ngày - Giờ Tốt.
                     </div>
                     """, unsafe_allow_html=True)
 
