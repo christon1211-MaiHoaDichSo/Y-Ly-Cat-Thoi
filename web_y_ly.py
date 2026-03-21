@@ -530,6 +530,19 @@ st.set_page_config(
 )
 
 st.set_option("client.toolbarMode", "minimal")
+# --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
+
+# 1. Hàm đọc và mã hóa file logo của bạn (Giữ nguyên)
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        # Nếu không tìm thấy file, trả về chuỗi rỗng để không bị lỗi app
+        return "" 
+
+img_base64 = get_base64_of_bin_file('logo.png')
 
 st.markdown(f"""
 <style>
