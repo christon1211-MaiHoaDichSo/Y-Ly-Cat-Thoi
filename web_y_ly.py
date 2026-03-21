@@ -685,7 +685,7 @@ st.markdown(
     <div class="sticky-header">
         <div class="header-content">
             <img src="data:image/png;base64,{img_base64}" class="header-logo">
-            <h1 class="header-title">Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>
+            <h1 class="header-title">Y Lý Cát Thời Dân Gian</h1>
         </div>
     </div>
     """,
