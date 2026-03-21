@@ -531,38 +531,70 @@ st.set_page_config(
 
 st.set_option("client.toolbarMode", "minimal")
 
-st.markdown("""
+st.markdown(f"""
 <style>
-/* Giữ header */
-header[data-testid="stHeader"] {
-    visibility: visible;
-}
+/* Thanh logo + tiêu đề giả lập nằm trong vùng header trắng */
+.ylct-chrome-center {{
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 
-/* Ẩn nút Deploy */
-.stAppDeployButton {
-    display: none !important;
-}
+    /* Không chặn bấm vào Share / 3 chấm / icon */
+    pointer-events: none;
 
-/* Ẩn nút GitHub nếu có */
-a[title*="GitHub"],
-a[aria-label*="GitHub"],
-#GithubIcon {
-    display: none !important;
-}
+    /* Giữ vùng giữa, chừa chỗ cho icon bên phải */
+    max-width: min(56vw, 760px);
+    width: max-content;
+    padding: 0 8px;
+    box-sizing: border-box;
+}}
 
-/* Ẩn nút Share nếu có */
-button[title="Share"],
-button[aria-label="Share"],
-a[title="Share"],
-a[aria-label="Share"] {
-    display: none !important;
-}
+.ylct-chrome-center img {{
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}}
 
-/* Giữ app menu 3 chấm */
-#MainMenu {
-    visibility: visible !important;
-}
+.ylct-chrome-center .ylct-chrome-title {{
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    color: #1f2430;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}}
+
+/* Mobile: giữ 1 hàng nhỏ gọn */
+@media (max-width: 768px) {{
+    .ylct-chrome-center {{
+        top: 10px;
+        gap: 6px;
+        max-width: calc(100vw - 150px); /* chừa chỗ cho icon/menu */
+    }}
+
+    .ylct-chrome-center img {{
+        width: 24px;
+        height: 24px;
+    }}
+
+    .ylct-chrome-center .ylct-chrome-title {{
+        font-size: 13px;
+    }}
+}}
 </style>
+
+<div class="ylct-chrome-center">
+    <img src="data:image/png;base64,{img_base64}">
+    <div class="ylct-chrome-title">Y Lý Cát Thời Dân Gian</div>
+</div>
 """, unsafe_allow_html=True)
 
 import streamlit.components.v1 as components
