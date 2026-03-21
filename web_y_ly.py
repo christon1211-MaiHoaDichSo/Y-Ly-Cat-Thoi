@@ -138,6 +138,12 @@ class YLyCatThoiEngine:
             {"thận"},
         ]
 
+        for nhom in nhom_dong_nghia:
+            if any(x in a for x in nhom) and any(x in b for x in nhom):
+                return True
+
+        return False
+
 
     def phan_loai_thu_tuc(self, bo_phan, loai_ui=None):
         if loai_ui == "Thăm khám / kiểm tra tổng quát":
@@ -233,7 +239,8 @@ class YLyCatThoiEngine:
         
         # Sửa lỗi ẩn: Phải phân loại thủ thuật trước khi dùng để tính toán ở dưới
         phan_loai = self.phan_loai_thu_tuc(bo_phan, loai_ui)
-        
+        chi_thang = self.CHI[(thang_am + 1) % 12]
+
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
         nt_can_text = self.NT_CAN.get(ngay_can, "")
         nt_chi_text = self.NT_CHI.get(ngay_chi, "")
