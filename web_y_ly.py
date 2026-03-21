@@ -146,93 +146,187 @@ class YLyCatThoiEngine:
 
 
     def phan_loai_thu_tuc(self, bo_phan, loai_ui=None):
-        if loai_ui == "Thăm khám / kiểm tra tổng quát":
-            return {
+        mapping = {
+            "Khám Tổng Quát - Xét Nghiệm Sơ Bộ": {
                 "loai": "tham_kham",
-                "ten_goi": loai_ui,
-                "muc_do": "rất thấp"
-            }
-
-        if loai_ui == "Chẩn đoán hình ảnh / khảo sát":
-            return {
+                "ten_goi": "Khám Tổng Quát - Xét Nghiệm Sơ Bộ",
+                "muc_do": "rất thấp",
+                "xam_lan": "không xâm lấn",
+                "dinh_huong_luan": "luận mềm, thiên về phát hiện sớm, đọc kết quả, theo dõi",
+                "uu_tien": "ưu tiên phát hiện"
+            },
+            "Khám Chuyên Khoa - Xét Nghiệm Chuyên Sâu": {
+                "loai": "tham_kham_chuyen_sau",
+                "ten_goi": "Khám Chuyên Khoa - Xét Nghiệm Chuyên Sâu",
+                "muc_do": "thấp",
+                "xam_lan": "ít xâm lấn hoặc không xâm lấn",
+                "dinh_huong_luan": "luận theo hướng khảo sát sâu hơn, đối chiếu triệu chứng kỹ hơn",
+                "uu_tien": "ưu tiên phát hiện"
+            },
+            "Chẩn Đoán Hình Ảnh (X-ray, CT, MRI, Siêu Âm...)": {
                 "loai": "chan_doan_hinh_anh",
-                "ten_goi": loai_ui,
-                "muc_do": "thấp"
-            }
-
-        if loai_ui == "Thủ thuật xâm lấn nhẹ":
-            return {
-                "loai": "xam_lan_nhe",
-                "ten_goi": loai_ui,
-                "muc_do": "vừa"
-            }
-
-        if loai_ui == "Thủ thuật / phẫu thuật xâm lấn":
-            return {
-                "loai": "xam_lan_manh",
-                "ten_goi": loai_ui,
-                "muc_do": "cao"
-            }
-
-        if loai_ui == "Khác / chưa rõ":
-            return {
+                "ten_goi": "Chẩn Đoán Hình Ảnh",
+                "muc_do": "thấp",
+                "xam_lan": "không xâm lấn",
+                "dinh_huong_luan": "luận theo hướng nhìn bệnh rõ hơn, dễ phát hiện bất thường hơn",
+                "uu_tien": "ưu tiên phát hiện"
+            },
+            "Nội Soi - Thăm Dò Chẩn Đoán": {
+                "loai": "tham_do_chan_doan",
+                "ten_goi": "Nội Soi - Thăm Dò Chẩn Đoán",
+                "muc_do": "vừa",
+                "xam_lan": "xâm lấn nhẹ đến vừa",
+                "dinh_huong_luan": "luận trung tính-thận trọng, vừa là chẩn đoán vừa có tác động vào cơ thể",
+                "uu_tien": "cân bằng phát hiện và an toàn"
+            },
+            "Xét Nghiệm Máu / Nước Tiểu / Lấy Mẫu": {
+                "loai": "xet_nghiem_lay_mau",
+                "ten_goi": "Xét Nghiệm Máu / Nước Tiểu / Lấy Mẫu",
+                "muc_do": "thấp",
+                "xam_lan": "xâm lấn rất nhẹ",
+                "dinh_huong_luan": "luận nhẹ, thiên về chất lượng mẫu và khả năng phát hiện sớm",
+                "uu_tien": "ưu tiên phát hiện"
+            },
+            "Tiêm / Truyền / Chích Ngừa": {
+                "loai": "tiem_truyen",
+                "ten_goi": "Tiêm / Truyền / Chích Ngừa",
+                "muc_do": "thấp",
+                "xam_lan": "xâm lấn nhẹ",
+                "dinh_huong_luan": "luận thận trọng nhẹ, chú ý phản ứng cơ thể và khả năng dung nạp",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Nha Khoa Nhẹ Nhàng (Cạo Vôi, Trám Răng, Vệ Sinh, Deep Clean...)": {
+                "loai": "nha_khoa_nhe",
+                "ten_goi": "Nha Khoa Nhẹ Nhàng",
+                "muc_do": "vừa",
+                "xam_lan": "xâm lấn nhẹ",
+                "dinh_huong_luan": "luận thận trọng vừa, chú ý chảy máu nhẹ, kích ứng, ê buốt",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Nha Khoa Chuyên Sâu (Nhổ Răng, Nhổ Răng Khôn, Niềng Răng...)": {
+                "loai": "nha_khoa_sau",
+                "ten_goi": "Nha Khoa Chuyên Sâu",
+                "muc_do": "cao",
+                "xam_lan": "xâm lấn vừa đến mạnh",
+                "dinh_huong_luan": "luận thận trọng rõ, ưu tiên tránh phạm Nhân Thần, Hung Thần, Lưu Chú",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Tiểu Phẫu Nhẹ (Gây Tê, Rạch Nhẹ, Xử Lý Mô Mềm...)": {
+                "loai": "tieu_phau_nhe",
+                "ten_goi": "Tiểu Phẫu Nhẹ",
+                "muc_do": "cao",
+                "xam_lan": "xâm lấn vừa",
+                "dinh_huong_luan": "luận thận trọng rõ, tránh các hung điểm trực phạm",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Tiểu Phẫu Chuyên Sâu": {
+                "loai": "tieu_phau_sau",
+                "ten_goi": "Tiểu Phẫu Chuyên Sâu",
+                "muc_do": "cao",
+                "xam_lan": "xâm lấn vừa đến mạnh",
+                "dinh_huong_luan": "luận mạnh tay hơn, coi trọng giờ khí và các thần sát bất lợi",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Đại Phẫu - Phẫu Thuật Gây Mê": {
+                "loai": "dai_phau",
+                "ten_goi": "Đại Phẫu - Phẫu Thuật Gây Mê",
+                "muc_do": "rất cao",
+                "xam_lan": "xâm lấn mạnh",
+                "dinh_huong_luan": "luận nghiêm ngặt nhất, tránh hung thần và các điểm phá/xung",
+                "uu_tien": "ưu tiên an toàn tuyệt đối"
+            },
+            "Phẫu Thuật Nội Soi": {
+                "loai": "phau_thuat_noi_soi",
+                "ten_goi": "Phẫu Thuật Nội Soi",
+                "muc_do": "cao",
+                "xam_lan": "xâm lấn vừa đến mạnh",
+                "dinh_huong_luan": "luận nghiêng về can thiệp xâm lấn, vẫn có yếu tố thăm dò nhưng lấy an toàn làm chính",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Trị Liệu Nhẹ Nhàng": {
+                "loai": "tri_lieu_nhe",
+                "ten_goi": "Trị Liệu Nhẹ Nhàng",
+                "muc_do": "thấp",
+                "xam_lan": "không xâm lấn hoặc rất nhẹ",
+                "dinh_huong_luan": "luận mềm, thiên về độ hanh thông, đáp ứng cơ thể, hiệu quả phục hồi",
+                "uu_tien": "ưu tiên đáp ứng"
+            },
+            "Trị Liệu Chuyên Sâu": {
+                "loai": "tri_lieu_sau",
+                "ten_goi": "Trị Liệu Chuyên Sâu",
+                "muc_do": "vừa",
+                "xam_lan": "ít xâm lấn hoặc xâm lấn nhẹ",
+                "dinh_huong_luan": "luận trung tính-thận trọng, chú ý mức chịu đựng và tiến triển hồi phục",
+                "uu_tien": "ưu tiên đáp ứng"
+            },
+            "Phục Hồi Chức Năng - Vật Lý Trị Liệu": {
+                "loai": "phuc_hoi_chuc_nang",
+                "ten_goi": "Phục Hồi Chức Năng - Vật Lý Trị Liệu",
+                "muc_do": "thấp",
+                "xam_lan": "không xâm lấn hoặc rất nhẹ",
+                "dinh_huong_luan": "luận theo hướng hỗ trợ phục hồi, giảm cản trở, tăng độ đáp ứng",
+                "uu_tien": "ưu tiên phục hồi"
+            },
+            "Châm Cứu - Bấm Huyệt - Trị Liệu Đông Y": {
+                "loai": "cham_cuu_dong_y",
+                "ten_goi": "Châm Cứu - Bấm Huyệt - Trị Liệu Đông Y",
+                "muc_do": "vừa",
+                "xam_lan": "xâm lấn nhẹ hoặc không xâm lấn",
+                "dinh_huong_luan": "luận kỹ Nhân Thần, Thích Huyết Sát, Thích Hại Sát, Âm Thương Sát",
+                "uu_tien": "ưu tiên tránh phạm"
+            },
+            "Thẩm Mỹ Nhẹ Nhàng (Xăm Mày, Xăm Môi, Bơm Môi, Chăm Sóc Da...)": {
+                "loai": "tham_my_nhe",
+                "ten_goi": "Thẩm Mỹ Nhẹ Nhàng",
+                "muc_do": "vừa",
+                "xam_lan": "xâm lấn nhẹ",
+                "dinh_huong_luan": "luận thận trọng vừa, chú ý chảy máu, sưng, lành thương và tính thẩm mỹ",
+                "uu_tien": "ưu tiên lành thương"
+            },
+            "Thẩm Mỹ Chuyên Sâu (Nâng Mũi, Cắt Mí, Độn Cằm, Nâng Ngực...)": {
+                "loai": "tham_my_sau",
+                "ten_goi": "Thẩm Mỹ Chuyên Sâu",
+                "muc_do": "rất cao",
+                "xam_lan": "xâm lấn mạnh",
+                "dinh_huong_luan": "luận gần như đại phẫu, rất coi trọng hung-cát và hồi phục hậu thủ thuật",
+                "uu_tien": "ưu tiên an toàn tuyệt đối"
+            },
+            "Da Liễu - Laser - Đốt - Can Thiệp Bề Mặt Da": {
+                "loai": "da_lieu_laser",
+                "ten_goi": "Da Liễu - Laser - Đốt",
+                "muc_do": "vừa",
+                "xam_lan": "xâm lấn nhẹ đến vừa",
+                "dinh_huong_luan": "luận chú ý kích ứng, viêm, chảy dịch, lành thương bề mặt",
+                "uu_tien": "ưu tiên lành thương"
+            },
+            "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp": {
+                "loai": "san_phu_nam_khoa",
+                "ten_goi": "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp",
+                "muc_do": "cao",
+                "xam_lan": "xâm lấn vừa đến mạnh",
+                "dinh_huong_luan": "luận thận trọng cao, tránh các điểm phá/xung và các hung thần trực phạm",
+                "uu_tien": "ưu tiên an toàn"
+            },
+            "Các Hoạt Động Khác / Chưa Rõ": {
                 "loai": "khac",
-                "ten_goi": loai_ui,
-                "muc_do": "chưa xác định"
+                "ten_goi": "Các Hoạt Động Khác / Chưa Rõ",
+                "muc_do": "chưa xác định",
+                "xam_lan": "chưa xác định",
+                "dinh_huong_luan": "luận trung tính, không cực đoan, chờ thêm dữ liệu",
+                "uu_tien": "cân bằng"
             }
+        }
 
-        text = (bo_phan or "").strip().lower()
-
-        nhom_kham = [
-            "khám", "khám tổng quát", "khám định kỳ", "thăm khám", "kiểm tra", "tái khám"
-        ]
-
-        nhom_chan_doan_hinh_anh = [
-            "xray", "x-ray", "mri", "ct", "ct scan", "siêu âm", "nội soi chẩn đoán",
-            "chụp", "chụp phim", "chụp cắt lớp", "chụp cộng hưởng từ"
-        ]
-
-        nhom_xam_lan_nhe = [
-            "lấy máu", "xét nghiệm máu", "tiêm", "chích", "trích", "bấm sinh thiết",
-            "nhổ răng", "cạo vôi", "rạch nhỏ", "đốt", "deep clean", "vệ sinh răng miệng"
-        ]
-
-        nhom_xam_lan_manh = [
-            "phẫu thuật", "mổ", "mổ xẻ", "can thiệp", "tiểu phẫu", "đại phẫu"
-        ]
-
-        if any(k in text for k in nhom_xam_lan_manh):
-            return {
-                "loai": "xam_lan_manh",
-                "ten_goi": "Thủ thuật / phẫu thuật xâm lấn",
-                "muc_do": "cao"
-            }
-
-        if any(k in text for k in nhom_xam_lan_nhe):
-            return {
-                "loai": "xam_lan_nhe",
-                "ten_goi": "Thủ thuật xâm lấn nhẹ",
-                "muc_do": "vừa"
-            }
-
-        if any(k in text for k in nhom_chan_doan_hinh_anh):
-            return {
-                "loai": "chan_doan_hinh_anh",
-                "ten_goi": "Chẩn đoán hình ảnh / khảo sát",
-                "muc_do": "thấp"
-            }
-
-        if any(k in text for k in nhom_kham):
-            return {
-                "loai": "tham_kham",
-                "ten_goi": "Thăm khám / kiểm tra tổng quát",
-                "muc_do": "rất thấp"
-            }
+        if loai_ui in mapping:
+            return mapping[loai_ui]
 
         return {
             "loai": "khac",
-            "ten_goi": "Hoạt động y khoa chưa phân nhóm rõ",
-            "muc_do": "chưa xác định"
+            "ten_goi": "Các Hoạt Động Khác / Chưa Rõ",
+            "muc_do": "chưa xác định",
+            "xam_lan": "chưa xác định",
+            "dinh_huong_luan": "luận trung tính, không cực đoan, chờ thêm dữ liệu",
+            "uu_tien": "cân bằng"
         }
 
     def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, loai_ui, cac_gio_hoang_dao):
@@ -602,17 +696,33 @@ with col_trai:
         key="gio_kham"
     )
     
-    loai_hoat_dong = st.selectbox(
-        "Loại hoạt động y khoa",
-        [
-            "Thăm khám / kiểm tra tổng quát",
-            "Chẩn đoán hình ảnh / khảo sát",
-            "Thủ thuật xâm lấn nhẹ",
-            "Thủ thuật / phẫu thuật xâm lấn",
-            "Khác / chưa rõ"
-        ],
-        index=0
-    )
+loai_hoat_dong = st.selectbox(
+    "Loại hoạt động y khoa",
+    [
+        "Khám Tổng Quát - Xét Nghiệm Sơ Bộ",
+        "Khám Chuyên Khoa - Xét Nghiệm Chuyên Sâu",
+        "Chẩn Đoán Hình Ảnh (X-ray, CT, MRI, Siêu Âm...)",
+        "Nội Soi - Thăm Dò Chẩn Đoán",
+        "Xét Nghiệm Máu / Nước Tiểu / Lấy Mẫu",
+        "Tiêm / Truyền / Chích Ngừa",
+        "Nha Khoa Nhẹ Nhàng (Cạo Vôi, Trám Răng, Vệ Sinh, Deep Clean...)",
+        "Nha Khoa Chuyên Sâu (Nhổ Răng, Nhổ Răng Khôn, Niềng Răng...)",
+        "Tiểu Phẫu Nhẹ (Gây Tê, Rạch Nhẹ, Xử Lý Mô Mềm...)",
+        "Tiểu Phẫu Chuyên Sâu",
+        "Đại Phẫu - Phẫu Thuật Gây Mê",
+        "Phẫu Thuật Nội Soi",
+        "Trị Liệu Nhẹ Nhàng",
+        "Trị Liệu Chuyên Sâu",
+        "Phục Hồi Chức Năng - Vật Lý Trị Liệu",
+        "Châm Cứu - Bấm Huyệt - Trị Liệu Đông Y",
+        "Thẩm Mỹ Nhẹ Nhàng (Xăm Mày, Xăm Môi, Bơm Môi, Chăm Sóc Da...)",
+        "Thẩm Mỹ Chuyên Sâu (Nâng Mũi, Cắt Mí, Độn Cằm, Nâng Ngực...)",
+        "Da Liễu - Laser - Đốt - Can Thiệp Bề Mặt Da",
+        "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp",
+        "Các Hoạt Động Khác / Chưa Rõ"
+    ],
+    index=0
+)
 
     bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
 
@@ -764,6 +874,15 @@ LƯU Ý VỀ NGỮ KHÍ:
 - Nếu là thủ thuật hoặc can thiệp xâm lấn:
   + Khi đó mới được dùng giọng thận trọng mạnh hơn.
   + Nếu có triệu chứng kéo dài, sưng đau, chảy máu hoặc dấu hiệu viêm, có thể nhắc người đọc lưu ý theo dõi sát và tuân thủ bác sĩ chuyên khoa.
+- Trong JSON, trường "phan_loai_thu_tuc" là dữ liệu ưu tiên cao.
+- Phải dùng các trường:
+  + loai
+  + muc_do
+  + xam_lan
+  + dinh_huong_luan
+  + uu_tien
+  để quyết định giọng điệu và mức độ thận trọng.
+- Không được luận cùng một giọng cho khám tổng quát, chẩn đoán hình ảnh, nha khoa chuyên sâu và đại phẫu.
 
 ➥ Kết Luận Cuối Cùng
 - Phải đưa ra kết luận dứt khoát, không mập mờ
