@@ -6,6 +6,134 @@ import random
 import base64
 import json
 from lunarcalendar import Converter, Solar, Lunar
+import streamlit.components.v1 as components
+
+# THÊM DÒNG NÀY ĐỂ DÙNG LỊCH TIẾT KHÍ:
+import lunar_python
+# ==============================================================================
+# BỘ DỮ LIỆU TỪ ĐIỂN TIẾT KHÍ, NGŨ HÀNH VÀ MÀU SẮC GIAO DIỆN
+# ==============================================================================
+TU_DIEN_CAN_CHI_LP = {'甲': 'Giáp', '乙': 'Ất', '丙': 'Bính', '丁': 'Đinh', '戊': 'Mậu', '己': 'Kỷ', '庚': 'Canh', '辛': 'Tân', '壬': 'Nhâm', '癸': 'Quý', '子': 'Tý', '丑': 'Sửu', '寅': 'Dần', '卯': 'Mão', '辰': 'Thìn', '巳': 'Tỵ', '午': 'Ngọ', '未': 'Mùi', '申': 'Thân', '酉': 'Dậu', '戌': 'Tuất', '亥': 'Hợi'}
+
+NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "Hỏa", "Mậu": "Thổ", "Kỷ": "Thổ", "Canh": "Kim", "Tân": "Kim", "Nhâm": "Thủy", "Quý": "Thủy"}
+NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
+
+MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
+def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name):
+    # Lấy giờ ở giữa Canh Giờ để tính chính xác (ví dụ Ngọ = 12h)
+    h_val = CHI_TO_HOUR[gio_chi_name] + 1
+    if h_val >= 24: h_val = 0
+    
+    # Dùng lunar_python để tính Tiết Khí
+    solar_lp = lunar_python.Solar.fromYmdHms(int(nam), int(thang), int(ngay), h_val, 30, 0)
+    lunar_lp = solar_lp.getLunar()
+    
+    # Quy đổi Bát Tự sang Tiếng Việt
+    can_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearGanExact()]
+    chi_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearZhiExact()]
+    can_thang = TU_DIEN_CAN_CHI_LP[lunar_lp.getMonthGanExact()]
+    chi_thang = TU_DIEN_CAN_CHI_LP[lunar_lp.getMonthZhiExact()]
+    can_ngay = TU_DIEN_CAN_CHI_LP[lunar_lp.getDayGanExact()]
+    chi_ngay = TU_DIEN_CAN_CHI_LP[lunar_lp.getDayZhiExact()]
+    can_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeGan()]
+    chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
+    
+    pillars = [
+        {"title": "NĂM", "val": str(nam), "can": can_nam, "chi": chi_nam},
+        {"title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
+        {"title": "NGÀY", "val": f"{int(ngay):02d}", "can": can_ngay, "chi": chi_ngay},
+        {"title": "GIỜ", "val": f"Giờ {gio_chi_name}", "can": can_gio, "chi": chi_gio}
+    ]
+    
+    html_cards = ""
+    for p in pillars:
+        # Nhặt màu Can & Chi theo ngũ hành
+        mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p['can']), "#333")
+        mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p['chi']), "#333")
+        
+        # Lấy Ngũ Hành Nạp Âm của Trụ đó để làm viền và đổ bóng ombre
+        nap_am, hanh_na = NA_AM_60.get(f"{p['can']} {p['chi']}", ("Chưa rõ", "Thổ"))
+        mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
+        mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
+        
+        html_cards += f"""
+        <div class="bt-card" style="background: {mau_ombre}; border: 1px solid {mau_vien}60;">
+            <div class="bt-title">{p['title']}</div>
+            <div class="bt-val">{p['val']}</div>
+            <div class="bt-canchi">
+                <span style="color: {mau_can}; display: block;">{p['can'].upper()}</span>
+                <span style="color: {mau_chi}; display: block;">{p['chi'].upper()}</span>
+            </div>
+            <div class="bt-napam" style="color: {mau_vien};">{nap_am}</div>
+        </div>
+        """
+        
+    css = """
+    <style>
+    .bt-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        width: 100%;
+        margin-bottom: 25px;
+    }
+    .bt-card {
+        flex: 1;
+        border-radius: 15px;
+        padding: 20px 5px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s ease;
+    }
+    .bt-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+    .bt-title { font-family: 'Times New Roman', serif; font-size: 13px; font-weight: bold; color: #999; letter-spacing: 1px; margin-bottom: 5px;}
+    .bt-val { font-size: 28px; font-weight: bold; color: #444; margin-bottom: 15px; font-family: 'Times New Roman', serif; }
+    .bt-canchi { font-size: 26px; font-weight: 900; line-height: 1.3; margin-bottom: 20px; font-family: 'Times New Roman', serif; }
+    .bt-napam { font-size: 14px; font-weight: 600; font-family: 'Arial', sans-serif;}
+    
+    /* Thiết kế riêng để lên di động không bị vỡ */
+    @media (max-width: 850px) {
+        .bt-container { gap: 10px; flex-wrap: wrap; }
+        .bt-card { min-width: 45%; flex: 1 1 45%; padding: 15px 5px; }
+        .bt-val { font-size: 22px; margin-bottom: 10px;}
+        .bt-canchi { font-size: 22px; margin-bottom: 15px;}
+        .bt-napam { font-size: 13px; }
+    }
+    </style>
+    """
+    
+    return f"{css}<div class='bt-container'>{html_cards}</div>"
+
+# Hiệu ứng Ombre (chuyển màu từ trắng sang nhạt) dành cho nền các Thẻ
+MAU_NEN_OMBRE = {
+    "Hỏa": "linear-gradient(180deg, #ffffff 40%, #ffefef 100%)",
+    "Thủy": "linear-gradient(180deg, #ffffff 40%, #f0f7ff 100%)",
+    "Mộc": "linear-gradient(180deg, #ffffff 40%, #f0fff0 100%)",
+    "Kim": "linear-gradient(180deg, #ffffff 40%, #f8f8f8 100%)",
+    "Thổ": "linear-gradient(180deg, #ffffff 40%, #fff8f0 100%)"
+}
+
+NA_AM_60 = {
+    "Giáp Tý": ("Hải Trung Kim", "Kim"), "Ất Sửu": ("Hải Trung Kim", "Kim"), "Bính Dần": ("Lư Trung Hỏa", "Hỏa"), "Đinh Mão": ("Lư Trung Hỏa", "Hỏa"),
+    "Mậu Thìn": ("Đại Lâm Mộc", "Mộc"), "Kỷ Tỵ": ("Đại Lâm Mộc", "Mộc"), "Canh Ngọ": ("Lộ Bàng Thổ", "Thổ"), "Tân Mùi": ("Lộ Bàng Thổ", "Thổ"),
+    "Nhâm Thân": ("Kiếm Phong Kim", "Kim"), "Quý Dậu": ("Kiếm Phong Kim", "Kim"), "Giáp Tuất": ("Sơn Đầu Hỏa", "Hỏa"), "Ất Hợi": ("Sơn Đầu Hỏa", "Hỏa"),
+    "Bính Tý": ("Giản Hạ Thủy", "Thủy"), "Đinh Sửu": ("Giản Hạ Thủy", "Thủy"), "Mậu Dần": ("Thành Đầu Thổ", "Thổ"), "Kỷ Mão": ("Thành Đầu Thổ", "Thổ"),
+    "Canh Thìn": ("Bạch Lạp Kim", "Kim"), "Tân Tỵ": ("Bạch Lạp Kim", "Kim"), "Nhâm Ngọ": ("Dương Liễu Mộc", "Mộc"), "Quý Mùi": ("Dương Liễu Mộc", "Mộc"),
+    "Giáp Thân": ("Tuyền Trung Thủy", "Thủy"), "Ất Dậu": ("Tuyền Trung Thủy", "Thủy"), "Bính Tuất": ("Ốc Thượng Thổ", "Thổ"), "Đinh Hợi": ("Ốc Thượng Thổ", "Thổ"),
+    "Mậu Tý": ("Tích Lịch Hỏa", "Hỏa"), "Kỷ Sửu": ("Tích Lịch Hỏa", "Hỏa"), "Canh Dần": ("Tùng Bách Mộc", "Mộc"), "Tân Mão": ("Tùng Bách Mộc", "Mộc"),
+    "Nhâm Thìn": ("Trường Lưu Thủy", "Thủy"), "Quý Tỵ": ("Trường Lưu Thủy", "Thủy"), "Giáp Ngọ": ("Sa Trung Kim", "Kim"), "Ất Mùi": ("Sa Trung Kim", "Kim"),
+    "Bính Thân": ("Sơn Hạ Hỏa", "Hỏa"), "Đinh Dậu": ("Sơn Hạ Hỏa", "Hỏa"), "Mậu Tuất": ("Bình Địa Mộc", "Mộc"), "Kỷ Hợi": ("Bình Địa Mộc", "Mộc"),
+    "Canh Tý": ("Bích Thượng Thổ", "Thổ"), "Tân Sửu": ("Bích Thượng Thổ", "Thổ"), "Nhâm Dần": ("Kim Bạch Kim", "Kim"), "Quý Mão": ("Kim Bạch Kim", "Kim"),
+    "Giáp Thìn": ("Phú Đăng Hỏa", "Hỏa"), "Ất Tỵ": ("Phú Đăng Hỏa", "Hỏa"), "Bính Ngọ": ("Thiên Hà Thủy", "Thủy"), "Đinh Mùi": ("Thiên Hà Thủy", "Thủy"),
+    "Mậu Thân": ("Đại Trạch Thổ", "Thổ"), "Kỷ Dậu": ("Đại Trạch Thổ", "Thổ"), "Canh Tuất": ("Thoa Xuyến Kim", "Kim"), "Tân Hợi": ("Thoa Xuyến Kim", "Kim"),
+    "Nhâm Tý": ("Tang Đố Mộc", "Mộc"), "Quý Sửu": ("Tang Đố Mộc", "Mộc"), "Giáp Dần": ("Đại Khê Thủy", "Thủy"), "Ất Mão": ("Đại Khê Thủy", "Thủy"),
+    "Bính Thìn": ("Sa Trung Thổ", "Thổ"), "Đinh Tỵ": ("Sa Trung Thổ", "Thổ"), "Mậu Ngọ": ("Thiên Thượng Hỏa", "Hỏa"), "Kỷ Mùi": ("Thiên Thượng Hỏa", "Hỏa"),
+    "Canh Thân": ("Thạch Lựu Mộc", "Mộc"), "Tân Dậu": ("Thạch Lựu Mộc", "Mộc"), "Nhâm Tuất": ("Đại Hải Thủy", "Thủy"), "Quý Hợi": ("Đại Hải Thủy", "Thủy")
+}
 
 # ==============================================================================
 # BỘ DỮ LIỆU LOGIC (GIỮ NGUYÊN TỪ BẢN GỐC)
@@ -838,6 +966,11 @@ with col_trai:
         format_func=lambda x: GIO_HIENTHI[x],
         key="gio_kham"
     )
+    # GỌI HÀM VẼ TỨ TRỤ TIẾT KHÍ NGAY SAU KHI ĐÃ CÓ BIẾN DỮ LIỆU
+    # -------------------------------------------------------------
+    battu_html = render_ui_battu_tietkhi(nam_duong, thang_duong, ngay_duong, gio_kham)
+    battu_placeholder.markdown(battu_html, unsafe_allow_html=True)
+    
     
     loai_hoat_dong = st.selectbox(
         "Loại hoạt động y khoa",
