@@ -688,7 +688,7 @@ with col_trai:
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
     # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
-    # ... (code phía trên)
+
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -722,20 +722,27 @@ with col_trai:
             "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp",
             "Các Hoạt Động Khác / Chưa Rõ"
         ],
-        index=0
+        index=0,
+        key="loai_hoat_dong"
     )
 
-    bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
-    # ... (code phía dưới)
-
-    bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
+    bo_phan = st.text_input(
+        "Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)",
+        key="bo_phan_input"
+    )
 
     trieu_chung = st.text_area(
         "Triệu chứng hiện tại (nếu có)",
-        placeholder="Ví dụ: đau âm ỉ, sưng, chảy máu, sốt, khó thở, đau ngực..."
+        placeholder="Ví dụ: đau âm ỉ, sưng, chảy máu, sốt, khó thở, đau ngực...",
+        key="trieu_chung"
     )
 
-    btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
+    btn_phan_tich = st.button(
+        "🔍 Phân Tích Bệnh Án",
+        type="primary",
+        use_container_width=True,
+        key="btn_phan_tich"
+    )
 
     # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
@@ -888,7 +895,7 @@ LƯU Ý VỀ NGỮ KHÍ:
   để quyết định giọng điệu và mức độ thận trọng.
 - Không được luận cùng một giọng cho khám tổng quát, chẩn đoán hình ảnh, nha khoa chuyên sâu và đại phẫu.
 
-➥ Kết Luận Cuối Cùng
+➥ Kết Luận Cuối Cùng : 
 - Phải đưa ra kết luận dứt khoát, không mập mờ
 - Không được chỉ chép lại dữ liệu
 - Phải phân tích logic toàn bộ rồi quyết định
@@ -917,7 +924,7 @@ CUỐI CÙNG PHẢI VIẾT ĐÚNG 2 DÒNG:
 MẪU VĂN PHONG:
 "Xét tổng thể, thời điểm này không phạm các hung điểm lớn. Với một việc mang tính thăm khám hoặc chẩn đoán, giờ này không tạo trở ngại trực tiếp. Nếu đi vào thời khí thuận, ý nghĩa thiên về dễ phát hiện vấn đề sớm hơn, thuận cho việc đọc dấu hiệu và định hướng theo dõi. Nếu rơi vào giờ khí tượng kém hơn, vẫn có thể tiến hành, nhưng nên đọc kết quả kỹ và đối chiếu triệu chứng cẩn thận."
 
-➥ Kết Luận Cuối Cùng
+➥ Kết Luận Cuối Cùng : 
 ✅ Nên: ...
 ⛔ Không Nên: ...
 
@@ -1015,7 +1022,7 @@ if btn_phan_tich:
                         margin-top: 8px;
                         line-height: 1.6;
                     ">
-                    🚨Khuyến cáo y tế: Nếu có các dấu hiệu nguy cấp như khó thở, đau ngực dữ dội, sốt cao liên tục, chảy máu không cầm, ngất, co giật, méo miệng, yếu liệt, đau bụng dữ dội, nôn ra máu hoặc bất kỳ biểu hiện bất thường nghiêm trọng nào, cần đi cấp cứu ngay hoặc gọi số Cấp Cứu Khẩn Cấp, không chờ Ngày - Giờ Tốt.
+                    🚨Khuyến cáo y tế: Nếu có các dấu hiệu nguy cấp như khó thở, đau ngực dữ dội, sốt cao liên tục, chảy máu không cầm, ngất, co giật, méo miệng, yếu liệt, đau bụng dữ dội, nôn ra máu hoặc bất kỳ biểu hiện bất thường nghiêm trọng nào, cần đi cấp cứu ngay hoặc gọi số Cấp Cứu Khẩn Cấp, không thể chờ Ngày - Giờ Tốt.
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -1025,4 +1032,4 @@ if btn_phan_tich:
                     st.error(loi_khuyen)
 
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2025 Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số- Ứng dụng thuộc bản quyền tác giả Chris Nhật Tôn. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: gray; font-size: 14px;'>© 2025 Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số - Ứng dụng thuộc bản quyền tác giả Chris Nhật Tôn. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa trước khi áp dụng.</div>", unsafe_allow_html=True)
