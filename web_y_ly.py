@@ -568,7 +568,7 @@ a[aria-label="Share"] {
 import streamlit.components.v1 as components
 
 
-# --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (RESPONSIVE MOBILE - ĐÃ SỬA LỖI TRÀN) ---
+# --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
 # 1. Hàm đọc và mã hóa file logo của bạn (Giữ nguyên)
 def get_base64_of_bin_file(bin_file):
@@ -582,118 +582,102 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file('logo.png')
 
-# 2. Tiêm CSS và HTML để tạo thanh Header cố định (Sticky) với sửa lỗi cho di động
+# 2. Tiêm CSS và HTML để tạo thanh Header cố định (Sticky) đã được thiết kế lại
 st.markdown(
     f"""
     <style>
-    /* 1. Đẩy nội dung chính của Streamlit xuống để không bị thanh header đè lên */
+    /* A. ĐẨY NỘI DUNG Streamlit XUỐNG ĐỂ KHÔNG BỊ HEADER ĐÈ */
     .block-container {{
-        padding-top: 6rem !important; 
+        padding-top: 7rem !important; 
     }}
     
-    /* 2. Thiết kế thanh Header dính sát trần (mặc định cho máy tính) */
+    /* B. CẤU HÌNH HEADER CHUNG (Bất kể PC hay Mobile) */
+    /* Ở đây chúng ta khóa cứng màu nền TRẮNG MỜ và chữ ĐEN,
+       bất kể hệ thống có bật Dark Mode hay không. */
     .sticky-header {{
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        height: 70px;
-        background-color: rgba(255, 255, 255, 0.95); /* Màu nền sáng có độ trong suốt nhẹ */
-        backdrop-filter: blur(8px); /* Hiệu ứng mờ nền chuẩn web hiện đại */
-        z-index: 999990; /* Nằm dưới nút menu 3 chấm của Streamlit một chút */
+        height: auto;
+        min-height: 70px;
+        background-color: rgba(255, 255, 255, 0.95) !important; /* Nền trắng mờ */
+        backdrop-filter: blur(10px); /* Hiệu ứng mờ nền chuẩn */
+        z-index: 999990; /* Nằm dưới nút menu 3 chấm của Streamlit */
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ xuống dưới */
-        border-bottom: 2px solid #D3A352; /* Viền vàng hoàng gia tạo điểm nhấn */
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ xuống dưới */
+        border-bottom: 2px solid #D3A352; /* Viền vàng hoàng gia */
+        color: black !important; /* Chữ luôn đen */
     }}
 
-    /* Hỗ trợ Dark Mode tự động */
-    @media (prefers-color-scheme: dark) {{
-        .sticky-header {{
-            background-color: rgba(14, 17, 23, 0.95);
-            border-bottom: 2px solid #D3A352;
-        }}
-        .header-title {{
-            color: #ffffff !important;
-        }}
-    }}
-
-    /* 3. Vùng chứa logo và chữ ở giữa (mặc định cho máy tính) */
+    /* Vùng chứa logo và chữ ở giữa (Mặc định cho máy tính) */
     .header-content {{
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 20px;
         max-width: 1200px;
         width: 100%;
-        padding: 0 20px;
-        justify-content: center; /* Căn giữa hoàn toàn */
+        padding: 10px 20px;
+        justify-content: center; /* Căn giữa trên PC */
     }}
 
     .header-logo {{
-        height: 65px; /* Chiều cao cố định cho logo */
+        height: 50px; /* Chiều cao cố định trên PC */
         width: auto;
-        border-radius: 6px;
+        border-radius: 8px;
     }}
 
     .header-title {{
         margin: 0;
         padding: 0;
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 700;
-        color: #1E2022;
+        color: #1E2022 !important; /* Màu đen */
         letter-spacing: 0.5px;
+        text-transform: none; /* Giữ chữ hoa/thường */
     }}
 
-    /* =========================================
-       4. THIẾT KẾ ĐÁP ỨNG CHO MOBILE (Sửa lỗi tràn)
-       ========================================= */
-    /* Màn hình Tablet hoặc điện thoại xoay ngang */
-    @media (max-width: 850px) {{
-        .sticky-header {{
-            height: 60px;
-        }}
-        .header-logo {{
-            height: 35px;
-        }}
-        .header-title {{
-            font-size: 18px; 
-        }}
-    }}
-
-    /* Màn hình điện thoại đứng - SỬA LỖI CHÍNH TẠI ĐÂY */
+    /* C. THIẾT KẾ ĐÁP ỨNG CHO MOBILE (Thiết kế lại theo phản hồi) */
     @media (max-width: 500px) {{
+        /* 1. Header di động linh hoạt */
         .sticky-header {{
-            height: auto; /* Để chiều cao tự động, không cố định nữa */
-            min-height: 60px; /* Chiều cao tối thiểu để logo không bị cắt */
-            padding: 10px 0; /* Thêm padding dọc thay vì chiều cao cố định */
-            align-items: center; /* Căn giữa dọc */
+            min-height: 80px; /* Tăng chiều cao tối thiểu cho di động */
+            padding: 15px 0; /* Thêm padding dọc thay vì chiều cao cố định */
         }}
+
+        /* 2. Layout Grid: CHIA LÀM 3 PHẦN CHÍNH XÁC */
+        /* Cột 1 (Logo): 1fr (1 phần), Cột 2 (Tiêu đề): 2fr (2 phần) */
         .header-content {{
-            flex-direction: row; /* Giữ bố cục ngang, nhưng cực nhỏ gọn */
-            gap: 8px; /* Giảm gap giữa logo và text */
-            padding: 0 10px; /* Thêm padding ngang */
-            align-items: center; /* Căn giữa dọc */
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* 1/3 logo, 2/3 tiêu đề */
+            gap: 15px; /* Giảm gap giữa logo và text */
+            padding: 0 15px; /* Padding ngang nhỏ hơn */
+            width: 100%;
+            align-items: center; /* Căn giữa dọc các phần tử */
+            justify-content: center; /* Đảm bảo grid nằm giữa */
         }}
+
+        /* 3. Phóng to LOGO */
         .header-logo {{
-            height: 30px; /* Giảm nhẹ logo */
+            height: auto; /* Cho phép chiều cao tự động để lấp đầy cột */
+            max-height: 60px; /* Chiều cao tối đa để logo không quá to */
+            width: 100%; /* Lấp đầy 1/3 không gian cột của nó */
+            object-fit: contain; /* Giữ tỷ lệ, nằm gọn trong box */
+            border-radius: 8px;
+            margin: 0;
         }}
+
+        /* 4. Cấu hình tiêu đề */
         .header-title {{
-            font-size: 10px; /* Giảm mạnh phông chữ */
+            font-size: 15px; /* Phông chữ vừa đủ */
+            font-weight: 700;
+            margin: 0;
+            color: #1E2022 !important; /* Chữ luôn đen */
             white-space: normal; /* Cho phép rớt dòng */
-            line-height: 1.2;
+            line-height: 1.3;
             text-align: left; /* Căn trái trên mobile để dễ đọc khi rớt dòng */
-            max-width: 100%; /* Đảm bảo text không tràn ra ngoài container */
-        }}
-    }}
-    
-    /* B breakpoint bổ sung cho thiết bị cực nhỏ (Ví dụ iPhone SE đời đầu, v.v.) */
-    @media (max-width: 375px) {{
-        .header-logo {{
-            height: 30px; /* Giảm logo tối đa */
-        }}
-        .header-title {{
-            font-size: 11px; /* Giảm phông chữ tối đa */
         }}
     }}
     </style>
@@ -707,6 +691,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+# --------------------------------------------------------
 
 components.html("""
 <div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
