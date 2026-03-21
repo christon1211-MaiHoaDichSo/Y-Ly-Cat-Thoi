@@ -643,7 +643,7 @@ st.markdown(
     @media (max-width: 500px) {{
         /* 1. Header di động linh hoạt */
         .sticky-header {{
-            min-height: 80px; /* Tăng chiều cao tối thiểu cho di động */
+            min-height: 50px; /* Tăng chiều cao tối thiểu cho di động */
             padding: 15px 0; /* Thêm padding dọc thay vì chiều cao cố định */
         }}
 
