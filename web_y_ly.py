@@ -138,13 +138,43 @@ class YLyCatThoiEngine:
             {"thận"},
         ]
 
-        for nhom in nhom_dong_nghia:
-            if any(x in a for x in nhom) and any(x in b for x in nhom):
-                return True
 
-        return False
+    def phan_loai_thu_tuc(self, bo_phan, loai_ui=None):
+        if loai_ui == "Thăm khám / kiểm tra tổng quát":
+            return {
+                "loai": "tham_kham",
+                "ten_goi": loai_ui,
+                "muc_do": "rất thấp"
+            }
 
-    def phan_loai_thu_tuc(self, bo_phan):
+        if loai_ui == "Chẩn đoán hình ảnh / khảo sát":
+            return {
+                "loai": "chan_doan_hinh_anh",
+                "ten_goi": loai_ui,
+                "muc_do": "thấp"
+            }
+
+        if loai_ui == "Thủ thuật xâm lấn nhẹ":
+            return {
+                "loai": "xam_lan_nhe",
+                "ten_goi": loai_ui,
+                "muc_do": "vừa"
+            }
+
+        if loai_ui == "Thủ thuật / phẫu thuật xâm lấn":
+            return {
+                "loai": "xam_lan_manh",
+                "ten_goi": loai_ui,
+                "muc_do": "cao"
+            }
+
+        if loai_ui == "Khác / chưa rõ":
+            return {
+                "loai": "khac",
+                "ten_goi": loai_ui,
+                "muc_do": "chưa xác định"
+            }
+
         text = (bo_phan or "").strip().lower()
 
         nhom_kham = [
@@ -199,10 +229,10 @@ class YLyCatThoiEngine:
             "muc_do": "chưa xác định"
         }
 
-    def lap_bao_cao_chi_tiet(self, nam_chi, chi_thang, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, cac_gio_hoang_dao):
+    def lap_bao_cao_chi_tiet(self, nam_chi, thang_am, ngay_can, ngay_chi, gio, ngay_am, bo_phan, loai_ui, cac_gio_hoang_dao):
         
         # Sửa lỗi ẩn: Phải phân loại thủ thuật trước khi dùng để tính toán ở dưới
-        phan_loai = self.phan_loai_thu_tuc(bo_phan)
+        phan_loai = self.phan_loai_thu_tuc(bo_phan, loai_ui)
         
         nt_ngay_text = self.NT_NGAY.get(ngay_am, "")
         nt_can_text = self.NT_CAN.get(ngay_can, "")
@@ -335,6 +365,7 @@ class YLyCatThoiEngine:
         report = {
             "co_quan_can_thiep": bo_phan,
             "phan_loai_thu_tuc": phan_loai,
+            "loai_hoat_dong_ui": loai_ui,
             "1_Nhat_Pha": {
                 "pham": nhat_pha,
                 "dien_giai": f"Giờ {gio} {'xung' if nhat_pha else 'không xung'} Ngày {ngay_chi}."
@@ -564,7 +595,24 @@ with col_trai:
         key="gio_kham"
     )
     
-    bo_phan = st.text_input("Nhập bộ phận cơ thể cần khám (Mắt, Dạ dày, Răng...)")
+    loai_hoat_dong = st.selectbox(
+        "Loại hoạt động y khoa",
+        [
+            "Thăm khám / kiểm tra tổng quát",
+            "Chẩn đoán hình ảnh / khảo sát",
+            "Thủ thuật xâm lấn nhẹ",
+            "Thủ thuật / phẫu thuật xâm lấn",
+            "Khác / chưa rõ"
+        ],
+        index=0
+    )
+
+    bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
+
+    trieu_chung = st.text_area(
+        "Triệu chứng hiện tại (nếu có)",
+        placeholder="Ví dụ: đau âm ỉ, sưng, chảy máu, sốt, khó thở, đau ngực..."
+    )
 
     btn_phan_tich = st.button("🔍 Phân Tích Bệnh Án", type="primary", use_container_width=True)
 
@@ -627,6 +675,13 @@ NGUYÊN TẮC BẮT BUỘC:
   + chẩn đoán hình ảnh / chụp khảo sát
   + thủ thuật xâm lấn nhẹ
   + can thiệp / phẫu thuật xâm lấn
+- Trong JSON đầu vào sẽ có:
+  + bo_phan
+  + loai_hoat_dong
+  + trieu_chung
+- Hãy ưu tiên dùng trường loai_hoat_dong để xác định bản chất việc đang làm, không tự đoán bừa từ tên bộ phận.
+- Hãy dùng trieu_chung để làm mềm giọng bác sĩ và đánh giá mức độ cần theo dõi, nhưng không tự bịa bệnh.
+
 THỨ TỰ LUẬN GIẢI BẮT BUỘC:
 
 1. Nhật Phá
@@ -693,16 +748,15 @@ THỨ TỰ LUẬN GIẢI BẮT BUỘC:
   "10. Cát Thần: Địa Y - bổ trợ ..."
 - Chỉ giải thích tác dụng thực tế, không nói dài
 
-Lưu ý 
-Nếu là hoạt động thăm khám hoặc chẩn đoán hình ảnh:
-- Không dùng giọng quá nặng như phẫu thuật.
-- Nếu giờ đẹp, có thể nói theo hướng:
-  "thuận cho việc phát hiện sớm, nhìn bệnh rõ hơn, dễ chốt hướng điều trị hơn"
-- Nếu giờ xấu hoặc Hắc Đạo:
-  "không phải cấm đi khám/chụp, nhưng nên thận trọng hơn trong việc đọc kết quả, đối chiếu triệu chứng, và tái kiểm nếu cần"
-- Tuyệt đối không viết kiểu vô lý như cấm khám tổng quát chỉ vì giờ xấu.
-. Nếu là thủ thuật hoặc can thiệp xâm lấn:
-- Lúc đó mới được dùng giọng thận trọng mạnh hơn.
+LƯU Ý VỀ NGỮ KHÍ:
+- Nếu là hoạt động thăm khám hoặc chẩn đoán hình ảnh:
+  + Không dùng giọng quá nặng như phẫu thuật.
+  + Nếu giờ thuận, có thể nói theo hướng thuận cho việc phát hiện sớm, nhìn dấu hiệu rõ hơn, dễ chốt hướng theo dõi hơn.
+  + Nếu giờ chưa đẹp hoặc rơi vào Hắc Đạo, không được nói theo kiểu cấm khám; chỉ được khuyên thận trọng hơn khi đọc kết quả, đối chiếu triệu chứng và tái kiểm nếu cần.
+
+- Nếu là thủ thuật hoặc can thiệp xâm lấn:
+  + Khi đó mới được dùng giọng thận trọng mạnh hơn.
+  + Nếu có triệu chứng kéo dài, sưng đau, chảy máu hoặc dấu hiệu viêm, có thể nhắc người đọc lưu ý theo dõi sát và tuân thủ bác sĩ chuyên khoa.
 
 ➥ Kết Luận Cuối Cùng
 - Phải đưa ra kết luận dứt khoát, không mập mờ
@@ -774,7 +828,7 @@ if btn_phan_tich:
         st.error("Lỗi: Lương y cần biết bạn muốn chữa/khám bộ phận nào.")
     else:
         # LỚP BẢO VỆ 1: Kiểm tra từ khóa cấp cứu
-        is_cap_cuu = any(tu_khoa in bo_phan.lower() for tu_khoa in TU_KHOA_CAP_CUU)
+        is_cap_cuu = any(tu_khoa in trieu_chung.lower() for tu_khoa in TU_KHOA_CAP_CUU)
         
         if is_cap_cuu:
             st.error("🚨 CẢNH BÁO Y KHOA KHẨN CẤP 🚨")
@@ -788,13 +842,13 @@ if btn_phan_tich:
             with st.spinner("Đang chẩn đoán mạch và hội chẩn Dịch Lý..."):
                 bao_cao = engine.lap_bao_cao_chi_tiet(
                     data['chi_nam'],
-                    data['chi_thang'], # <--- TRUYỀN CHI THÁNG VÀO ĐÂY
                     thang_am,
                     data['can_ngay'],
                     data['chi_ngay'],
                     gio_kham,
                     ngay_am,
                     bo_phan,
+                    loai_hoat_dong,
                     data['hoang_dao_list']
                 )
 
@@ -807,7 +861,9 @@ if btn_phan_tich:
                             "thang_am": thang_am,
                             "ngay_am": ngay_am,
                             "gio_kham": gio_kham,
-                            "bo_phan": bo_phan
+                            "bo_phan": bo_phan,
+                            "loai_hoat_dong": loai_hoat_dong,
+                            "trieu_chung": trieu_chung
                         },
                         "bao_cao_ylct": bao_cao
                     },
@@ -819,7 +875,7 @@ if btn_phan_tich:
 
                 if "Lỗi hệ thống" not in loi_khuyen:
                     st.success("Hoàn tất luận giải!")
-                    st.write(loi_khuyen)
+                    st.markdown(loi_khuyen)
 
                     st.markdown("""
                     <div style="
