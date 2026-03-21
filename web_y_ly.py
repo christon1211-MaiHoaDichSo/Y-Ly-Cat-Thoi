@@ -582,116 +582,73 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file('logo.png')
 
-# 2. Tiêm CSS và HTML để tạo thanh Header cố định (Sticky) đã được thiết kế lại
+# 2. Header mới: PC nhỏ gọn hơn, mobile gọn 1 hàng
 st.markdown(
     f"""
     <style>
-    /* A. ĐẨY NỘI DUNG Streamlit XUỐNG ĐỂ KHÔNG BỊ HEADER ĐÈ */
-    .block-container {{
-        padding-top: 7rem !important; 
-    }}
-    
-    /* B. CẤU HÌNH HEADER CHUNG (Bất kể PC hay Mobile) */
-    /* Ở đây chúng ta khóa cứng màu nền TRẮNG MỜ và chữ ĐEN,
-       bất kể hệ thống có bật Dark Mode hay không. */
-    .sticky-header {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        min-height: 60px;
-        background-color: rgba(255, 255, 255, 0.95) !important; /* Nền trắng mờ */
-        backdrop-filter: blur(10px); /* Hiệu ứng mờ nền chuẩn */
-        z-index: 999990; /* Nằm dưới nút menu 3 chấm của Streamlit */
+    .ylct-header {{
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ xuống dưới */
-        border-bottom: 2px solid #D3A352; /* Viền vàng hoàng gia */
-        color: black !important; /* Chữ luôn đen */
-    }}
-
-    /* Vùng chứa logo và chữ ở giữa (Mặc định cho máy tính) */
-    .header-content {{
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        max-width: 1200px;
+        gap: 12px;
+        margin: 4px 0 8px 0;
+        padding: 2px 8px;
         width: 100%;
-        padding: 10px 20px;
-        justify-content: center; /* Căn giữa trên PC */
+        box-sizing: border-box;
     }}
 
-    .header-logo {{
-        height: 70px; /* Chiều cao cố định trên PC */
-        width: auto;
+    .ylct-header img {{
+        width: 90px;   /* Giữ logo to như cũ trên PC */
+        height: auto;
         border-radius: 8px;
+        flex-shrink: 0;
     }}
 
-    .header-title {{
+    .ylct-header .ylct-title {{
         margin: 0;
         padding: 0;
-        font-size: 23px;
+        font-size: 16px;   /* nhỏ còn khoảng 1/2 so với 32 */
         font-weight: 700;
-        color: #1E2022 !important; /* Màu đen */
-        letter-spacing: 0.5px;
-        text-transform: none; /* Giữ chữ hoa/thường */
+        line-height: 1.1;
+        color: #1f2430;
+        text-align: center;
+        white-space: nowrap;
     }}
 
-    /* C. THIẾT KẾ ĐÁP ỨNG CHO MOBILE (Thiết kế lại theo phản hồi) */
-    @media (max-width: 500px) {{
-        /* 1. Header di động linh hoạt */
-        .sticky-header {{
-            min-height: 50px; /* Tăng chiều cao tối thiểu cho di động */
-            padding: 15px 0; /* Thêm padding dọc thay vì chiều cao cố định */
+    @media (max-width: 768px) {{
+        .ylct-header {{
+            justify-content: center;
+            gap: 8px;
+            margin: 2px 0 6px 0;
+            padding: 2px 6px;
+            flex-wrap: nowrap;
         }}
 
-        /* 2. Layout Grid: CHIA LÀM 3 PHẦN CHÍNH XÁC */
-        /* Cột 1 (Logo): 1fr (1 phần), Cột 2 (Tiêu đề): 2fr (2 phần) */
-        .header-content {{
-            display: grid;
-            grid-template-columns: 1fr 2fr; /* 1/3 logo, 2/3 tiêu đề */
-            gap: 15px; /* Giảm gap giữa logo và text */
-            padding: 0 15px; /* Padding ngang nhỏ hơn */
-            width: 100%;
-            align-items: center; /* Căn giữa dọc các phần tử */
-            justify-content: center; /* Đảm bảo grid nằm giữa */
+        .ylct-header img {{
+            width: 42px;   /* mobile thu nhỏ để không che mất phần dưới */
         }}
 
-        /* 3. Phóng to LOGO */
-        .header-logo {{
-            height: auto; /* Cho phép chiều cao tự động để lấp đầy cột */
-            max-height: 60px; /* Chiều cao tối đa để logo không quá to */
-            width: 100%; /* Lấp đầy 1/3 không gian cột của nó */
-            object-fit: contain; /* Giữ tỷ lệ, nằm gọn trong box */
-            border-radius: 8px;
-            margin: 0;
-        }}
-
-        /* 4. Cấu hình tiêu đề */
-        .header-title {{
-            font-size: 5px; /* Phông chữ vừa đủ */
-            font-weight: 700;
-            margin: 0;
-            color: #1E2022 !important; /* Chữ luôn đen */
-            white-space: normal; /* Cho phép rớt dòng */
-            line-height: 1.2;
-            text-align: left; /* Căn trái trên mobile để dễ đọc khi rớt dòng */
+        .ylct-header .ylct-title {{
+            font-size: 15px;
+            line-height: 1.05;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            max-width: 78vw;
         }}
     }}
     </style>
 
-    <div class="sticky-header">
-        <div class="header-content">
-            <img src="data:image/png;base64,{img_base64}" class="header-logo">
-            <h1 class="header-title">Y Lý Cát Thời Dân Gian</h1>
-        </div>
+    <div class="ylct-header">
+        <img src="data:image/png;base64,{img_base64}">
+        <div class="ylct-title">Y Lý Cát Thời Dân Gian</div>
     </div>
     """,
     unsafe_allow_html=True
 )
-# --------------------------------------------------------
+
+st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
 components.html("""
 <div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
