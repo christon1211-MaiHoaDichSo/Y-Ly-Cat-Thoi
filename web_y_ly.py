@@ -688,6 +688,7 @@ with col_trai:
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
     # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
+    # ... (code phía trên)
     gio_kham = st.selectbox(
         "Giờ Khám (Địa Chi)", 
         CHI, 
@@ -696,33 +697,36 @@ with col_trai:
         key="gio_kham"
     )
     
-loai_hoat_dong = st.selectbox(
-    "Loại hoạt động y khoa",
-    [
-        "Khám Tổng Quát - Xét Nghiệm Sơ Bộ",
-        "Khám Chuyên Khoa - Xét Nghiệm Chuyên Sâu",
-        "Chẩn Đoán Hình Ảnh (X-ray, CT, MRI, Siêu Âm...)",
-        "Nội Soi - Thăm Dò Chẩn Đoán",
-        "Xét Nghiệm Máu / Nước Tiểu / Lấy Mẫu",
-        "Tiêm / Truyền / Chích Ngừa",
-        "Nha Khoa Nhẹ Nhàng (Cạo Vôi, Trám Răng, Vệ Sinh, Deep Clean...)",
-        "Nha Khoa Chuyên Sâu (Nhổ Răng, Nhổ Răng Khôn, Niềng Răng...)",
-        "Tiểu Phẫu Nhẹ (Gây Tê, Rạch Nhẹ, Xử Lý Mô Mềm...)",
-        "Tiểu Phẫu Chuyên Sâu",
-        "Đại Phẫu - Phẫu Thuật Gây Mê",
-        "Phẫu Thuật Nội Soi",
-        "Trị Liệu Nhẹ Nhàng",
-        "Trị Liệu Chuyên Sâu",
-        "Phục Hồi Chức Năng - Vật Lý Trị Liệu",
-        "Châm Cứu - Bấm Huyệt - Trị Liệu Đông Y",
-        "Thẩm Mỹ Nhẹ Nhàng (Xăm Mày, Xăm Môi, Bơm Môi, Chăm Sóc Da...)",
-        "Thẩm Mỹ Chuyên Sâu (Nâng Mũi, Cắt Mí, Độn Cằm, Nâng Ngực...)",
-        "Da Liễu - Laser - Đốt - Can Thiệp Bề Mặt Da",
-        "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp",
-        "Các Hoạt Động Khác / Chưa Rõ"
-    ],
-    index=0
-)
+    loai_hoat_dong = st.selectbox(
+        "Loại hoạt động y khoa",
+        [
+            "Khám Tổng Quát - Xét Nghiệm Sơ Bộ",
+            "Khám Chuyên Khoa - Xét Nghiệm Chuyên Sâu",
+            "Chẩn Đoán Hình Ảnh (X-ray, CT, MRI, Siêu Âm...)",
+            "Nội Soi - Thăm Dò Chẩn Đoán",
+            "Xét Nghiệm Máu / Nước Tiểu / Lấy Mẫu",
+            "Tiêm / Truyền / Chích Ngừa",
+            "Nha Khoa Nhẹ Nhàng (Cạo Vôi, Trám Răng, Vệ Sinh, Deep Clean...)",
+            "Nha Khoa Chuyên Sâu (Nhổ Răng, Nhổ Răng Khôn, Niềng Răng...)",
+            "Tiểu Phẫu Nhẹ (Gây Tê, Rạch Nhẹ, Xử Lý Mô Mềm...)",
+            "Tiểu Phẫu Chuyên Sâu",
+            "Đại Phẫu - Phẫu Thuật Gây Mê",
+            "Phẫu Thuật Nội Soi",
+            "Trị Liệu Nhẹ Nhàng",
+            "Trị Liệu Chuyên Sâu",
+            "Phục Hồi Chức Năng - Vật Lý Trị Liệu",
+            "Châm Cứu - Bấm Huyệt - Trị Liệu Đông Y",
+            "Thẩm Mỹ Nhẹ Nhàng (Xăm Mày, Xăm Môi, Bơm Môi, Chăm Sóc Da...)",
+            "Thẩm Mỹ Chuyên Sâu (Nâng Mũi, Cắt Mí, Độn Cằm, Nâng Ngực...)",
+            "Da Liễu - Laser - Đốt - Can Thiệp Bề Mặt Da",
+            "Sản Phụ Khoa / Nam Khoa - Thủ Thuật / Can Thiệp",
+            "Các Hoạt Động Khác / Chưa Rõ"
+        ],
+        index=0
+    )
+
+    bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
+    # ... (code phía dưới)
 
     bo_phan = st.text_input("Bộ phận cơ thể đang xem (Mắt, Dạ dày, Răng, Cổ họng...)")
 
