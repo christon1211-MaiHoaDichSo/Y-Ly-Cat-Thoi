@@ -630,7 +630,7 @@ st.markdown(
     }}
 
     .header-logo {{
-        height: 45px; /* Chiều cao cố định cho logo */
+        height: 60px; /* Chiều cao cố định cho logo */
         width: auto;
         border-radius: 6px;
     }}
@@ -670,7 +670,7 @@ st.markdown(
             padding: 0 10px;
         }}
         .header-logo {{
-            height: 30px;
+            height: 45px;
         }}
         .header-title {{
             font-size: 14px; /* Chữ nhỏ gọn */
