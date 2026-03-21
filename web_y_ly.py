@@ -671,7 +671,7 @@ st.markdown(
 
         /* 4. Cấu hình tiêu đề */
         .header-title {{
-            font-size: 10px; /* Phông chữ vừa đủ */
+            font-size: 5px; /* Phông chữ vừa đủ */
             font-weight: 700;
             margin: 0;
             color: #1E2022 !important; /* Chữ luôn đen */
