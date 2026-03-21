@@ -568,8 +568,7 @@ a[aria-label="Share"] {
 import streamlit.components.v1 as components
 
 
-# 2. Tiêu đề và Đồng hồ Client-side
-# --- KHU VỰC TIÊU ĐỀ MỚI (CANH CHỈNH HOÀN HẢO 100%) ---
+# --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG CUỘN & RESPONSIVE MOBILE) ---
 
 # 1. Hàm đọc và mã hóa file logo của bạn
 def get_base64_of_bin_file(bin_file):
@@ -578,26 +577,120 @@ def get_base64_of_bin_file(bin_file):
             data = f.read()
         return base64.b64encode(data).decode()
     except FileNotFoundError:
-        return "" # Nếu không tìm thấy file, sẽ không bị sập web
+        return "" 
 
-# Lấy mã của logo (Nhớ đảm bảo file tên là logo.png và để cùng thư mục)
 img_base64 = get_base64_of_bin_file('logo.png')
 
-# 2. Dùng Flexbox để khóa chặt Logo và Chữ trên cùng 1 trục ngang
+# 2. Tiêm CSS và HTML để tạo thanh Header cố định (Sticky)
 st.markdown(
     f"""
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <img src="data:image/png;base64,{img_base64}" width="90" style="margin-right: 10px; border-radius: 8px;">
-        <h1 style="margin: 0; padding: 0; font-size: 32px;">Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>
+    <style>
+    /* 1. Đẩy nội dung chính của Streamlit xuống để không bị thanh header đè lên */
+    .block-container {{
+        padding-top: 6rem !important; 
+    }}
+    
+    /* 2. Thiết kế thanh Header dính sát trần */
+    .sticky-header {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 70px;
+        background-color: rgba(255, 255, 255, 0.95); /* Màu nền sáng có độ trong suốt nhẹ */
+        backdrop-filter: blur(8px); /* Hiệu ứng mờ nền chuẩn web hiện đại */
+        z-index: 999990; /* Nằm dưới nút menu 3 chấm của Streamlit một chút */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ xuống dưới */
+        border-bottom: 2px solid #D3A352; /* Viền vàng hoàng gia tạo điểm nhấn */
+    }}
+
+    /* Hỗ trợ Dark Mode tự động (Nếu app Streamlit đang ở chế độ nền tối) */
+    @media (prefers-color-scheme: dark) {{
+        .sticky-header {{
+            background-color: rgba(14, 17, 23, 0.95);
+            border-bottom: 2px solid #D3A352;
+        }}
+        .header-title {{
+            color: #ffffff !important;
+        }}
+    }}
+
+    /* 3. Vùng chứa logo và chữ ở giữa */
+    .header-content {{
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        max-width: 1200px;
+        width: 100%;
+        padding: 0 20px;
+        justify-content: center; /* Căn giữa hoàn toàn */
+    }}
+
+    .header-logo {{
+        height: 45px; /* Chiều cao cố định cho logo */
+        width: auto;
+        border-radius: 6px;
+    }}
+
+    .header-title {{
+        margin: 0;
+        padding: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #1E2022;
+        letter-spacing: 0.5px;
+    }}
+
+    /* =========================================
+       4. THIẾT KẾ ĐÁP ỨNG CHO MOBILE (Responsive)
+       ========================================= */
+    /* Màn hình Tablet hoặc điện thoại xoay ngang */
+    @media (max-width: 850px) {{
+        .sticky-header {{
+            height: 60px;
+        }}
+        .header-logo {{
+            height: 35px;
+        }}
+        .header-title {{
+            font-size: 18px; 
+        }}
+    }}
+
+    /* Màn hình điện thoại đứng */
+    @media (max-width: 500px) {{
+        .sticky-header {{
+            height: 65px; /* Nới nhẹ để chữ rớt 2 dòng nếu cần */
+        }}
+        .header-content {{
+            gap: 10px;
+            padding: 0 10px;
+        }}
+        .header-logo {{
+            height: 30px;
+        }}
+        .header-title {{
+            font-size: 14px; /* Chữ nhỏ gọn */
+            white-space: normal; /* Cho phép rớt dòng */
+            line-height: 1.3;
+            text-align: left; /* Đổi về căn trái trên mobile để dễ đọc */
+        }}
+    }}
+    </style>
+
+    <div class="sticky-header">
+        <div class="header-content">
+            <img src="data:image/png;base64,{img_base64}" class="header-logo">
+            <h1 class="header-title">Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số</h1>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
 )
-st.markdown("---")
 # --------------------------------------------------------
-
-# Đây là đoạn mã HTML/JS nhúng thẳng vào web. 
-# Nó sẽ chạy trên trình duyệt của người dùng, lấy Múi Giờ và Thời Gian chính xác tại nơi họ đang đứng (từng giây một).
 components.html("""
 <div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
     <div style="font-size: 16px;">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
