@@ -600,7 +600,7 @@ st.markdown(
         left: 0;
         width: 100%;
         height: auto;
-        min-height: 70px;
+        min-height: 60px;
         background-color: rgba(255, 255, 255, 0.95) !important; /* Nền trắng mờ */
         backdrop-filter: blur(10px); /* Hiệu ứng mờ nền chuẩn */
         z-index: 999990; /* Nằm dưới nút menu 3 chấm của Streamlit */
@@ -624,7 +624,7 @@ st.markdown(
     }}
 
     .header-logo {{
-        height: 50px; /* Chiều cao cố định trên PC */
+        height: 70px; /* Chiều cao cố định trên PC */
         width: auto;
         border-radius: 8px;
     }}
@@ -632,7 +632,7 @@ st.markdown(
     .header-title {{
         margin: 0;
         padding: 0;
-        font-size: 26px;
+        font-size: 23px;
         font-weight: 700;
         color: #1E2022 !important; /* Màu đen */
         letter-spacing: 0.5px;
@@ -671,12 +671,12 @@ st.markdown(
 
         /* 4. Cấu hình tiêu đề */
         .header-title {{
-            font-size: 15px; /* Phông chữ vừa đủ */
+            font-size: 10px; /* Phông chữ vừa đủ */
             font-weight: 700;
             margin: 0;
             color: #1E2022 !important; /* Chữ luôn đen */
             white-space: normal; /* Cho phép rớt dòng */
-            line-height: 1.3;
+            line-height: 1.2;
             text-align: left; /* Căn trái trên mobile để dễ đọc khi rớt dòng */
         }}
     }}
