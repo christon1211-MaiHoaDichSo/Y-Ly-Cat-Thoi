@@ -519,9 +519,54 @@ class YLyCatThoiEngine:
 # GIAO DIỆN WEB VỚI STREAMLIT (THAY THẾ APP CŨ)
 # ==============================================================================
 # 1. Cấu hình trang
-st.set_page_config(page_title="Y Lý Cát Thời", page_icon="logo.png", layout="wide")
+st.set_page_config(
+    page_title="Y Lý Cát Thời",
+    page_icon="logo.png",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+    menu_items={
+        "About": "Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số"
+    }
+)
 
-import streamlit.components.v1 as components # Nhớ kéo lên đầu file dán dòng import này nếu chưa có nhé
+st.set_option("client.toolbarMode", "minimal")
+
+st.markdown("""
+<style>
+/* Giữ header */
+header[data-testid="stHeader"] {
+    visibility: visible;
+}
+
+/* Ẩn nút Deploy */
+.stAppDeployButton {
+    display: none !important;
+}
+
+/* Ẩn nút GitHub nếu có */
+a[title*="GitHub"],
+a[aria-label*="GitHub"],
+#GithubIcon {
+    display: none !important;
+}
+
+/* Ẩn nút Share nếu có */
+button[title="Share"],
+button[aria-label="Share"],
+a[title="Share"],
+a[aria-label="Share"] {
+    display: none !important;
+}
+
+/* Giữ app menu 3 chấm */
+#MainMenu {
+    visibility: visible !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+import streamlit.components.v1 as components
+
 
 # 2. Tiêu đề và Đồng hồ Client-side
 # --- KHU VỰC TIÊU ĐỀ MỚI (CANH CHỈNH HOÀN HẢO 100%) ---
