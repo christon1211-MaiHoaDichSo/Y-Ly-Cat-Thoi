@@ -509,16 +509,14 @@ def render_ui_battu_tietkhi(
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 5px;
-            height: 350px; /* Tăng không gian hiển thị */
+            margin-bottom: 8px;
+            height: 45px; /* Tăng không gian hiển thị */
             width: 100%;
         }}
         .img-logo-chutinh {{
-            height: 250px; /* Phóng to để phá bỏ lớp viền trong suốt */
+            height: 14px; /* Phóng to để phá bỏ lớp viền trong suốt */
             width: auto;
-            object-fit: contain;
-            margin: -115px 0; /* Cắt gọt rìa trong suốt thừa */
-            transform: scale(1.1); /* Phóng to logo lên cho rõ nét */
+            transform: scale(6.5); /* Phóng to logo lên cho rõ nét */
             transform-origin: center center; /* Khóa tâm, chống lệch */
         }}
         .fallback-ct {{ font-size: 12px; font-weight: bold; background: #fff; padding: 3px 12px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; }}
@@ -569,8 +567,8 @@ def render_ui_battu_tietkhi(
             .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 4px; height: 25px; }}
-            .img-logo-chutinh {{ height: 180px; margin: -75px 0; transform: scale(1.1); }}
+            .bt-chutinh {{ margin-bottom: 4px; height: 30px; }}
+            .img-logo-chutinh {{ height: 10px; transform: scale(5.5); }}
             .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
 
             .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
