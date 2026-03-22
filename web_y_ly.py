@@ -504,22 +504,27 @@ def render_ui_battu_tietkhi(
             line-height: 1;
         }}
         
-        /* KHUNG CHỨA: Tạo mỏ neo và cắt bỏ hoàn toàn viền trong suốt */
+        /* KHUNG CHỨA: Dùng Flexbox an toàn, không được dùng overflow: hidden nữa */
         .bt-chutinh {{ 
-            position: relative; /* Mỏ neo để giữ ảnh không chạy lung tung */
-            height: 45px; /* Chiều cao hiển thị an toàn */
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 35px; /* Khoảng cách an toàn để không đè chữ Bính Ngọ */
             width: 100%;
             margin-bottom: 8px;
-            overflow: hidden; /* Cắt đứt mọi viền trong suốt bị tràn ra ngoài */
         }}
         
         .img-logo-chutinh {{
-            position: absolute;
-            top: 5px; /* Khoảng cách từ đỉnh xuống (có thể thay đổi thành 0px, -5px, 10px để kéo logo lên xuống) */
-            left: 50%; /* Đẩy ra giữa khung */
-            transform: translateX(-50%); /* Neo chính xác 100% tại tâm điểm */
-            width: 800px; /* Ép bề ngang thật to để logo bên trong nở bự ra. (Hãy đổi thành 900px nếu muốn to hơn, 700px nếu muốn nhỏ lại) */
-            max-width: none !important; /* Bắt buộc trình duyệt không được ép nhỏ ảnh */
+            height: 250px; /* Ép chiều cao ảnh thật to để logo bên trong nở ra */
+            width: auto;
+            margin: -120px 0; /* Rút gọn không gian ảo bên trên và dưới để không đẩy chữ */
+            
+            /* BỘ ĐIỀU KHIỂN CHÍNH XÁC (Hãy thay đổi các số này để ép nó theo ý bạn):
+               - translateX(20px) : Đẩy ảnh sang PHẢI 20px để trị bệnh lệch trái.
+               - translateY(5px)  : Đẩy ảnh XUỐNG DƯỚI 5px.
+               - scale(1.3)       : Phóng to thêm 30%.
+            */
+            transform: scale(1.3) translateX(20px) translateY(5px);
         }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
@@ -569,7 +574,11 @@ def render_ui_battu_tietkhi(
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
             .bt-chutinh {{ margin-bottom: 6px; height: 30px; }}
-            .img-logo-chutinh {{ height: 10px; transform: scale(8.5) translateY(3.5px); }}
+            .img-logo-chutinh {{ 
+                height: 180px; 
+                margin: -90px 0; 
+                transform: scale(1.2) translateX(15px) translateY(2px); 
+            }}
 
 
             .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
