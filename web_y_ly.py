@@ -575,14 +575,14 @@ def render_ui_battu_tietkhi(
             .bt-val {{ font-size: 18px; margin-bottom: 6px; line-height: 1; }} 
             
             /* 3. RESET TỌA ĐỘ LOGO: Đưa về tâm điểm tuyệt đối, xóa bỏ sai lệch từ PC */
-            .bt-chutinh {{ margin-bottom: 4px; height: 22px; width: 100%; position: relative; }}
+            .bt-chutinh {{ margin-bottom: 4px; height: 20px; width: 100%; position: relative; }}
             .img-logo-chutinh {{ 
                 position: absolute;
                 top: 50%; 
-                left: 50%; 
+                left: 80%; 
                 height: 180px; 
                 /* Neo chính tâm, scale nhẹ nhàng để vừa vặn không lấn át chữ */
-                transform: translate(-50%, -50%) scale(1.05); 
+                transform: translate(-50%, -50%) scale(1.5); 
             }}
 
             /* 4. Can Chi và Tàng Ẩn: Thu nhỏ một chút để 3 chữ (VD: Kỷ Đinh Ất) có thể đứng ngang hàng ngang */
