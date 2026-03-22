@@ -707,7 +707,7 @@ MAU_NEN_OMBRE = {
     "Hỏa": "linear-gradient(180deg, #ffffff 70%, #ffefef 100%)",
     "Thủy": "linear-gradient(180deg, #ffffff 70%, #f0f7ff 100%)",
     "Mộc": "linear-gradient(180deg, #ffffff 70%, #f0fff0 100%)",
-    "Kim": "linear-gradient(180deg, #ffffff 50%, #e0e4e8 70%)",
+    "Kim": "linear-gradient(180deg, #ffffff 50%, #e0e4e8 30%)",
     "Thổ": "linear-gradient(180deg, #ffffff 70%, #fff8f0 100%)"
 }
 
