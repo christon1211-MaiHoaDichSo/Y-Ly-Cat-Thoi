@@ -504,22 +504,22 @@ def render_ui_battu_tietkhi(
             line-height: 1;
         }}
         
-        /* KHUNG CHỨA: Cố định 40px để chữ BÍNH NGỌ không bao giờ bị đẩy lùi xuống */
+        /* KHUNG CHỨA: Tạo mỏ neo và cắt bỏ hoàn toàn viền trong suốt */
         .bt-chutinh {{ 
-            height: 40px; 
+            position: relative; /* Mỏ neo để giữ ảnh không chạy lung tung */
+            height: 45px; /* Chiều cao hiển thị an toàn */
             width: 100%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
             margin-bottom: 8px;
+            overflow: hidden; /* Cắt đứt mọi viền trong suốt bị tràn ra ngoài */
         }}
         
         .img-logo-chutinh {{
-            height: 14px; /* Giữ cái bóng của ảnh thật nhỏ */
-            width: auto;
-            /* BÍ QUYẾT LÀ ĐÂY: Phóng to 10 lần, sau đó KÉO NÓ XUỐNG DƯỚI 3.5px */
-            /* Nếu nó vẫn cao, bạn tăng 3.5px lên 4px, 5px. Nếu nó thấp quá thì giảm xuống 2px */
-            transform: scale(10) translateY(3.5px); 
+            position: absolute;
+            top: 5px; /* Khoảng cách từ đỉnh xuống (có thể thay đổi thành 0px, -5px, 10px để kéo logo lên xuống) */
+            left: 50%; /* Đẩy ra giữa khung */
+            transform: translateX(-50%); /* Neo chính xác 100% tại tâm điểm */
+            width: 800px; /* Ép bề ngang thật to để logo bên trong nở bự ra. (Hãy đổi thành 900px nếu muốn to hơn, 700px nếu muốn nhỏ lại) */
+            max-width: none !important; /* Bắt buộc trình duyệt không được ép nhỏ ảnh */
         }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
