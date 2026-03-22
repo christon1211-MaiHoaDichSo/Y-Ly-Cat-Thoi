@@ -8,6 +8,15 @@ import json
 from lunarcalendar import Converter, Solar, Lunar
 import streamlit.components.v1 as components
 
+def get_device_now():
+    raw = st.query_params.get("client_now")
+    if raw:
+        try:
+            return datetime.datetime.fromisoformat(raw)
+        except:
+            pass
+    return datetime.datetime.now()
+
 # THÊM DÒNG NÀY ĐỂ DÙNG LỊCH TIẾT KHÍ:
 import lunar_python
 # ==============================================================================
@@ -40,13 +49,11 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
         gio_display = f"{h_val:02d}:{30:02d}:00"
 
     pillars = [
-        {"title": "NĂM",   "val": str(nam),          "can": can_nam,   "chi": chi_nam},
+        {"title": "NĂM",   "val": str(nam),           "can": can_nam,   "chi": chi_nam},
         {"title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
         {"title": "NGÀY",  "val": f"{int(ngay):02d}",  "can": can_ngay,  "chi": chi_ngay},
-        {"title": "GIỜ",   "val": gio_display,       "can": can_gio,   "chi": chi_gio},
+        {"title": "GIỜ",   "val": gio_display,        "can": can_gio,   "chi": chi_gio},
     ]
-
-    value_ids = ["bt-year-val", "bt-month-val", "bt-day-val", "bt-time-val"]
 
     cards = []
     for idx, p in enumerate(pillars):
@@ -57,50 +64,160 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
         mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
 
-        id_attr = f' id="{value_ids[idx]}"' if live_from_device else ""
+        if idx == 3 and live_from_device:
+            cards.append(
+                f'''
+                <div class="bt-card" id="bt-hour-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">
+                    <div class="bt-title">{p["title"]}</div>
+                    <div class="bt-val" id="bt-time-val">{p["val"]}</div>
+                    <div class="bt-canchi">
+                        <span id="bt-hour-can" style="color:{mau_can}; display:block;">{p["can"].upper()}</span>
+                        <span id="bt-hour-chi" style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>
+                    </div>
+                    <div class="bt-napam" id="bt-hour-napam" style="color:{mau_vien};">{nap_am}</div>
+                </div>
+                '''
+            )
+        else:
+            val_id = ""
+            if live_from_device and idx == 0:
+                val_id = ' id="bt-year-val"'
+            elif live_from_device and idx == 1:
+                val_id = ' id="bt-month-val"'
+            elif live_from_device and idx == 2:
+                val_id = ' id="bt-day-val"'
 
-        cards.append(
-            f'<div class="bt-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">'
-            f'<div class="bt-title">{p["title"]}</div>'
-            f'<div class="bt-val"{id_attr}>{p["val"]}</div>'
-            f'<div class="bt-canchi">'
-            f'<span style="color:{mau_can}; display:block;">{p["can"].upper()}</span>'
-            f'<span style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>'
-            f'</div>'
-            f'<div class="bt-napam" style="color:{mau_vien};">{nap_am}</div>'
-            f'</div>'
-        )
+            cards.append(
+                f'''
+                <div class="bt-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">
+                    <div class="bt-title">{p["title"]}</div>
+                    <div class="bt-val"{val_id}>{p["val"]}</div>
+                    <div class="bt-canchi">
+                        <span style="color:{mau_can}; display:block;">{p["can"].upper()}</span>
+                        <span style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>
+                    </div>
+                    <div class="bt-napam" style="color:{mau_vien};">{nap_am}</div>
+                </div>
+                '''
+            )
 
     cards_html = "".join(cards)
 
     live_script = ""
     if live_from_device:
-        live_script = """
-        <script>
-            function pad2(n) {
-                return String(n).padStart(2, '0');
-            }
+        na_am_json = json.dumps(NA_AM_60, ensure_ascii=False)
+        mau_nguhanh_json = json.dumps(MAU_NGU_HANH, ensure_ascii=False)
+        ngu_hanh_can_json = json.dumps(NGU_HANH_CAN, ensure_ascii=False)
+        ngu_hanh_chi_json = json.dumps(NGU_HANH_CHI, ensure_ascii=False)
+        mau_nen_ombre_json = json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)
 
-            function updateDeviceCards() {
+        day_can_json = json.dumps(can_ngay, ensure_ascii=False)
+        initial_date_key = f"{int(nam):04d}-{int(thang):02d}-{int(ngay):02d}"
+
+        live_script = f"""
+        <script>
+            const DAY_CAN = {day_can_json};
+            const INITIAL_DATE_KEY = "{initial_date_key}";
+
+            const CAN_ORDER = ["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
+            const CHI_ORDER = ["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
+
+            const START_CAN_BY_DAY_CAN = {{
+                "Giáp": "Giáp", "Kỷ": "Giáp",
+                "Ất": "Bính",  "Canh": "Bính",
+                "Bính": "Mậu", "Tân": "Mậu",
+                "Đinh": "Canh","Nhâm": "Canh",
+                "Mậu": "Nhâm", "Quý": "Nhâm"
+            }};
+
+            const NA_AM_60 = {na_am_json};
+            const MAU_NGU_HANH = {mau_nguhanh_json};
+            const NGU_HANH_CAN = {ngu_hanh_can_json};
+            const NGU_HANH_CHI = {ngu_hanh_chi_json};
+            const MAU_NEN_OMBRE = {mau_nen_ombre_json};
+
+            function pad2(n) {{
+                return String(n).padStart(2, "0");
+            }}
+
+            function getChiIndexFromHour(hour24) {{
+                return Math.floor((hour24 + 1) / 2) % 12;
+            }}
+
+            function getHourCanChi(dayCan, hour24) {{
+                const chiIndex = getChiIndexFromHour(hour24);
+                const chi = CHI_ORDER[chiIndex];
+                const startCan = START_CAN_BY_DAY_CAN[dayCan];
+                const startCanIdx = CAN_ORDER.indexOf(startCan);
+                const can = CAN_ORDER[(startCanIdx + chiIndex) % 10];
+                return {{ can, chi }};
+            }}
+
+            function updateDeviceCards() {{
                 const now = new Date();
 
-                const y  = now.getFullYear();
+                const y = now.getFullYear();
                 const mo = pad2(now.getMonth() + 1);
-                const d  = pad2(now.getDate());
-                const h  = pad2(now.getHours());
+                const d = pad2(now.getDate());
+                const h = pad2(now.getHours());
                 const mi = pad2(now.getMinutes());
-                const s  = pad2(now.getSeconds());
+                const s = pad2(now.getSeconds());
 
-                const yearEl  = document.getElementById("bt-year-val");
+                const yearEl = document.getElementById("bt-year-val");
                 const monthEl = document.getElementById("bt-month-val");
-                const dayEl   = document.getElementById("bt-day-val");
-                const timeEl  = document.getElementById("bt-time-val");
+                const dayEl = document.getElementById("bt-day-val");
+                const timeEl = document.getElementById("bt-time-val");
 
-                if (yearEl)  yearEl.textContent  = y;
+                if (yearEl) yearEl.textContent = y;
                 if (monthEl) monthEl.textContent = mo;
-                if (dayEl)   dayEl.textContent   = d;
-                if (timeEl)  timeEl.textContent  = `${h}:${mi}:${s}`;
-            }
+                if (dayEl) dayEl.textContent = d;
+                if (timeEl) timeEl.textContent = `${{h}}:${{mi}}:${{s}}`;
+
+                const currentDateKey = `${{y}}-${{mo}}-${{d}}`;
+
+                // Sang ngày mới => reload 1 lần để Python tính lại Can ngày / Trụ ngày / Tiết khí
+                if (currentDateKey !== INITIAL_DATE_KEY) {{
+                    const url = new URL(window.parent.location.href);
+                    url.searchParams.set("client_now", `${{currentDateKey}}T${{h}}:${{mi}}:${{s}}`);
+                    url.searchParams.set("client_date", currentDateKey);
+                    window.parent.location.replace(url.toString());
+                    return;
+                }}
+
+                const {{ can, chi }} = getHourCanChi(DAY_CAN, now.getHours());
+
+                const canEl = document.getElementById("bt-hour-can");
+                const chiEl = document.getElementById("bt-hour-chi");
+                const napamEl = document.getElementById("bt-hour-napam");
+                const cardEl = document.getElementById("bt-hour-card");
+
+                if (canEl) {{
+                    canEl.textContent = can.toUpperCase();
+                    const hanhCan = NGU_HANH_CAN[can];
+                    canEl.style.color = MAU_NGU_HANH[hanhCan] || "#333";
+                }}
+
+                if (chiEl) {{
+                    chiEl.textContent = chi.toUpperCase();
+                    const hanhChi = NGU_HANH_CHI[chi];
+                    chiEl.style.color = MAU_NGU_HANH[hanhChi] || "#333";
+                }}
+
+                const key = `${{can}} ${{chi}}`;
+                const napInfo = NA_AM_60[key] || ["Chưa rõ", "Thổ"];
+                const napAm = napInfo[0];
+                const hanhNa = napInfo[1];
+
+                if (napamEl) {{
+                    napamEl.textContent = napAm;
+                    napamEl.style.color = MAU_NGU_HANH[hanhNa] || "#777";
+                }}
+
+                if (cardEl) {{
+                    cardEl.style.background = MAU_NEN_OMBRE[hanhNa] || "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)";
+                    cardEl.style.border = `1px solid ${{(MAU_NGU_HANH[hanhNa] || "#dddddd")}}55`;
+                }}
+            }}
 
             updateDeviceCards();
             setInterval(updateDeviceCards, 1000);
@@ -743,7 +860,27 @@ st.set_page_config(
         "About": "Y Lý Cát Thời - Kinh Dịch Hội - Mai Hoa Dịch Số"
     }
 )
+components.html("""
+<script>
+(function () {
+    function pad2(n) { return String(n).padStart(2, "0"); }
 
+    const now = new Date();
+    const dateKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    const stamp = `${dateKey}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+
+    const url = new URL(window.parent.location.href);
+    const oldDate = url.searchParams.get("client_date");
+
+    // Chỉ sync khi mới vào app hoặc khi sang ngày mới trên thiết bị
+    if (oldDate !== dateKey) {
+        url.searchParams.set("client_now", stamp);
+        url.searchParams.set("client_date", dateKey);
+        window.parent.location.replace(url.toString());
+    }
+})();
+</script>
+""", height=0)
 st.set_option("client.toolbarMode", "minimal")
 # --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
@@ -910,19 +1047,16 @@ st.markdown(
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
-now_top = datetime.datetime.now()
+now_top = get_device_now()
 
-nam_top = st.session_state.get("duong_nam", now_top.year)
-thang_top = st.session_state.get("duong_thang", now_top.month)
-ngay_top = st.session_state.get("duong_ngay", now_top.day)
-gio_top = st.session_state.get("gio_kham", CHI[((now_top.hour + 1) // 2) % 12])
+gio_top = CHI[((now_top.hour + 1) // 2) % 12]
 
 battu_top_html = render_ui_battu_tietkhi(
-    nam_top,
-    thang_top,
-    ngay_top,
+    now_top.year,
+    now_top.month,
+    now_top.day,
     gio_top,
-    gio_display="00:00:00",
+    gio_display=now_top.strftime("%H:%M:%S"),
     live_from_device=True
 )
 
@@ -933,7 +1067,7 @@ st.markdown("---")
 engine = YLyCatThoiEngine()
 
 # Lấy thời gian hiện tại làm mặc định
-now = datetime.datetime.now()
+now = get_device_now()
 dt_logic = now if now.hour < 23 else now + datetime.timedelta(days=1)
 lunar_now = Converter.Solar2Lunar(Solar(dt_logic.year, dt_logic.month, dt_logic.day))
 
