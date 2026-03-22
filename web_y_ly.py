@@ -504,27 +504,22 @@ def render_ui_battu_tietkhi(
             line-height: 1;
         }}
         
-        /* CHỈNH ẢNH LOGO THẬP THẦN: CẮT XÉN VIỀN TRONG SUỐT BẰNG OVERFLOW */
+        /* KHUNG CHỨA: Cố định 40px để chữ BÍNH NGỌ không bao giờ bị đẩy lùi xuống */
         .bt-chutinh {{ 
-            position: relative; /* Tạo mỏ neo cho ảnh */
-            height: 40px; /* Chiều cao an toàn, không đè chữ Can Chi */
+            height: 40px; 
             width: 100%;
-            margin-bottom: 8px;
-            overflow: hidden; /* CỰC KỲ QUAN TRỌNG: Cắt gọt toàn bộ viền trong suốt bị tràn */
             display: flex; 
             align-items: center; 
             justify-content: center; 
+            margin-bottom: 8px;
         }}
         
         .img-logo-chutinh {{
-            position: absolute; /* Rút ảnh khỏi bố cục HTML để không đẩy các chữ khác */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Neo chính giữa tuyệt đối tâm khung */
-            height: 350px; /* Ép kích thước ảnh thật to để logo bên trong to lên. BẠN TĂNG/GIẢM SỐ NÀY ĐỂ CHỈNH ĐỘ TO */
+            height: 14px; /* Giữ cái bóng của ảnh thật nhỏ */
             width: auto;
-            max-width: none; /* Gỡ bỏ giới hạn chiều rộng */
-            pointer-events: none; /* Chống lỗi click nhầm */
+            /* BÍ QUYẾT LÀ ĐÂY: Phóng to 10 lần, sau đó KÉO NÓ XUỐNG DƯỚI 3.5px */
+            /* Nếu nó vẫn cao, bạn tăng 3.5px lên 4px, 5px. Nếu nó thấp quá thì giảm xuống 2px */
+            transform: scale(10) translateY(3.5px); 
         }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
@@ -574,7 +569,7 @@ def render_ui_battu_tietkhi(
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
             .bt-chutinh {{ margin-bottom: 6px; height: 30px; }}
-            .img-logo-chutinh {{ height: 260px }}
+            .img-logo-chutinh {{ height: 10px; transform: scale(8.5) translateY(3.5px); }}
 
 
             .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
