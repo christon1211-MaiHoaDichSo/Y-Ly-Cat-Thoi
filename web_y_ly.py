@@ -510,11 +510,11 @@ def render_ui_battu_tietkhi(
             align-items: center; 
             justify-content: center; 
             margin-bottom: 8px;
-            height: 45px; /* Tăng không gian hiển thị */
+            height: 35px; /* Tăng không gian hiển thị */
             width: 100%;
         }}
         .img-logo-chutinh {{
-            height: 14px; /* Phóng to để phá bỏ lớp viền trong suốt */
+            height: 50px; /* Phóng to để phá bỏ lớp viền trong suốt */
             width: auto;
             transform: scale(6.5); /* Phóng to logo lên cho rõ nét */
             transform-origin: center center; /* Khóa tâm, chống lệch */
