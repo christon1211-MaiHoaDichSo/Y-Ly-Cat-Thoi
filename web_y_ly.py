@@ -1317,18 +1317,18 @@ if bg_base64:
     overlay_opacity = 1.0 - (do_ro_net / 100.0)
     
     bg_css = f"""
-        <style>
-        .stApp {{
-            /* Dùng linear-gradient phủ màu trắng đè lên hình để tạo hiệu ứng opacity */
-            background-image: linear-gradient(rgba(255, 255, 255, {overlay_opacity}), rgba(255, 255, 255, {overlay_opacity})), url("data:image/png;base64,{bg_base64}");
-            background-size: 300px; /* Chỉnh kích thước lặp lại của monogram, bạn có thể tăng giảm số này */
-            background-repeat: repeat;
-            background-attachment: fixed;
-            background-position: center;
-        }}
-        </style>
-        """
-        st.markdown(bg_css, unsafe_allow_html=True)
+    <style>
+    .stApp {{
+        /* Dùng linear-gradient phủ màu trắng đè lên hình để tạo hiệu ứng opacity */
+        background-image: linear-gradient(rgba(255, 255, 255, {overlay_opacity}), rgba(255, 255, 255, {overlay_opacity})), url("data:image/png;base64,{bg_base64}");
+        background-size: 300px; /* Chỉnh kích thước lặp lại của monogram, bạn có thể tăng giảm số này */
+        background-repeat: repeat;
+        background-attachment: fixed;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(bg_css, unsafe_allow_html=True)
 
 # 2. Header mới: PC nhỏ gọn hơn, mobile gọn 1 hàng
 st.markdown(
