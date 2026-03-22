@@ -312,7 +312,7 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
     </body>
     </html>
     """
-    return f"{css}<div class='bt-container'>{html_cards}</div>"
+
 
 # Hiệu ứng Ombre (chuyển màu từ trắng sang nhạt) dành cho nền các Thẻ
 MAU_NEN_OMBRE = {
@@ -964,9 +964,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-import streamlit.components.v1 as components
-
-
 # --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
 # 1. Hàm đọc và mã hóa file logo của bạn (Giữ nguyên)
@@ -1049,7 +1046,7 @@ st.markdown(
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
-now_top = datetime.datetime.now()
+now_top = get_device_now()
 gio_top = CHI[((now_top.hour + 1) // 2) % 12]
 
 battu_top_html = render_ui_battu_tietkhi(
