@@ -514,11 +514,11 @@ def render_ui_battu_tietkhi(
         
         .img-logo-chutinh {{
             position: absolute;
-            top: 350%;
+            top: 340%;
             left: 62.5%;
             /* BỘ ĐIỀU KHIỂN HOÀN HẢO: 
                - translate(-50%, -50%) ép nó vào đúng tâm điểm 100%. 
-               - scale(1.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
+               - scale(2.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
             */
             transform: translate(-50%, -50%) scale(1.8); 
             height: 280px; /* Ép cái khung ảo to ra */
