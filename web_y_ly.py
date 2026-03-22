@@ -1300,6 +1300,34 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file('logo.png')
 
+img_base64 = get_base64_of_bin_file('logo.png')
+
+# ==============================================================================
+# CODE MỚI: XỬ LÝ BACKGROUND VÀ OPACITY
+# ==============================================================================
+# Tạo thanh trượt ở sidebar để điều chỉnh độ đậm nhạt của background
+do_ro_net = st.sidebar.slider("Độ rõ nét hình nền (%)", min_value=0, max_value=100, value=15, step=5)
+
+# Đọc file hình nền monogram
+bg_base64 = get_base64_of_bin_file('monogram.png') 
+
+if bg_base64:
+    # Tính toán độ mờ của lớp phủ màu trắng (overlay)
+    # Ví dụ: rõ nét 15% -> lớp phủ trắng sẽ che 85% (0.85)
+    overlay_opacity = 1.0 - (do_ro_net / 100.0)
+    
+    bg_css = f"""
+    <style>
+    .stApp {{
+        /* Dùng linear-gradient phủ màu trắng đè lên hình để tạo hiệu ứng opacity */
+        background-image: linear-gradient(rgba(255, 255, 255, {overlay_opacity}), rgba(255, 255, 255, {overlay_opacity})), url("data:image/png;base64,{bg_base64}");
+        background-size: 300px; /* Chỉnh kích thước lặp lại của monogram, bạn có thể tăng giảm số này */
+        background-repeat: repeat;
+        background-attachment: fixed;
+        background-position: center;
+    }}
+    </style>
+
 # 2. Header mới: PC nhỏ gọn hơn, mobile gọn 1 hàng
 st.markdown(
     f"""
