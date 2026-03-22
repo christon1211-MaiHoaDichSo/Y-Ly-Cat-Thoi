@@ -49,10 +49,10 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
         gio_display = f"{h_val:02d}:30:00"
 
     pillars = [
-        {"key": "year",  "title": "NĂM",   "val": str(nam),          "can": can_nam,   "chi": chi_nam},
+        {"key": "year",  "title": "NĂM",   "val": str(nam),            "can": can_nam,   "chi": chi_nam},
         {"key": "month", "title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
         {"key": "day",   "title": "NGÀY",  "val": f"{int(ngay):02d}",  "can": can_ngay,  "chi": chi_ngay},
-        {"key": "hour",  "title": "GIỜ",   "val": gio_display,       "can": can_gio,   "chi": chi_gio},
+        {"key": "hour",  "title": "GIỜ",   "val": gio_display,         "can": can_gio,   "chi": chi_gio},
     ]
 
     cards = []
@@ -92,7 +92,6 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
         mau_nen_ombre_json = json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)
 
         live_script = f"""
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.5/lunar.min.js"></script>
         <script>
             const TU_DIEN = {tu_dien_json};
             const NA_AM_60 = {na_am_json};
@@ -101,16 +100,13 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
             const NGU_HANH_CHI = {ngu_hanh_chi_json};
             const MAU_NEN_OMBRE = {mau_nen_ombre_json};
 
-            let btTimer = null;
-            let btBooted = false;
-
             function pad2(n) {{
                 return String(n).padStart(2, "0");
             }}
 
-            function setText(id, value) {{
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
+            function setOnlyValue(prefix, valueText) {{
+                const valEl = document.getElementById(`bt-${{prefix}}-val`);
+                if (valEl) valEl.textContent = valueText;
             }}
 
             function getNapAm(can, chi) {{
@@ -118,19 +114,22 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
                 return NA_AM_60[key] || ["Chưa rõ", "Thổ"];
             }}
 
-            function applyPillar(prefix, valueText, can, chi) {{
+            function mapCn(ch) {{
+                return TU_DIEN[ch] || ch;
+            }}
+
+            function applyPillarMeta(prefix, can, chi) {{
                 const cardEl = document.getElementById(`bt-${{prefix}}-card`);
-                const valEl = document.getElementById(`bt-${{prefix}}-val`);
                 const canEl = document.getElementById(`bt-${{prefix}}-can`);
                 const chiEl = document.getElementById(`bt-${{prefix}}-chi`);
                 const napamEl = document.getElementById(`bt-${{prefix}}-napam`);
 
-                if (valEl) valEl.textContent = valueText;
                 if (canEl) {{
                     canEl.textContent = String(can).toUpperCase();
                     const hanhCan = NGU_HANH_CAN[can];
                     canEl.style.color = MAU_NGU_HANH[hanhCan] || "#333";
                 }}
+
                 if (chiEl) {{
                     chiEl.textContent = String(chi).toUpperCase();
                     const hanhChi = NGU_HANH_CHI[chi];
@@ -147,21 +146,26 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
                     napamEl.textContent = napAm;
                     napamEl.style.color = mauVien;
                 }}
+
                 if (cardEl) {{
                     cardEl.style.background = mauNen;
                     cardEl.style.border = `1px solid ${{mauVien}}55`;
                 }}
             }}
 
-            function mapCn(ch) {{
-                return TU_DIEN[ch] || ch;
+            function updateValuesFromDeviceOnly() {{
+                const now = new Date();
+                setOnlyValue("year", String(now.getFullYear()));
+                setOnlyValue("month", pad2(now.getMonth() + 1));
+                setOnlyValue("day", pad2(now.getDate()));
+                setOnlyValue("hour", `${{pad2(now.getHours())}}:${{pad2(now.getMinutes())}}:${{pad2(now.getSeconds())}}`);
             }}
 
-            function updateTopCardsExact() {{
-                if (typeof Solar === "undefined") return false;
+            function updateExactCanChi() {{
+                if (typeof window.Solar === "undefined") return false;
 
                 const now = new Date();
-                const solar = Solar.fromDate(now);
+                const solar = window.Solar.fromDate(now);
                 const lunar = solar.getLunar();
 
                 const yearCan = mapCn(lunar.getYearGanExact());
@@ -176,53 +180,74 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
                 const hourCan = mapCn(lunar.getTimeGan());
                 const hourChi = mapCn(lunar.getTimeZhi());
 
-                applyPillar("year",  String(now.getFullYear()), yearCan, yearChi);
-                applyPillar("month", pad2(now.getMonth() + 1), monthCan, monthChi);
-                applyPillar("day",   pad2(now.getDate()), dayCan, dayChi);
-                applyPillar("hour",  `${{pad2(now.getHours())}}:${{pad2(now.getMinutes())}}:${{pad2(now.getSeconds())}}`, hourCan, hourChi);
+                applyPillarMeta("year", yearCan, yearChi);
+                applyPillarMeta("month", monthCan, monthChi);
+                applyPillarMeta("day", dayCan, dayChi);
+                applyPillarMeta("hour", hourCan, hourChi);
 
                 return true;
             }}
 
+            function loadScript(src, onload, onerror) {{
+                const s = document.createElement("script");
+                s.src = src;
+                s.async = true;
+                s.onload = onload;
+                s.onerror = onerror;
+                document.head.appendChild(s);
+            }}
+
             function bootTopCards() {{
-                if (btBooted) return;
-                btBooted = true;
+                // Luôn cho số giờ/ngày/tháng/năm chạy theo device ngay lập tức,
+                // dù thư viện can-chi có load kịp hay không.
+                updateValuesFromDeviceOnly();
 
-                let tries = 0;
-
-                function waitAndStart() {{
-                    try {{
-                        const ok = updateTopCardsExact();
-                        if (ok) {{
-                            if (!btTimer) {{
-                                btTimer = setInterval(() => {{
-                                    try {{
-                                        updateTopCardsExact();
-                                    }} catch (e) {{
-                                        console.error("Top cards update error:", e);
-                                    }}
-                                }}, 1000);
-                            }}
-                            return;
-                        }}
-                    }} catch (e) {{
-                        console.error("Top cards boot error:", e);
-                    }}
-
-                    tries += 1;
-                    if (tries < 200) {{
-                        setTimeout(waitAndStart, 100);
-                    }}
+                if (window.__ylctBtTimer) {{
+                    clearInterval(window.__ylctBtTimer);
                 }}
 
-                waitAndStart();
+                window.__ylctBtTimer = setInterval(() => {{
+                    try {{
+                        updateValuesFromDeviceOnly();
+                        updateExactCanChi();
+                    }} catch (e) {{
+                        console.error("YLCT top cards tick error:", e);
+                    }}
+                }}, 1000);
+
+                if (typeof window.Solar !== "undefined") {{
+                    updateExactCanChi();
+                    return;
+                }}
+
+                loadScript(
+                    "https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.5/lunar.min.js",
+                    () => {{
+                        try {{
+                            updateExactCanChi();
+                        }} catch (e) {{
+                            console.error("YLCT primary CDN loaded but exact update failed:", e);
+                        }}
+                    }},
+                    () => {{
+                        loadScript(
+                            "https://cdn.staticfile.org/lunar-javascript/1.7.5/lunar.min.js",
+                            () => {{
+                                try {{
+                                    updateExactCanChi();
+                                }} catch (e) {{
+                                    console.error("YLCT fallback CDN loaded but exact update failed:", e);
+                                }}
+                            }},
+                            () => {{
+                                console.error("YLCT: failed to load lunar-javascript from both CDNs.");
+                            }}
+                        );
+                    }}
+                );
             }}
 
-            if (document.readyState === "loading") {{
-                document.addEventListener("DOMContentLoaded", bootTopCards);
-            }} else {{
-                bootTopCards();
-            }}
+            bootTopCards();
         </script>
         """
 
@@ -870,14 +895,21 @@ components.html("""
     const now = new Date();
     const dateKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     const stamp = `${dateKey}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+    const tz = String(now.getTimezoneOffset());
 
     const url = new URL(window.parent.location.href);
+    const oldNow = url.searchParams.get("client_now");
     const oldDate = url.searchParams.get("client_date");
+    const oldTz = url.searchParams.get("client_tz");
 
-    // Chỉ sync khi mới vào app hoặc khi sang ngày mới trên thiết bị
-    if (oldDate !== dateKey) {
+    // Chỉ ép rerun khi:
+    // 1) chưa có dữ liệu client,
+    // 2) đổi ngày trên thiết bị,
+    // 3) đổi timezone / thiết bị
+    if (!oldNow || !oldDate || oldDate !== dateKey || oldTz !== tz) {
         url.searchParams.set("client_now", stamp);
         url.searchParams.set("client_date", dateKey);
+        url.searchParams.set("client_tz", tz);
         window.parent.location.replace(url.toString());
     }
 })();
