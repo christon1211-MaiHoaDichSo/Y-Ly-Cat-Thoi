@@ -507,15 +507,15 @@ def render_ui_battu_tietkhi(
         /* KHUNG CHỨA: Tạo mỏ neo giữ khoảng cách an toàn, không dùng overflow để ảnh không bị mất */
         .bt-chutinh {{ 
             position: relative; 
-            height: 35px; /* Giữ khoảng trống 45px giữa số và chữ Can Chi */
+            height: 25px; /* Giữ khoảng trống 45px giữa số và chữ Can Chi */
             width: 100%;
             margin-bottom: 12px;
         }}
         
         .img-logo-chutinh {{
             position: absolute;
-            top: 340%;
-            left: 62.5%;
+            top: 400%;
+            left: 70%;
             /* BỘ ĐIỀU KHIỂN HOÀN HẢO: 
                - translate(-50%, -50%) ép nó vào đúng tâm điểm 100%. 
                - scale(5.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
