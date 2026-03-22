@@ -608,17 +608,17 @@ def render_ui_battu_tietkhi(
                 font-size: 7px;
             }}
             .bt-term-wrap {{
-                margin-top: 3px;
+                margin-top: 2px;
                 padding-top: 0px;
             }}
             .bt-term-current {{
                 font-size: 11px;
-                margin-bottom: 3px;
+                margin-bottom: 2px;
             }}
             .bt-term-countdown {{
                 font-size: 9px;
+                line-height: 1.2;
             }}
-        }}
         @media (max-width: 430px) {{
             .bt-container {{
                 gap: 4px;
@@ -659,6 +659,37 @@ def render_ui_battu_tietkhi(
             </div>
         </div>
         {live_script}
+        <script>
+        (function() {{
+            function resizeBtFrame() {{
+                const h1 = document.documentElement.scrollHeight || 0;
+                const h2 = document.body.scrollHeight || 0;
+                const realHeight = Math.max(h1, h2);
+
+                if (window.frameElement) {{
+                    window.frameElement.style.height = (realHeight + 6) + "px";
+                }}
+            }}
+
+            window.addEventListener("load", resizeBtFrame);
+            window.addEventListener("resize", resizeBtFrame);
+
+            setTimeout(resizeBtFrame, 50);
+            setTimeout(resizeBtFrame, 200);
+            setTimeout(resizeBtFrame, 500);
+
+            const observer = new MutationObserver(function() {{
+                resizeBtFrame();
+            }});
+
+            observer.observe(document.body, {{
+                childList: true,
+                subtree: true,
+                attributes: true,
+                characterData: true
+            }});
+        })();
+        </script>
     </body>
     </html>
     """
@@ -1364,7 +1395,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=280, scrolling=False)
+components.html(battu_top_html, height=240, scrolling=False)
 
 st.markdown(
     "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
