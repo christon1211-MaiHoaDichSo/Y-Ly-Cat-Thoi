@@ -193,6 +193,74 @@ def render_ui_battu_tietkhi(
                 return TU_DIEN[ch] || ch;
             }}
 
+            function solarObjToDate(solarObj) {
+                return new Date(
+                    solarObj.getYear(),
+                    solarObj.getMonth() - 1,
+                    solarObj.getDay(),
+                    solarObj.getHour(),
+                    solarObj.getMinute(),
+                    solarObj.getSecond()
+                );
+            }
+
+            function formatCountdown(ms) {
+                if (ms < 0) ms = 0;
+
+                const totalSeconds = Math.floor(ms / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                return { days, hours, minutes, seconds };
+            }
+
+            function updateJieQiInfo() {
+                const currentEl = document.getElementById("bt-current-term");
+                const countdownEl = document.getElementById("bt-next-term-countdown");
+
+                if (!currentEl || !countdownEl) return false;
+                if (typeof window.Solar === "undefined") return false;
+
+                const now = new Date();
+
+                const solar = window.Solar.fromYmdHms(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    now.getDate(),
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds()
+                );
+
+                const lunar = solar.getLunar();
+
+                const currentExact = lunar.getCurrentJieQi ? lunar.getCurrentJieQi() : null;
+                const prevJieQi = lunar.getPrevJieQi(false);
+                const nextJieQi = lunar.getNextJieQi(false);
+
+                const currentName = currentExact
+                    ? currentExact.getName()
+                    : (prevJieQi ? prevJieQi.getName() : "—");
+
+                currentEl.textContent = `Tiết Khí : ${currentName}`;
+
+                if (!nextJieQi) {
+                    countdownEl.textContent = "Không tìm thấy tiết khí tiếp theo";
+                    return true;
+                }
+
+    const nextName = nextJieQi.getName();
+    const nextDate = solarObjToDate(nextJieQi.getSolar());
+    const diff = nextDate.getTime() - now.getTime();
+    const t = formatCountdown(diff);
+
+    countdownEl.textContent =
+        `Còn ${t.days} ngày ${t.hours} giờ ${t.minutes} phút ${t.seconds} giây sang tiết khí ${nextName}`;
+
+    return true;
+}
             function applyPillarMeta(prefix, can, chi) {{
                 const cardEl = document.getElementById(`bt-${{prefix}}-card`);
                 const canEl = document.getElementById(`bt-${{prefix}}-can`);
@@ -284,19 +352,21 @@ def render_ui_battu_tietkhi(
             function bootTopCards() {{
                 updateValuesFromDeviceOnly();
                 updateExactCanChi();
+                updateJieQiInfo();
 
                 if (window.__ylctBtTimer) {{
                     clearInterval(window.__ylctBtTimer);
                 }}
 
-                window.__ylctBtTimer = setInterval(() => {{
-                    try {{
+                window.__ylctBtTimer = setInterval(() => {
+                    try {
                         updateValuesFromDeviceOnly();
                         updateExactCanChi();
-                    }} catch (e) {{
+                        updateJieQiInfo();
+                    } catch (e) {
                         console.error("YLCT top cards tick error:", e);
-                    }}
-                }}, 1000);
+                    }
+                }, 1000);
 
                 if (typeof window.Solar !== "undefined") {{
                     return;
@@ -421,6 +491,29 @@ def render_ui_battu_tietkhi(
             max-width: 100%;
         }}
 
+        .bt-term-wrap {{
+            width: 100%;
+            margin-top: 8px;
+            padding-top: 4px;
+            text-align: center;
+            box-sizing: border-box;
+        }}
+
+        .bt-term-current {{
+            font-size: clamp(11px, 1vw, 16px);
+            font-weight: 700;
+            color: #5b4636;
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }}
+
+        .bt-term-countdown {{
+            font-size: clamp(10px, 0.95vw, 14px);
+            font-weight: 500;
+            color: #6c6c6c;
+            line-height: 1.25;
+        }}
+
         @media (max-width: 768px) {{
             .bt-wrap {{
                 padding: 2px 0 0 0;
@@ -484,12 +577,44 @@ def render_ui_battu_tietkhi(
             .bt-napam {{
                 font-size: 6px;
             }}
+        @media (max-width: 768px) {{
+            .bt-term-wrap {{
+                margin-top: 6px;
+                padding-top: 2px;
+            }}
+
+            .bt-term-current {{
+                font-size: 11px;
+                margin-bottom: 3px;
+            }}
+
+            .bt-term-countdown {{
+                font-size: 9px;
+            }}
         }}
+
+        @media (max-width: 430px) {{
+            .bt-term-current {{
+                font-size: 10px;
+            }}
+
+            .bt-term-countdown {{
+                font-size: 8px;
+            }}
+        }}
+
     </style>
     </head>
     <body>
         <div class="bt-wrap">
             <div class="bt-container">{cards_html}</div>
+
+            <div class="bt-term-wrap">
+                <div class="bt-term-current" id="bt-current-term">Tiết Khí: Đang tải...</div>
+                <div class="bt-term-countdown" id="bt-next-term-countdown">
+                    Còn ... ngày ... giờ ... phút ... giây sang tiết khí tiếp theo
+                </div>
+            </div>
         </div>
         {live_script}
     </body>
@@ -1251,9 +1376,12 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=300, scrolling=False)
+components.html(battu_top_html, height=250, scrolling=False)
 
-st.markdown("---")
+st.markdown(
+    "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
+    unsafe_allow_html=True
+)
 
 engine = YLyCatThoiEngine()
 
