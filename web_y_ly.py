@@ -504,27 +504,26 @@ def render_ui_battu_tietkhi(
             line-height: 1;
         }}
         
-        /* KHUNG CHỨA: Dùng Flexbox an toàn, không được dùng overflow: hidden nữa */
+        /* KHUNG CHỨA: Tạo mỏ neo giữ khoảng cách an toàn, không dùng overflow để ảnh không bị mất */
         .bt-chutinh {{ 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 35px; /* Khoảng cách an toàn để không đè chữ Bính Ngọ */
+            position: relative; 
+            height: 45px; /* Giữ khoảng trống 45px giữa số và chữ Can Chi */
             width: 100%;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }}
         
         .img-logo-chutinh {{
-            height: 250px; /* Ép chiều cao ảnh thật to để logo bên trong nở ra */
-            width: auto;
-            margin: -120px 0; /* Rút gọn không gian ảo bên trên và dưới để không đẩy chữ */
-            
-            /* BỘ ĐIỀU KHIỂN CHÍNH XÁC (Hãy thay đổi các số này để ép nó theo ý bạn):
-               - translateX(20px) : Đẩy ảnh sang PHẢI 20px để trị bệnh lệch trái.
-               - translateY(5px)  : Đẩy ảnh XUỐNG DƯỚI 5px.
-               - scale(1.3)       : Phóng to thêm 30%.
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* BỘ ĐIỀU KHIỂN HOÀN HẢO: 
+               - translate(-50%, -50%) ép nó vào đúng tâm điểm 100%. 
+               - scale(1.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
             */
-            transform: scale(1.3) translateX(20px) translateY(5px);
+            transform: translate(-50%, -50%) scale(1.8); 
+            height: 280px; /* Ép cái khung ảo to ra */
+            width: auto;
+            pointer-events: none; /* Cực kỳ quan trọng: Làm cho viền trong suốt trở nên "xuyên thấu", không chặn chuột của bạn */
         }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
@@ -573,11 +572,10 @@ def render_ui_battu_tietkhi(
             .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 6px; height: 30px; }}
+            .bt-chutinh {{ margin-bottom: 8px; height: 35px; }}
             .img-logo-chutinh {{ 
-                height: 180px; 
-                margin: -90px 0; 
-                transform: scale(1.2) translateX(15px) translateY(2px); 
+                height: 200px; 
+                transform: translate(-50%, -50%) scale(1.5); /* Tăng scale(1.5) lên 1.8 nếu điện thoại thấy nhỏ */
             }}
 
 
