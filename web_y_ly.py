@@ -480,7 +480,7 @@ def render_ui_battu_tietkhi(
             gap: 12px;
             padding: 5px;
         }}
-        .bt-card {
+        .bt-card {{
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -490,26 +490,26 @@ def render_ui_battu_tietkhi(
             text-align: center;
             box-sizing: border-box;
             min-height: max-content; /* Không cho phép ép lùn Card */
-        }
+        }}
         
         /* CHỈNH ẢNH LOGO THẬP THẦN (BÙ TRỪ PHẦN TRONG SUỐT BỊ DƯ) */
-        .bt-chutinh { 
+        .bt-chutinh {{ 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin-bottom: 8px;
             height: 35px; /* Khung hiển thị an toàn */
-        }
-        .img-logo-chutinh {
+        }}
+        .img-logo-chutinh {{
             height: 140px; /* Phóng to ảnh gấp 6 lần để phá bỏ lớp viền trong suốt */
             width: auto;
             object-fit: contain;
             margin: -50px 0; /* Cắt gọt rìa trong suốt thừa ở trên và dưới */
             transform: scale(1.3); /* Phóng to logo lên cho rõ nét */
-        }
+        }}
 
         /* Cấu trúc Can Chi dọc */
-        .bt-canchi-vert {
+        .bt-canchi-vert {{
             display: flex;
             flex-direction: column;
             font-size: 42px;
@@ -519,7 +519,7 @@ def render_ui_battu_tietkhi(
             letter-spacing: 1px;
             flex-shrink: 0; /* QUAN TRỌNG: Khóa cứng, không cho phép ép dẹp đè chữ */
             gap: 4px; /* Tách khoảng cách giữa Can và Chi ra một chút */
-        }
+        }}
 
         /* Lưới hiển thị Tàng Ẩn và Phó tinh */
         .bt-tang-pho-grid {{
@@ -552,11 +552,11 @@ def render_ui_battu_tietkhi(
             .bt-title {{ font-size: 12px; margin-bottom: 2px; }}
             .bt-val {{ font-size: 20px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 8px; min-height: 18px; }}
-            .img-logo-chutinh {{ height: 16px; }}
+            .bt-chutinh {{ margin-bottom: 8px; height: 25px; }}
+            .img-logo-chutinh {{ height: 100px; margin: -35px 0; transform: scale(1.2); }}
             .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
 
-            .bt-canchi-vert {{ font-size: 26px; margin-bottom: 12px; }}
+            .bt-canchi-vert {{ font-size: 26px; margin-bottom: 12px; flex-shrink: 0; }}
             
             .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
             .bt-tang {{ font-size: 13px; }}
