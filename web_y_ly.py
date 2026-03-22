@@ -61,6 +61,30 @@ def render_ui_battu_tietkhi(
     chi_ngay = TU_DIEN_CAN_CHI_LP[lunar_lp.getDayZhiExact()]
     can_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeGan()]
     chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
+    current_jq_name = "—"
+    next_jq_name = "—"
+    next_jq_iso = ""
+
+    try:
+        prev_jq = lunar_lp.getPrevJieQi(False)
+        next_jq = lunar_lp.getNextJieQi(False)
+
+        if prev_jq:
+            current_jq_name = prev_jq.getName()
+
+        if next_jq:
+            next_jq_name = next_jq.getName()
+            next_solar = next_jq.getSolar()
+            next_jq_iso = (
+                f"{next_solar.getYear():04d}-"
+                f"{next_solar.getMonth():02d}-"
+                f"{next_solar.getDay():02d}T"
+                f"{next_solar.getHour():02d}:"
+                f"{next_solar.getMinute():02d}:"
+                f"{next_solar.getSecond():02d}"
+            )
+    except Exception:
+        pass
 
     if gio_display is None:
         gio_display = f"{h_val:02d}:{m_val:02d}:{s_val:02d}"
@@ -102,6 +126,9 @@ def render_ui_battu_tietkhi(
         ngu_hanh_can_json = json.dumps(NGU_HANH_CAN, ensure_ascii=False)
         ngu_hanh_chi_json = json.dumps(NGU_HANH_CHI, ensure_ascii=False)
         mau_nen_ombre_json = json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)
+        current_jq_name_json = json.dumps(current_jq_name, ensure_ascii=False)
+        next_jq_name_json = json.dumps(next_jq_name, ensure_ascii=False)
+        next_jq_iso_json = json.dumps(next_jq_iso, ensure_ascii=False)
 
         live_script = f"""
         <script>
@@ -113,6 +140,9 @@ def render_ui_battu_tietkhi(
             const MAU_NEN_OMBRE = {mau_nen_ombre_json};
             const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
             const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
+            const INITIAL_CURRENT_TERM = {current_jq_name_json};
+            const INITIAL_NEXT_TERM = {next_jq_name_json};
+            const INITIAL_NEXT_TERM_ISO = {next_jq_iso_json};
 
             function pad2(n) {{
                 return String(n).padStart(2, "0");
@@ -210,7 +240,19 @@ def render_ui_battu_tietkhi(
                 const seconds = totalSeconds % 60;
                 return {{ days, hours, minutes, seconds }};
             }}
-
+            function resizeIframeToContent() {{
+                try {{
+                    const h = Math.max(
+                        document.body ? document.body.scrollHeight : 0,
+                        document.documentElement ? document.documentElement.scrollHeight : 0
+                    );
+                    if (window.frameElement && h > 0) {{
+                        window.frameElement.style.height = `${{h + 4}}px`;
+                    }}
+                }} catch (e) {{
+                    console.error("YLCT resize iframe error:", e);
+                }}
+            }}
             function updateValuesFromDeviceOnly() {{
                 const now = new Date();
                 setOnlyValue("year", String(now.getFullYear()));
@@ -277,54 +319,65 @@ def render_ui_battu_tietkhi(
                 const currentEl = document.getElementById("bt-current-term");
                 const countdownEl = document.getElementById("bt-next-term-countdown");
                 if (!currentEl || !countdownEl) return false;
-                if (typeof window.Solar === "undefined") return false;
 
-                const now = new Date();
-                const solar = window.Solar.fromYmdHms(
-                    now.getFullYear(),
-                    now.getMonth() + 1,
-                    now.getDate(),
-                    now.getHours(),
-                    now.getMinutes(),
-                    now.getSeconds()
-                );
-                const lunar = solar.getLunar();
+                let currentName = INITIAL_CURRENT_TERM || "—";
+                let nextName = INITIAL_NEXT_TERM || "—";
+                let nextDate = INITIAL_NEXT_TERM_ISO ? new Date(INITIAL_NEXT_TERM_ISO) : null;
 
-                let currentName = "—";
-                let nextName = "—";
-                let nextDate = null;
+                // Nếu JS lunar load được thì dùng kết quả exact realtime để override
+                if (typeof window.Solar !== "undefined") {{
+                    try {{
+                        const now = new Date();
+                        const solar = window.Solar.fromYmdHms(
+                            now.getFullYear(),
+                            now.getMonth() + 1,
+                            now.getDate(),
+                            now.getHours(),
+                            now.getMinutes(),
+                            now.getSeconds()
+                        );
+                        const lunar = solar.getLunar();
 
-                if (typeof lunar.getPrevJieQi === "function" && typeof lunar.getNextJieQi === "function") {{
-                    const prev = lunar.getPrevJieQi(false);
-                    const next = lunar.getNextJieQi(false);
+                        if (typeof lunar.getPrevJieQi === "function" && typeof lunar.getNextJieQi === "function") {{
+                            const prev = lunar.getPrevJieQi(false);
+                            const next = lunar.getNextJieQi(false);
 
-                    if (prev) currentName = prev.getName();
-                    if (next) {{
-                        nextName = next.getName();
-                        nextDate = solarObjToDate(next.getSolar());
-                    }}
-                }} else {{
-                    const data = getJieQiByTable(lunar, now);
-                    if (data) {{
-                        if (data.current) currentName = data.current.name;
-                        if (data.next) {{
-                            nextName = data.next.name;
-                            nextDate = data.next.date;
+                            if (prev) currentName = prev.getName();
+                            if (next) {{
+                                nextName = next.getName();
+                                nextDate = solarObjToDate(next.getSolar());
+                            }}
+                        }} else {{
+                            const data = getJieQiByTable(lunar, now);
+                            if (data) {{
+                                if (data.current) currentName = data.current.name;
+                                if (data.next) {{
+                                    nextName = data.next.name;
+                                    nextDate = data.next.date;
+                                }}
+                            }}
                         }}
+                    }} catch (e) {{
+                        console.error("YLCT JieQi exact update error:", e);
                     }}
                 }}
 
                 currentEl.textContent = `Tiết Khí : ${{currentName}}`;
 
-                if (!nextDate) {{
+                if (!nextDate || isNaN(nextDate.getTime())) {{
                     countdownEl.textContent = "Không tìm thấy tiết khí tiếp theo";
+                    resizeIframeToContent();
                     return true;
                 }}
 
+                const now = new Date();
                 const diff = nextDate.getTime() - now.getTime();
                 const t = formatCountdown(diff);
 
-                countdownEl.textContent = `Còn ${{t.days}} ngày ${{t.hours}} giờ ${{t.minutes}} phút ${{t.seconds}} giây sang tiết khí ${{nextName}}`;
+                countdownEl.textContent =
+                    `Còn ${{t.days}} ngày ${{t.hours}} giờ ${{t.minutes}} phút ${{t.seconds}} giây sang tiết khí tiếp theo : ${{nextName}}`;
+
+                resizeIframeToContent();
                 return true;
             }}
 
@@ -341,6 +394,7 @@ def render_ui_battu_tietkhi(
                 updateValuesFromDeviceOnly();
                 updateExactCanChi();
                 updateJieQiInfo();
+                resizeIframeToContent();
 
                 if (window.__ylctBtTimer) {{
                     clearInterval(window.__ylctBtTimer);
@@ -351,6 +405,7 @@ def render_ui_battu_tietkhi(
                         updateValuesFromDeviceOnly();
                         updateExactCanChi();
                         updateJieQiInfo();
+                        resizeIframeToContent();
                     }} catch (e) {{
                         console.error("YLCT top cards tick error:", e);
                     }}
@@ -366,6 +421,7 @@ def render_ui_battu_tietkhi(
                         try {{
                             updateExactCanChi();
                             updateJieQiInfo();
+                            resizeIframeToContent();
                         }} catch (e) {{
                             console.error("YLCT primary CDN loaded but update failed:", e);
                         }}
@@ -377,6 +433,7 @@ def render_ui_battu_tietkhi(
                                 try {{
                                     updateExactCanChi();
                                     updateJieQiInfo();
+                                    resizeIframeToContent();
                                 }} catch (e) {{
                                     console.error("YLCT fallback CDN loaded but update failed:", e);
                                 }}
@@ -467,8 +524,8 @@ def render_ui_battu_tietkhi(
         }}
         .bt-term-wrap {{
             width: 100%;
-            margin-top: 8px;
-            padding-top: 4px;
+            margin-top: 4px;
+            padding-top: 1px;
             text-align: center;
             box-sizing: border-box;
         }}
@@ -514,8 +571,8 @@ def render_ui_battu_tietkhi(
                 font-size: 7px;
             }}
             .bt-term-wrap {{
-                margin-top: 6px;
-                padding-top: 2px;
+                margin-top: 3px;
+                padding-top: 0px;
             }}
             .bt-term-current {{
                 font-size: 11px;
@@ -1246,7 +1303,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=250, scrolling=False)
+components.html(battu_top_html, height=190, scrolling=False)
 
 st.markdown(
     "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
