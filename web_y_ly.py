@@ -1384,7 +1384,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-top_cards_height = 200 if client_layout == "mobile" else 260
+top_cards_height = 150 if client_layout == "mobile" else 260
 components.html(battu_top_html, height=top_cards_height, scrolling=False)
 
 st.markdown(
