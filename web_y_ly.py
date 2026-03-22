@@ -32,7 +32,44 @@ TU_DIEN_CAN_CHI_LP = {'甲': 'Giáp', '乙': 'Ất', '丙': 'Bính', '丁': 'Đi
 
 NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "Hỏa", "Mậu": "Thổ", "Kỷ": "Thổ", "Canh": "Kim", "Tân": "Kim", "Nhâm": "Thủy", "Quý": "Thủy"}
 NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
+AM_DUONG_CAN = {
+    "Giáp": "Dương", "Ất": "Âm",
+    "Bính": "Dương", "Đinh": "Âm",
+    "Mậu": "Dương", "Kỷ": "Âm",
+    "Canh": "Dương", "Tân": "Âm",
+    "Nhâm": "Dương", "Quý": "Âm"
+}
 
+# Tàng can theo Chủ (chính khí) / Kiêm (trung + dư khí)
+CHI_TANG_CAN_META = {
+    "Tý":  {"chu": ["Quý"], "kiem": []},
+    "Sửu": {"chu": ["Kỷ"], "kiem": ["Quý", "Tân"]},
+    "Dần": {"chu": ["Giáp"], "kiem": ["Bính", "Mậu"]},
+    "Mão": {"chu": ["Ất"], "kiem": []},
+    "Thìn":{"chu": ["Mậu"], "kiem": ["Ất", "Quý"]},
+    "Tỵ":  {"chu": ["Bính"], "kiem": ["Mậu", "Canh"]},
+    "Ngọ": {"chu": ["Đinh"], "kiem": ["Kỷ"]},
+    "Mùi": {"chu": ["Kỷ"], "kiem": ["Đinh", "Ất"]},
+    "Thân":{"chu": ["Canh"], "kiem": ["Nhâm", "Mậu"]},
+    "Dậu": {"chu": ["Tân"], "kiem": []},
+    "Tuất":{"chu": ["Mậu"], "kiem": ["Tân", "Đinh"]},
+    "Hợi": {"chu": ["Nhâm"], "kiem": ["Giáp"]},
+}
+
+# 12 Trường Sinh (tính theo Nhật Can)
+TRUONG_SINH_STAGES = [
+    "Trường Sinh","Mộc Dục","Quan Đới","Lâm Quan","Đế Vượng","Suy",
+    "Bệnh","Tử","Mộ","Tuyệt","Thai","Dưỡng"
+]
+
+# Điểm “Trường Sinh” bắt đầu theo từng Nhật Can
+TRUONG_SINH_START = {
+    "Giáp":"Hợi", "Ất":"Ngọ",
+    "Bính":"Dần", "Đinh":"Dậu",
+    "Mậu":"Dần", "Kỷ":"Thân",
+    "Canh":"Tỵ",  "Tân":"Tý",
+    "Nhâm":"Thân","Quý":"Mão",
+}
 MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
 JIEQI_VIET = {
     "立春": "Lập Xuân",
@@ -137,13 +174,18 @@ def render_ui_battu_tietkhi(
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
         prefix = p["key"]
         cards.append(
-            f'<div class="bt-card" id="bt-{prefix}-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">'
-            f'<div class="bt-title">{p["title"]}</div>'
             f'<div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>'
+            f'<div class="bt-chutinh" id="bt-{prefix}-ct">—</div>'
+
             f'<div class="bt-canchi">'
-            f'<span id="bt-{prefix}-can" style="color:{mau_can}; display:block;">{p["can"].upper()}</span>'
-            f'<span id="bt-{prefix}-chi" style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>'
+            f'  <span id="bt-{prefix}-can" ...>{p["can"].upper()}</span>'
+            f'  <span id="bt-{prefix}-chi" ...>{p["chi"].upper()}</span>'
             f'</div>'
+
+            f'<div class="bt-tang" id="bt-{prefix}-tang">—</div>'
+            f'<div class="bt-pho" id="bt-{prefix}-pho">—</div>'
+
+            f'<div class="bt-truongsinh" id="bt-{prefix}-ts">—</div>'
             f'<div class="bt-napam" id="bt-{prefix}-napam" style="color:{mau_vien};">{nap_am}</div>'
             f'</div>'
         )
@@ -158,6 +200,10 @@ def render_ui_battu_tietkhi(
         ngu_hanh_can_json = json.dumps(NGU_HANH_CAN, ensure_ascii=False)
         ngu_hanh_chi_json = json.dumps(NGU_HANH_CHI, ensure_ascii=False)
         mau_nen_ombre_json = json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)
+        am_duong_can_json = json.dumps(AM_DUONG_CAN, ensure_ascii=False)
+        chi_tang_can_meta_json = json.dumps(CHI_TANG_CAN_META, ensure_ascii=False)
+        truong_sinh_start_json = json.dumps(TRUONG_SINH_START, ensure_ascii=False)
+        truong_sinh_stages_json = json.dumps(TRUONG_SINH_STAGES, ensure_ascii=False)
         current_jq_name_json = json.dumps(current_jq_name, ensure_ascii=False)
         next_jq_name_json = json.dumps(next_jq_name, ensure_ascii=False)
         next_jq_iso_json = json.dumps(next_jq_iso, ensure_ascii=False)
@@ -169,6 +215,10 @@ def render_ui_battu_tietkhi(
             const MAU_NGU_HANH = {mau_nguhanh_json};
             const NGU_HANH_CAN = {ngu_hanh_can_json};
             const NGU_HANH_CHI = {ngu_hanh_chi_json};
+            const AM_DUONG_CAN = {am_duong_can_json};
+            const CHI_TANG_CAN_META = {chi_tang_can_meta_json};
+            const TRUONG_SINH_START = {truong_sinh_start_json};
+            const TRUONG_SINH_STAGES = {truong_sinh_stages_json};
             const MAU_NEN_OMBRE = {mau_nen_ombre_json};
             const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
             const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
@@ -197,6 +247,112 @@ def render_ui_battu_tietkhi(
             function mapJieQiName(name) {{
                 return JIEQI_VIET[name] || name || "—";
             }}
+
+            // ===== Normalize Can/Chi từ UI (đang UPPER) =====
+            const CAN_NORM = {"GIÁP":"Giáp","ẤT":"Ất","BÍNH":"Bính","ĐINH":"Đinh","MẬU":"Mậu","KỶ":"Kỷ","CANH":"Canh","TÂN":"Tân","NHÂM":"Nhâm","QUÝ":"Quý"};
+            const CHI_NORM = {"TÝ":"Tý","SỬU":"Sửu","DẦN":"Dần","MÃO":"Mão","THÌN":"Thìn","TỴ":"Tỵ","NGỌ":"Ngọ","MÙI":"Mùi","THÂN":"Thân","DẬU":"Dậu","TUẤT":"Tuất","HỢI":"Hợi"};
+
+            function normCanText(s){ if(!s) return ""; s=(""+s).trim().toUpperCase(); return CAN_NORM[s] || s; }
+            function normChiText(s){ if(!s) return ""; s=(""+s).trim().toUpperCase(); return CHI_NORM[s] || s; }
+
+            // ===== Công thức Thập Thần =====
+            const SINH = {"Mộc":"Hỏa","Hỏa":"Thổ","Thổ":"Kim","Kim":"Thủy","Thủy":"Mộc"};
+            const KHAC = {"Mộc":"Thổ","Thổ":"Thủy","Thủy":"Hỏa","Hỏa":"Kim","Kim":"Mộc"};
+
+            function sameYinYang(a,b){ return (AM_DUONG_CAN[a]||"") === (AM_DUONG_CAN[b]||""); }
+
+            function getTenGod(dayCan, otherCan){
+              const eDay = NGU_HANH_CAN[dayCan];
+              const eOther = NGU_HANH_CAN[otherCan];
+              if(!eDay || !eOther) return {full:"—", short:"—"};
+              const sameYY = sameYinYang(dayCan, otherCan);
+
+              if(eDay === eOther) return sameYY ? {full:"Tỷ Kiên", short:"Tỷ"} : {full:"Kiếp Tài", short:"Kiếp"};
+              if(SINH[eDay] === eOther) return sameYY ? {full:"Thực Thần", short:"Thực"} : {full:"Thương Quan", short:"Thương"};
+              if(SINH[eOther] === eDay) return sameYY ? {full:"Thiên Ấn", short:"Kiêu"} : {full:"Chính Ấn", short:"C.Ấn"};
+              if(KHAC[eDay] === eOther) return sameYY ? {full:"Thiên Tài", short:"T.Tài"} : {full:"Chính Tài", short:"C.Tài"};
+              if(KHAC[eOther] === eDay) return sameYY ? {full:"Thất Sát", short:"Sát"} : {full:"Chính Quan", short:"Quan"};
+              return {full:"—", short:"—"};
+            }
+
+            // ===== Công thức 12 Trường Sinh =====
+            function getTruongSinh(dayCan, chi){
+              const start = TRUONG_SINH_START[dayCan];
+              if(!start) return "—";
+              const idxStart = CHI_ORDER.indexOf(start);
+              const idxChi = CHI_ORDER.indexOf(chi);
+              if(idxStart < 0 || idxChi < 0) return "—";
+              const dir = (AM_DUONG_CAN[dayCan] === "Dương") ? 1 : -1; // Dương thuận, Âm nghịch
+              const delta = (idxChi - idxStart) * dir;
+              const k = ((delta % 12) + 12) % 12;
+              return TRUONG_SINH_STAGES[k] || "—";
+            }
+
+            // ===== Auto shrink =====
+            function fitRowText(el, minPx){
+              if(!el) return;
+              minPx = minPx || 9;
+              let size = parseFloat(getComputedStyle(el).fontSize) || 14;
+              el.style.fontSize = size + "px";
+              for(let i=0;i<24;i++){
+                if(el.scrollWidth <= el.clientWidth) break;
+                size -= 0.5;
+                if(size < minPx) break;
+                el.style.fontSize = size + "px";
+              }
+            }
+
+            function setInlineRow(containerEl, values){
+              if(!containerEl) return;
+              if(!values || !values.length){ containerEl.textContent = "—"; return; }
+              containerEl.innerHTML = "";
+              values.forEach(v=>{
+                const sp=document.createElement("span");
+                sp.className="bt-inline";
+                sp.textContent=v;
+                containerEl.appendChild(sp);
+              });
+              containerEl.querySelectorAll(".bt-inline").forEach(sp=>fitRowText(sp,9));
+            }
+
+            // ===== Update 1 pillar =====
+            function updatePillarTenGod(prefix, dayCan){
+              const canEl = document.getElementById("bt-"+prefix+"-can");
+              const chiEl = document.getElementById("bt-"+prefix+"-chi");
+              const ctEl  = document.getElementById("bt-"+prefix+"-ct");
+              const tangEl= document.getElementById("bt-"+prefix+"-tang");
+              const phoEl = document.getElementById("bt-"+prefix+"-pho");
+              const tsEl  = document.getElementById("bt-"+prefix+"-ts");
+              if(!canEl || !chiEl) return;
+
+              const can = normCanText(canEl.innerText);
+              const chi = normChiText(chiEl.innerText);
+
+              if(ctEl){
+                ctEl.textContent = (prefix==="day") ? "NHẬT CHỦ" : getTenGod(dayCan, can).full;
+                fitRowText(ctEl,10);
+              }
+
+              const meta = CHI_TANG_CAN_META[chi] || {chu:[], kiem:[]};
+              const tangList = (meta.chu||[]).concat(meta.kiem||[]);
+              const phoList = tangList.map(tc => getTenGod(dayCan, tc).short);
+
+              if(tangEl) setInlineRow(tangEl, tangList);
+              if(phoEl) setInlineRow(phoEl, phoList);
+
+              if(tsEl){
+                tsEl.textContent = getTruongSinh(dayCan, chi);
+                fitRowText(tsEl,9);
+              }
+            }
+
+            function updateThapThanAll(){
+              const dayCanEl = document.getElementById("bt-day-can");
+              if(!dayCanEl) return;
+              const dayCan = normCanText(dayCanEl.innerText);
+              ["year","month","day","hour"].forEach(p => updatePillarTenGod(p, dayCan));
+            }
+
             function applyPillarMeta(prefix, can, chi) {{
                 const cardEl = document.getElementById(`bt-${{prefix}}-card`);
                 const canEl = document.getElementById(`bt-${{prefix}}-can`);
@@ -229,7 +385,7 @@ def render_ui_battu_tietkhi(
                     cardEl.style.border = `1px solid ${{mauVien}}55`;
                 }}
             }}
-
+            updateThapThanAll();
             function solarToOrdinal(y, m, d) {{
                 const a = Math.floor((14 - m) / 12);
                 const y1 = y + 4800 - a;
@@ -519,7 +675,8 @@ def render_ui_battu_tietkhi(
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            gap: clamp(4px, 0.7vw, 10px);
             box-sizing: border-box;
             overflow: hidden;
         }}
@@ -550,6 +707,42 @@ def render_ui_battu_tietkhi(
         }}
         .bt-canchi span {{
             white-space: nowrap;
+        }}
+        .bt-chutinh {{
+          font-size: clamp(10px, 1.05vw, 16px);
+          font-weight: 700;
+          line-height: 1.05;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
+        }}
+
+        .bt-tang, .bt-pho {{
+          font-size: clamp(9px, 0.95vw, 14px);
+          line-height: 1.05;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          gap: clamp(6px, 1.2vw, 16px);
+        }}
+
+        .bt-inline {{
+          display: inline-block;
+          max-width: 48%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }}
+
+        .bt-truongsinh {{
+          font-size: clamp(9px, 0.95vw, 14px);
+          font-weight: 700;
+          line-height: 1.05;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
         }}
         .bt-napam {{
             font-size: clamp(6px, 0.9vw, 13px);
