@@ -578,11 +578,11 @@ def render_ui_battu_tietkhi(
             .bt-chutinh {{ margin-bottom: 4px; height: 20px; width: 100%; position: relative; }}
             .img-logo-chutinh {{ 
                 position: absolute;
-                top: 50%; 
-                left: 80%; 
+                top: 150%; 
+                left: 100%; 
                 height: 180px; 
                 /* Neo chính tâm, scale nhẹ nhàng để vừa vặn không lấn át chữ */
-                transform: translate(-50%, -50%) scale(1.5); 
+                transform: translate(-50%, -50%) scale(1.7); 
             }}
 
             /* 4. Can Chi và Tàng Ẩn: Thu nhỏ một chút để 3 chữ (VD: Kỷ Đinh Ất) có thể đứng ngang hàng ngang */
