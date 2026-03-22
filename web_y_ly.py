@@ -564,35 +564,40 @@ def render_ui_battu_tietkhi(
         .bt-term-current {{ font-size: 16px; font-weight: bold; color: #5b4636; margin-bottom: 4px;}}
         .bt-term-countdown {{ font-size: 14px; color: #6c6c6c; }}
 
-        /* RESPONSIVE CHO ĐIỆN THOẠI */
+        /* RESPONSIVE CHO ĐIỆN THOẠI - KHÔI PHỤC SỰ CÂN BẰNG VÀ GỌN GÀNG */
         @media (max-width: 768px) {{
-            .bt-container {{ gap: 6px; padding: 2px; }}
-            .bt-card {{ padding: 10px 4px; border-radius: 14px; }}
+            /* 1. Thu hẹp lề và khoảng cách giữa 4 cột để tối đa hóa không gian bên trong thẻ */
+            .bt-container {{ gap: 4px; padding: 2px; }}
+            .bt-card {{ padding: 8px 2px; border-radius: 10px; }}
             
-            .bt-title {{ font-size: 14px; margin-bottom: 2px; }}
-            .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
+            /* 2. Cân đối lại Font Size: Đủ nhỏ để không vỡ khung, đủ to để dễ đọc */
+            .bt-title {{ font-size: 12px; margin-bottom: 2px; }}
+            .bt-val {{ font-size: 18px; margin-bottom: 6px; line-height: 1; }} 
             
-            .bt-chutinh {{ margin-bottom: 8px; height: 35px; }}
-            
+            /* 3. RESET TỌA ĐỘ LOGO: Đưa về tâm điểm tuyệt đối, xóa bỏ sai lệch từ PC */
+            .bt-chutinh {{ margin-bottom: 4px; height: 22px; width: 100%; position: relative; }}
             .img-logo-chutinh {{ 
-                height: 200px; 
-                /* ĐẶT LẠI TỌA ĐỘ RIÊNG CHO MOBILE Ở ĐÂY ĐỂ TRÁNH LỖI KẾ THỪA TỪ PC */
-                top: 400%; /* Bạn tự tinh chỉnh lại số này lên/xuống (ví dụ: 300%, 500%) để đưa nó vào giữa khe hở */
-                left: 69%; /* Giữ lại tỷ lệ lệch ngang giống PC, hoặc chỉnh về 50% nếu thấy nó lệch */
-                transform: translate(-50%, -50%) scale(2.5); 
+                position: absolute;
+                top: 50%; 
+                left: 50%; 
+                height: 180px; 
+                /* Neo chính tâm, scale nhẹ nhàng để vừa vặn không lấn át chữ */
+                transform: translate(-50%, -50%) scale(1.05); 
             }}
 
-            .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }}
+            /* 4. Can Chi và Tàng Ẩn: Thu nhỏ một chút để 3 chữ (VD: Kỷ Đinh Ất) có thể đứng ngang hàng ngang */
+            .bt-canchi-vert {{ font-size: 18px; margin-bottom: 8px; flex-shrink: 0; line-height: 1.1; }}
 
-            .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
-            .bt-tang {{ font-size: 13px; }}
-            .bt-pho {{ font-size: 11px; }}
+            .bt-tang-pho-grid {{ width: 98%; margin-bottom: 8px; gap: 2px; }}
+            .bt-tang {{ font-size: 11px; }} 
+            .bt-pho {{ font-size: 9px; line-height: 1; }} 
             
-            .bt-truongsinh {{ font-size: 14px; margin-bottom: 8px; }}
-            .bt-napam {{ font-size: 10px; }}
+            .bt-truongsinh {{ font-size: 12px; margin-bottom: 6px; }}
+            .bt-napam {{ font-size: 9px; line-height: 1.2; }}
             
-            .bt-term-current {{ font-size: 13px; }}
-            .bt-term-countdown {{ font-size: 11px; }}
+            /* Tiết khí bên dưới */
+            .bt-term-current {{ font-size: 12px; }}
+            .bt-term-countdown {{ font-size: 10px; }}
         }}
     </style>
     </head>
