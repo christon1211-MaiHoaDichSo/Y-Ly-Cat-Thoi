@@ -480,32 +480,36 @@ def render_ui_battu_tietkhi(
             gap: 12px;
             padding: 5px;
         }}
-        .bt-card {{
+        .bt-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-radius: 20px; /* Bo góc cong đẹp như hình */
+            border-radius: 20px; 
             padding: 16px 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             text-align: center;
             box-sizing: border-box;
-        }}
+            min-height: max-content; /* Không cho phép ép lùn Card */
+        }
         
-        .bt-title {{ font-size: 16px; font-weight: bold; color: #777; margin-bottom: 2px; text-transform: capitalize;}}
-        .bt-val {{ font-size: 32px; font-weight: bold; color: #111; margin-bottom: 12px; font-family: Arial, sans-serif; line-height: 1;}}
-        
-        /* CHỈNH ẢNH LOGO THẬP THẦN */
-        .bt-chutinh {{ min-height: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }}
-        .img-logo-chutinh {{
-            height: 22px; /* Gắn cứng chiều cao để các thẻ đồng đều */
+        /* CHỈNH ẢNH LOGO THẬP THẦN (BÙ TRỪ PHẦN TRONG SUỐT BỊ DƯ) */
+        .bt-chutinh { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 8px;
+            height: 35px; /* Khung hiển thị an toàn */
+        }
+        .img-logo-chutinh {
+            height: 140px; /* Phóng to ảnh gấp 6 lần để phá bỏ lớp viền trong suốt */
             width: auto;
             object-fit: contain;
-        }}
-        /* Chế độ dự phòng nếu load ảnh fail */
-        .fallback-ct {{ font-size: 11px; font-weight: bold; background: #fff; padding: 2px 10px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; letter-spacing: 0.5px;}}
+            margin: -50px 0; /* Cắt gọt rìa trong suốt thừa ở trên và dưới */
+            transform: scale(1.3); /* Phóng to logo lên cho rõ nét */
+        }
 
-        /* Cấu trúc Can Chi dọc y hệt hình */
-        .bt-canchi-vert {{
+        /* Cấu trúc Can Chi dọc */
+        .bt-canchi-vert {
             display: flex;
             flex-direction: column;
             font-size: 42px;
@@ -513,7 +517,9 @@ def render_ui_battu_tietkhi(
             font-weight: 900;
             margin-bottom: 16px;
             letter-spacing: 1px;
-        }}
+            flex-shrink: 0; /* QUAN TRỌNG: Khóa cứng, không cho phép ép dẹp đè chữ */
+            gap: 4px; /* Tách khoảng cách giữa Can và Chi ra một chút */
+        }
 
         /* Lưới hiển thị Tàng Ẩn và Phó tinh */
         .bt-tang-pho-grid {{
@@ -1300,7 +1306,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-top_cards_height = 150 if client_layout == "mobile" else 260
+top_cards_height = 260 if client_layout == "mobile" else 400
 components.html(battu_top_html, height=top_cards_height, scrolling=False)
 
 st.markdown(
