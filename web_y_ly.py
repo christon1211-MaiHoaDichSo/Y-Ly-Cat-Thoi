@@ -578,8 +578,8 @@ def render_ui_battu_tietkhi(
             .bt-chutinh {{ margin-bottom: 4px; height: 20px; width: 100%; position: relative; }}
             .img-logo-chutinh {{ 
                 position: absolute;
-                top: 150%; 
-                left: 100%; 
+                top: 350%; 
+                left: 110%; 
                 height: 180px; 
                 /* Neo chính tâm, scale nhẹ nhàng để vừa vặn không lấn át chữ */
                 transform: translate(-50%, -50%) scale(1.7); 
