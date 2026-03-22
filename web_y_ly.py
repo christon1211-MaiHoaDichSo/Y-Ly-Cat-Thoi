@@ -1236,6 +1236,30 @@ components.html("""
 </script>
 """, height=0)
 st.set_option("client.toolbarMode", "minimal")
+components.html("""
+<script>
+(function () {
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    const now = new Date();
+    const dateKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    const stamp = `${dateKey}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+    const tz = String(now.getTimezoneOffset());
+
+    const url = new URL(window.parent.location.href);
+    const oldNow = url.searchParams.get("client_now");
+    const oldDate = url.searchParams.get("client_date");
+    const oldTz = url.searchParams.get("client_tz");
+
+    if (!oldNow || !oldDate || oldDate !== dateKey || oldTz !== tz) {
+        url.searchParams.set("client_now", stamp);
+        url.searchParams.set("client_date", dateKey);
+        url.searchParams.set("client_tz", tz);
+        window.parent.location.replace(url.toString());
+    }
+})();
+</script>
+""", height=0)
 
 
 # --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
