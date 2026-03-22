@@ -619,6 +619,7 @@ def render_ui_battu_tietkhi(
                 font-size: 9px;
                 line-height: 1.2;
             }}
+        }}
         @media (max-width: 430px) {{
             .bt-container {{
                 gap: 4px;
@@ -688,7 +689,7 @@ def render_ui_battu_tietkhi(
                 attributes: true,
                 characterData: true
             }});
-        })();
+        }})();
         </script>
     </body>
     </html>
