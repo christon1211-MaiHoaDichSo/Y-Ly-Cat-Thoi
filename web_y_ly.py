@@ -19,7 +19,7 @@ NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "H
 NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
 
 MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
-def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
+def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, live_from_device=False):
     h_val = CHI_TO_HOUR[gio_chi_name] + 1
     if h_val >= 24:
         h_val = 0
@@ -37,17 +37,19 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
     chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
 
     if gio_display is None:
-        gio_display = f"{h_val:02d}h30"
+        gio_display = f"{h_val:02d}:{30:02d}:00"
 
     pillars = [
-        {"title": "NĂM", "val": str(nam), "can": can_nam, "chi": chi_nam},
+        {"title": "NĂM",   "val": str(nam),          "can": can_nam,   "chi": chi_nam},
         {"title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
-        {"title": "NGÀY", "val": f"{int(ngay):02d}", "can": can_ngay, "chi": chi_ngay},
-        {"title": "GIỜ", "val": gio_display, "can": can_gio, "chi": chi_gio},
+        {"title": "NGÀY",  "val": f"{int(ngay):02d}",  "can": can_ngay,  "chi": chi_ngay},
+        {"title": "GIỜ",   "val": gio_display,       "can": can_gio,   "chi": chi_gio},
     ]
 
+    value_ids = ["bt-year-val", "bt-month-val", "bt-day-val", "bt-time-val"]
+
     cards = []
-    for p in pillars:
+    for idx, p in enumerate(pillars):
         mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p["can"]), "#333")
         mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p["chi"]), "#333")
 
@@ -55,10 +57,12 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
         mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
 
+        id_attr = f' id="{value_ids[idx]}"' if live_from_device else ""
+
         cards.append(
             f'<div class="bt-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">'
             f'<div class="bt-title">{p["title"]}</div>'
-            f'<div class="bt-val">{p["val"]}</div>'
+            f'<div class="bt-val"{id_attr}>{p["val"]}</div>'
             f'<div class="bt-canchi">'
             f'<span style="color:{mau_can}; display:block;">{p["can"].upper()}</span>'
             f'<span style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>'
@@ -68,6 +72,40 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
         )
 
     cards_html = "".join(cards)
+
+    live_script = ""
+    if live_from_device:
+        live_script = """
+        <script>
+            function pad2(n) {
+                return String(n).padStart(2, '0');
+            }
+
+            function updateDeviceCards() {
+                const now = new Date();
+
+                const y  = now.getFullYear();
+                const mo = pad2(now.getMonth() + 1);
+                const d  = pad2(now.getDate());
+                const h  = pad2(now.getHours());
+                const mi = pad2(now.getMinutes());
+                const s  = pad2(now.getSeconds());
+
+                const yearEl  = document.getElementById("bt-year-val");
+                const monthEl = document.getElementById("bt-month-val");
+                const dayEl   = document.getElementById("bt-day-val");
+                const timeEl  = document.getElementById("bt-time-val");
+
+                if (yearEl)  yearEl.textContent  = y;
+                if (monthEl) monthEl.textContent = mo;
+                if (dayEl)   dayEl.textContent   = d;
+                if (timeEl)  timeEl.textContent  = `${h}:${mi}:${s}`;
+            }
+
+            updateDeviceCards();
+            setInterval(updateDeviceCards, 1000);
+        </script>
+        """
 
     return f"""
     <html>
@@ -151,6 +189,7 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
         <div class="bt-wrap">
             <div class="bt-container">{cards_html}</div>
         </div>
+        {live_script}
     </body>
     </html>
     """
@@ -158,11 +197,11 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
 
 # Hiệu ứng Ombre (chuyển màu từ trắng sang nhạt) dành cho nền các Thẻ
 MAU_NEN_OMBRE = {
-    "Hỏa": "linear-gradient(180deg, #ffffff 40%, #ffefef 100%)",
-    "Thủy": "linear-gradient(180deg, #ffffff 40%, #f0f7ff 100%)",
-    "Mộc": "linear-gradient(180deg, #ffffff 40%, #f0fff0 100%)",
-    "Kim": "linear-gradient(180deg, #ffffff 40%, #f8f8f8 100%)",
-    "Thổ": "linear-gradient(180deg, #ffffff 40%, #fff8f0 100%)"
+    "Hỏa": "linear-gradient(180deg, #ffffff 70%, #ffefef 100%)",
+    "Thủy": "linear-gradient(180deg, #ffffff 70%, #f0f7ff 100%)",
+    "Mộc": "linear-gradient(180deg, #ffffff 70%, #f0fff0 100%)",
+    "Kim": "linear-gradient(180deg, #ffffff 70%, #f8f8f8 100%)",
+    "Thổ": "linear-gradient(180deg, #ffffff 70%, #fff8f0 100%)"
 }
 
 NA_AM_60 = {
@@ -883,10 +922,11 @@ battu_top_html = render_ui_battu_tietkhi(
     thang_top,
     ngay_top,
     gio_top,
-    gio_display=now_top.strftime("%Hh%M")
+    gio_display="00:00:00",
+    live_from_device=True
 )
 
-components.html(battu_top_html, height=285, scrolling=False)
+components.html(battu_top_html, height=300, scrolling=False)
 
 st.markdown("---")
 
