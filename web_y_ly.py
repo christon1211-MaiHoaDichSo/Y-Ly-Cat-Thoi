@@ -494,35 +494,44 @@ def render_ui_battu_tietkhi(
         
         /* Chữ Năm, Tháng, Ngày, Giờ (Đã phóng to) */
         .bt-title {{ font-size: 18px; font-weight: bold; color: #777; margin-bottom: 2px; text-transform: capitalize;}}
-        .bt-val {{ font-size: 28px; font-weight: bold; color: #111; margin-bottom: 12px; font-family: Arial, sans-serif; line-height: 1;}}
+        /* Phóng to số liệu 2026, 03, 22... (Tăng từ 28px lên 36px) */
+        .bt-val {{ 
+            font-size: 36px; 
+            font-weight: bold; 
+            color: #111; 
+            margin-bottom: 8px; 
+            font-family: Arial, sans-serif; 
+            line-height: 1;
+        }}
         
         /* CHỈNH ẢNH LOGO THẬP THẦN (Đã phóng to và căn giữa tuyệt đối) */
         .bt-chutinh {{ 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 10px;
-            height: 50px; /* Tăng không gian hiển thị */
+            margin-bottom: 5px;
+            height: 350px; /* Tăng không gian hiển thị */
             width: 100%;
         }}
         .img-logo-chutinh {{
-            height: 160px; /* Phóng to để phá bỏ lớp viền trong suốt */
+            height: 250px; /* Phóng to để phá bỏ lớp viền trong suốt */
             width: auto;
             object-fit: contain;
-            margin: -55px 0; /* Cắt gọt rìa trong suốt thừa */
-            transform: scale(2.0); /* Phóng to logo lên cho rõ nét */
+            margin: -115px 0; /* Cắt gọt rìa trong suốt thừa */
+            transform: scale(1.1); /* Phóng to logo lên cho rõ nét */
             transform-origin: center center; /* Khóa tâm, chống lệch */
         }}
         .fallback-ct {{ font-size: 12px; font-weight: bold; background: #fff; padding: 3px 12px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
+        /* Thu nhỏ chữ BÍNH NGỌ... (Giảm từ 32px xuống 26px) */
         .bt-canchi-vert {{
             display: flex;
             flex-direction: column;
-            font-size: 32px; /* Đã thu nhỏ từ 42px xuống 32px */
+            font-size: 26px; 
             line-height: 1.15;
             font-weight: 900;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             letter-spacing: 1px;
             flex-shrink: 0; 
             gap: 4px; 
@@ -558,13 +567,13 @@ def render_ui_battu_tietkhi(
             .bt-card {{ padding: 10px 4px; border-radius: 14px; }}
             
             .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
-            .bt-val {{ font-size: 20px; margin-bottom: 8px; }}
+            .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 8px; height: 30px; }}
-            .img-logo-chutinh {{ height: 120px; margin: -45px 0; transform: scale(1.3); }}
+            .bt-chutinh {{ margin-bottom: 4px; height: 25px; }}
+            .img-logo-chutinh {{ height: 180px; margin: -75px 0; transform: scale(1.1); }}
             .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
 
-            .bt-canchi-vert {{ font-size: 24px; margin-bottom: 12px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
+            .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
             
             .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
             .bt-tang {{ font-size: 13px; }}
