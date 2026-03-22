@@ -569,18 +569,21 @@ def render_ui_battu_tietkhi(
             .bt-container {{ gap: 6px; padding: 2px; }}
             .bt-card {{ padding: 10px 4px; border-radius: 14px; }}
             
-            .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
+            .bt-title {{ font-size: 14px; margin-bottom: 2px; }}
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
             .bt-chutinh {{ margin-bottom: 8px; height: 35px; }}
+            
             .img-logo-chutinh {{ 
                 height: 200px; 
-                transform: translate(-50%, -50%) scale(1.5); /* Tăng scale(1.5) lên 1.8 nếu điện thoại thấy nhỏ */
+                /* ĐẶT LẠI TỌA ĐỘ RIÊNG CHO MOBILE Ở ĐÂY ĐỂ TRÁNH LỖI KẾ THỪA TỪ PC */
+                top: 400%; /* Bạn tự tinh chỉnh lại số này lên/xuống (ví dụ: 300%, 500%) để đưa nó vào giữa khe hở */
+                left: 69%; /* Giữ lại tỷ lệ lệch ngang giống PC, hoặc chỉnh về 50% nếu thấy nó lệch */
+                transform: translate(-50%, -50%) scale(2.5); 
             }}
 
+            .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }}
 
-            .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
-            
             .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
             .bt-tang {{ font-size: 13px; }}
             .bt-pho {{ font-size: 11px; }}
