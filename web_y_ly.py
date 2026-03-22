@@ -97,23 +97,42 @@ JIEQI_VIET = {
     "小寒": "Tiểu Hàn",
     "大寒": "Đại Hàn"
 }
+# CÁI NÀY BẠN THÊM VÀO TRƯỚC HÀM render_ui_battu_tietkhi
+def load_chutinh_images():
+    # Sử dụng hàm get_base64_of_bin_file mà bạn đã có sẵn ở dưới
+    danh_sach = {
+        "Chính Ấn": "chinhan.png",
+        "Chính Quan": "chinhquan.png",
+        "Chính Tài": "chinhtai.png",
+        "Kiếp Tài": "kieptai.png",
+        "Thất Sát": "thatsat.png",
+        "Thiên Ấn": "thienan.png",
+        "Thiên Tài": "thientai.png",
+        "Thực Thần": "thucthan.png",
+        "Thương Quan": "thuongquan.png",
+        "Tỷ Kiên": "tykien.png",    # Nếu bạn có file này
+        "Nhật Chủ": "nhatchu.png"
+    }
+    
+    img_dict = {}
+    for ten, ten_file in danh_sach.items():
+        try:
+            with open(ten_file, 'rb') as f:
+                img_dict[ten] = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+        except FileNotFoundError:
+            img_dict[ten] = "" # Bỏ trống nếu thiếu file
+    return img_dict
+
+DICT_HINH_CHU_TINH = load_chutinh_images()
 def render_ui_battu_tietkhi(
-    nam,
-    thang,
-    ngay,
-    gio_chi_name,
-    gio_display=None,
-    live_from_device=False,
-    actual_hour=None,
-    actual_minute=None,
-    actual_second=None
+    nam, thang, ngay, gio_chi_name,
+    gio_display=None, live_from_device=False,
+    actual_hour=None, actual_minute=None, actual_second=None
 ):
     if actual_hour is None:
         h_val = CHI_TO_HOUR[gio_chi_name] + 1
-        if h_val >= 24:
-            h_val = 0
-        m_val = 30
-        s_val = 0
+        if h_val >= 24: h_val = 0
+        m_val = 30; s_val = 0
     else:
         h_val = int(actual_hour)
         m_val = int(actual_minute or 0)
@@ -130,6 +149,7 @@ def render_ui_battu_tietkhi(
     chi_ngay = TU_DIEN_CAN_CHI_LP[lunar_lp.getDayZhiExact()]
     can_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeGan()]
     chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
+    
     current_jq_name = "—"
     next_jq_name = "—"
     next_jq_iso = ""
@@ -137,21 +157,11 @@ def render_ui_battu_tietkhi(
     try:
         prev_jq = lunar_lp.getPrevJieQi(False)
         next_jq = lunar_lp.getNextJieQi(False)
-
-        if prev_jq:
-            current_jq_name = prev_jq.getName()
-
+        if prev_jq: current_jq_name = prev_jq.getName()
         if next_jq:
             next_jq_name = next_jq.getName()
             next_solar = next_jq.getSolar()
-            next_jq_iso = (
-                f"{next_solar.getYear():04d}-"
-                f"{next_solar.getMonth():02d}-"
-                f"{next_solar.getDay():02d}T"
-                f"{next_solar.getHour():02d}:"
-                f"{next_solar.getMinute():02d}:"
-                f"{next_solar.getSecond():02d}"
-            )
+            next_jq_iso = f"{next_solar.getYear():04d}-{next_solar.getMonth():02d}-{next_solar.getDay():02d}T{next_solar.getHour():02d}:{next_solar.getMinute():02d}:{next_solar.getSecond():02d}"
     except Exception:
         pass
 
@@ -159,163 +169,119 @@ def render_ui_battu_tietkhi(
         gio_display = f"{h_val:02d}:{m_val:02d}:{s_val:02d}"
 
     pillars = [
-        {"key": "year",  "title": "NĂM",   "val": str(nam),            "can": can_nam,   "chi": chi_nam},
-        {"key": "month", "title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
-        {"key": "day",   "title": "NGÀY",  "val": f"{int(ngay):02d}",  "can": can_ngay,  "chi": chi_ngay},
-        {"key": "hour",  "title": "GIỜ",   "val": gio_display,         "can": can_gio,   "chi": chi_gio},
+        {"key": "year",  "title": "Năm",   "val": str(nam),            "can": can_nam,   "chi": chi_nam},
+        {"key": "month", "title": "Tháng", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
+        {"key": "day",   "title": "Ngày",  "val": f"{int(ngay):02d}",  "can": can_ngay,  "chi": chi_ngay},
+        {"key": "hour",  "title": "Giờ",   "val": gio_display,         "can": can_gio,   "chi": chi_gio},
     ]
 
     cards = []
     for p in pillars:
-        mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p["can"]), "#333")
-        mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p["chi"]), "#333")
         nap_am, hanh_na = NA_AM_60.get(f"{p['can']} {p['chi']}", ("Chưa rõ", "Thổ"))
-        mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
         prefix = p["key"]
+        
+        # HTML Cấu trúc thẻ dọc giống ảnh thiết kế của bạn
         cards.append(
-            f'<div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>'
-            f'<div class="bt-chutinh" id="bt-{prefix}-ct">—</div>'
-
-            f'<div class="bt-canchi">'
-            f'  <span id="bt-{prefix}-can" ...>{p["can"].upper()}</span>'
-            f'  <span id="bt-{prefix}-chi" ...>{p["chi"].upper()}</span>'
-            f'</div>'
-
-            f'<div class="bt-tang" id="bt-{prefix}-tang">—</div>'
-            f'<div class="bt-pho" id="bt-{prefix}-pho">—</div>'
-
-            f'<div class="bt-truongsinh" id="bt-{prefix}-ts">—</div>'
-            f'<div class="bt-napam" id="bt-{prefix}-napam" style="color:{mau_vien};">{nap_am}</div>'
+            f'<div class="bt-card" id="bt-{prefix}-card">'
+            f'  <div class="bt-title">{p["title"]}</div>'
+            f'  <div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>'
+            f'  <div class="bt-chutinh" id="bt-{prefix}-ct"></div>'
+            f'  <div class="bt-canchi-vert">'
+            f'      <div id="bt-{prefix}-can" class="bt-can">{p["can"].upper()}</div>'
+            f'      <div id="bt-{prefix}-chi" class="bt-chi">{p["chi"].upper()}</div>'
+            f'  </div>'
+            f'  <div class="bt-tang-pho-grid">'
+            f'      <div class="bt-tang" id="bt-{prefix}-tang"></div>'
+            f'      <div class="bt-pho" id="bt-{prefix}-pho"></div>'
+            f'  </div>'
+            f'  <div class="bt-truongsinh" id="bt-{prefix}-ts">—</div>'
+            f'  <div class="bt-napam" id="bt-{prefix}-napam" style="color:{mau_vien};">{nap_am}</div>'
             f'</div>'
         )
 
     cards_html = "".join(cards)
-
+    
     live_script = ""
     if live_from_device:
-        tu_dien_json = json.dumps(TU_DIEN_CAN_CHI_LP, ensure_ascii=False)
-        na_am_json = json.dumps(NA_AM_60, ensure_ascii=False)
-        mau_nguhanh_json = json.dumps(MAU_NGU_HANH, ensure_ascii=False)
-        ngu_hanh_can_json = json.dumps(NGU_HANH_CAN, ensure_ascii=False)
-        ngu_hanh_chi_json = json.dumps(NGU_HANH_CHI, ensure_ascii=False)
-        mau_nen_ombre_json = json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)
-        am_duong_can_json = json.dumps(AM_DUONG_CAN, ensure_ascii=False)
-        chi_tang_can_meta_json = json.dumps(CHI_TANG_CAN_META, ensure_ascii=False)
-        truong_sinh_start_json = json.dumps(TRUONG_SINH_START, ensure_ascii=False)
-        truong_sinh_stages_json = json.dumps(TRUONG_SINH_STAGES, ensure_ascii=False)
-        current_jq_name_json = json.dumps(current_jq_name, ensure_ascii=False)
-        next_jq_name_json = json.dumps(next_jq_name, ensure_ascii=False)
-        next_jq_iso_json = json.dumps(next_jq_iso, ensure_ascii=False)
-        jieqi_viet_json = json.dumps(JIEQI_VIET, ensure_ascii=False)
-        live_script = f"""
+        # PHẦN 1: DÙNG F-STRING ĐỂ BƠM BIẾN VÀO JS MÀ KHÔNG GÂY LỖI LOGIC
+        live_script_vars = f"""
         <script>
-            const TU_DIEN = {tu_dien_json};
-            const NA_AM_60 = {na_am_json};
-            const MAU_NGU_HANH = {mau_nguhanh_json};
-            const NGU_HANH_CAN = {ngu_hanh_can_json};
-            const NGU_HANH_CHI = {ngu_hanh_chi_json};
-            const AM_DUONG_CAN = {am_duong_can_json};
-            const CHI_TANG_CAN_META = {chi_tang_can_meta_json};
-            const TRUONG_SINH_START = {truong_sinh_start_json};
-            const TRUONG_SINH_STAGES = {truong_sinh_stages_json};
-            const MAU_NEN_OMBRE = {mau_nen_ombre_json};
+            const TU_DIEN = {json.dumps(TU_DIEN_CAN_CHI_LP, ensure_ascii=False)};
+            const NA_AM_60 = {json.dumps(NA_AM_60, ensure_ascii=False)};
+            const MAU_NGU_HANH = {json.dumps(MAU_NGU_HANH, ensure_ascii=False)};
+            const NGU_HANH_CAN = {json.dumps(NGU_HANH_CAN, ensure_ascii=False)};
+            const NGU_HANH_CHI = {json.dumps(NGU_HANH_CHI, ensure_ascii=False)};
+            const AM_DUONG_CAN = {json.dumps(AM_DUONG_CAN, ensure_ascii=False)};
+            const CHI_TANG_CAN_META = {json.dumps(CHI_TANG_CAN_META, ensure_ascii=False)};
+            const TRUONG_SINH_START = {json.dumps(TRUONG_SINH_START, ensure_ascii=False)};
+            const TRUONG_SINH_STAGES = {json.dumps(TRUONG_SINH_STAGES, ensure_ascii=False)};
+            const MAU_NEN_OMBRE = {json.dumps(MAU_NEN_OMBRE, ensure_ascii=False)};
+            const INITIAL_CURRENT_TERM = {json.dumps(current_jq_name, ensure_ascii=False)};
+            const INITIAL_NEXT_TERM = {json.dumps(next_jq_name, ensure_ascii=False)};
+            const INITIAL_NEXT_TERM_ISO = {json.dumps(next_jq_iso, ensure_ascii=False)};
+            const JIEQI_VIET = {json.dumps(JIEQI_VIET, ensure_ascii=False)};
             const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
             const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
-            const INITIAL_CURRENT_TERM = {current_jq_name_json};
-            const INITIAL_NEXT_TERM = {next_jq_name_json};
-            const INITIAL_NEXT_TERM_ISO = {next_jq_iso_json};
-            const JIEQI_VIET = {jieqi_viet_json};
-            function pad2(n) {{
-                return String(n).padStart(2, "0");
-            }}
+            
+            // MAP HÌNH ẢNH LOGO VÀO JS
+            const CHU_TINH_IMAGES = {json.dumps(DICT_HINH_CHU_TINH, ensure_ascii=False)};
+        </script>
+        """
 
-            function setOnlyValue(prefix, valueText) {{
-                const valEl = document.getElementById(`bt-${{prefix}}-val`);
+        # PHẦN 2: CHUỖI RAW STRING BÌNH THƯỜNG DÀNH CHO LOGIC (KHÔNG BỊ LỖI DẤU NGOẶC)
+        live_script_logic = """
+        <script>
+            function pad2(n) { return String(n).padStart(2, "0"); }
+            function setOnlyValue(prefix, valueText) {
+                const valEl = document.getElementById(`bt-${prefix}-val`);
                 if (valEl) valEl.textContent = valueText;
-            }}
-
-            function getNapAm(can, chi) {{
-                const key = `${{can}} ${{chi}}`;
+            }
+            function getNapAm(can, chi) {
+                const key = `${can} ${chi}`;
                 return NA_AM_60[key] || ["Chưa rõ", "Thổ"];
-            }}
+            }
+            function mapCn(ch) { return TU_DIEN[ch] || ch; }
+            function mapJieQiName(name) { return JIEQI_VIET[name] || name || "—"; }
 
-            function mapCn(ch) {{
-                return TU_DIEN[ch] || ch;
-            }}
-
-            function mapJieQiName(name) {{
-                return JIEQI_VIET[name] || name || "—";
-            }}
-
-            // ===== Normalize Can/Chi từ UI (đang UPPER) =====
             const CAN_NORM = {"GIÁP":"Giáp","ẤT":"Ất","BÍNH":"Bính","ĐINH":"Đinh","MẬU":"Mậu","KỶ":"Kỷ","CANH":"Canh","TÂN":"Tân","NHÂM":"Nhâm","QUÝ":"Quý"};
             const CHI_NORM = {"TÝ":"Tý","SỬU":"Sửu","DẦN":"Dần","MÃO":"Mão","THÌN":"Thìn","TỴ":"Tỵ","NGỌ":"Ngọ","MÙI":"Mùi","THÂN":"Thân","DẬU":"Dậu","TUẤT":"Tuất","HỢI":"Hợi"};
 
-            function normCanText(s){ if(!s) return ""; s=(""+s).trim().toUpperCase(); return CAN_NORM[s] || s; }
-            function normChiText(s){ if(!s) return ""; s=(""+s).trim().toUpperCase(); return CHI_NORM[s] || s; }
+            function normCanText(s) { if(!s) return ""; s=(""+s).trim().toUpperCase(); return CAN_NORM[s] || s; }
+            function normChiText(s) { if(!s) return ""; s=(""+s).trim().toUpperCase(); return CHI_NORM[s] || s; }
 
-            // ===== Công thức Thập Thần =====
             const SINH = {"Mộc":"Hỏa","Hỏa":"Thổ","Thổ":"Kim","Kim":"Thủy","Thủy":"Mộc"};
             const KHAC = {"Mộc":"Thổ","Thổ":"Thủy","Thủy":"Hỏa","Hỏa":"Kim","Kim":"Mộc"};
+            function sameYinYang(a,b) { return (AM_DUONG_CAN[a]||"") === (AM_DUONG_CAN[b]||""); }
 
-            function sameYinYang(a,b){ return (AM_DUONG_CAN[a]||"") === (AM_DUONG_CAN[b]||""); }
-
+            // ĐÃ CẬP NHẬT TÊN VIẾT TẮT PHÓ TINH MỚI
             function getTenGod(dayCan, otherCan){
               const eDay = NGU_HANH_CAN[dayCan];
               const eOther = NGU_HANH_CAN[otherCan];
               if(!eDay || !eOther) return {full:"—", short:"—"};
               const sameYY = sameYinYang(dayCan, otherCan);
 
-              if(eDay === eOther) return sameYY ? {full:"Tỷ Kiên", short:"Tỷ"} : {full:"Kiếp Tài", short:"Kiếp"};
-              if(SINH[eDay] === eOther) return sameYY ? {full:"Thực Thần", short:"Thực"} : {full:"Thương Quan", short:"Thương"};
-              if(SINH[eOther] === eDay) return sameYY ? {full:"Thiên Ấn", short:"Kiêu"} : {full:"Chính Ấn", short:"C.Ấn"};
+              if(eDay === eOther) return sameYY ? {full:"Tỷ Kiên", short:"T.Kiên"} : {full:"Kiếp Tài", short:"K.Tài"};
+              if(SINH[eDay] === eOther) return sameYY ? {full:"Thực Thần", short:"T.Thần"} : {full:"Thương Quan", short:"T.Quan"};
+              if(SINH[eOther] === eDay) return sameYY ? {full:"Thiên Ấn", short:"T.Ấn"} : {full:"Chính Ấn", short:"C.Ấn"};
               if(KHAC[eDay] === eOther) return sameYY ? {full:"Thiên Tài", short:"T.Tài"} : {full:"Chính Tài", short:"C.Tài"};
-              if(KHAC[eOther] === eDay) return sameYY ? {full:"Thất Sát", short:"Sát"} : {full:"Chính Quan", short:"Quan"};
+              if(KHAC[eOther] === eDay) return sameYY ? {full:"Thất Sát", short:"T.Sát"} : {full:"Chính Quan", short:"C.Quan"};
               return {full:"—", short:"—"};
             }
 
-            // ===== Công thức 12 Trường Sinh =====
             function getTruongSinh(dayCan, chi){
               const start = TRUONG_SINH_START[dayCan];
               if(!start) return "—";
               const idxStart = CHI_ORDER.indexOf(start);
               const idxChi = CHI_ORDER.indexOf(chi);
               if(idxStart < 0 || idxChi < 0) return "—";
-              const dir = (AM_DUONG_CAN[dayCan] === "Dương") ? 1 : -1; // Dương thuận, Âm nghịch
+              const dir = (AM_DUONG_CAN[dayCan] === "Dương") ? 1 : -1;
               const delta = (idxChi - idxStart) * dir;
               const k = ((delta % 12) + 12) % 12;
               return TRUONG_SINH_STAGES[k] || "—";
             }
 
-            // ===== Auto shrink =====
-            function fitRowText(el, minPx){
-              if(!el) return;
-              minPx = minPx || 9;
-              let size = parseFloat(getComputedStyle(el).fontSize) || 14;
-              el.style.fontSize = size + "px";
-              for(let i=0;i<24;i++){
-                if(el.scrollWidth <= el.clientWidth) break;
-                size -= 0.5;
-                if(size < minPx) break;
-                el.style.fontSize = size + "px";
-              }
-            }
-
-            function setInlineRow(containerEl, values){
-              if(!containerEl) return;
-              if(!values || !values.length){ containerEl.textContent = "—"; return; }
-              containerEl.innerHTML = "";
-              values.forEach(v=>{
-                const sp=document.createElement("span");
-                sp.className="bt-inline";
-                sp.textContent=v;
-                containerEl.appendChild(sp);
-              });
-              containerEl.querySelectorAll(".bt-inline").forEach(sp=>fitRowText(sp,9));
-            }
-
-            // ===== Update 1 pillar =====
+            // GÁN HÌNH ẢNH LOGO VÀ RENDER TÀNG ẨN MÀU SẮC
             function updatePillarTenGod(prefix, dayCan){
               const canEl = document.getElementById("bt-"+prefix+"-can");
               const chiEl = document.getElementById("bt-"+prefix+"-chi");
@@ -328,21 +294,35 @@ def render_ui_battu_tietkhi(
               const can = normCanText(canEl.innerText);
               const chi = normChiText(chiEl.innerText);
 
+              // Render Hình Ảnh Chủ Tinh
               if(ctEl){
-                ctEl.textContent = (prefix==="day") ? "NHẬT CHỦ" : getTenGod(dayCan, can).full;
-                fitRowText(ctEl,10);
+                const godName = (prefix === "day") ? "Nhật Chủ" : getTenGod(dayCan, can).full;
+                const imgSrc = CHU_TINH_IMAGES[godName];
+                if(imgSrc) {
+                    ctEl.innerHTML = `<img src="${imgSrc}" class="img-logo-chutinh" alt="${godName}">`;
+                } else {
+                    ctEl.innerHTML = `<div class="fallback-ct">${godName}</div>`;
+                }
               }
 
+              // Render Tàng Ẩn & Phó Tinh song song
               const meta = CHI_TANG_CAN_META[chi] || {chu:[], kiem:[]};
               const tangList = (meta.chu||[]).concat(meta.kiem||[]);
-              const phoList = tangList.map(tc => getTenGod(dayCan, tc).short);
-
-              if(tangEl) setInlineRow(tangEl, tangList);
-              if(phoEl) setInlineRow(phoEl, phoList);
+              
+              let tangHTML = "";
+              let phoHTML = "";
+              tangList.forEach(tc => {
+                  const pt = getTenGod(dayCan, tc).short;
+                  const color = MAU_NGU_HANH[NGU_HANH_CAN[tc]] || "#333";
+                  tangHTML += `<span style="color:${color};">${tc}</span>`;
+                  phoHTML += `<span>${pt}</span>`;
+              });
+              
+              if(tangEl) tangEl.innerHTML = tangHTML;
+              if(phoEl) phoEl.innerHTML = phoHTML;
 
               if(tsEl){
                 tsEl.textContent = getTruongSinh(dayCan, chi);
-                fitRowText(tsEl,9);
               }
             }
 
@@ -353,22 +333,22 @@ def render_ui_battu_tietkhi(
               ["year","month","day","hour"].forEach(p => updatePillarTenGod(p, dayCan));
             }
 
-            function applyPillarMeta(prefix, can, chi) {{
-                const cardEl = document.getElementById(`bt-${{prefix}}-card`);
-                const canEl = document.getElementById(`bt-${{prefix}}-can`);
-                const chiEl = document.getElementById(`bt-${{prefix}}-chi`);
-                const napamEl = document.getElementById(`bt-${{prefix}}-napam`);
+            function applyPillarMeta(prefix, can, chi) {
+                const cardEl = document.getElementById(`bt-${prefix}-card`);
+                const canEl = document.getElementById(`bt-${prefix}-can`);
+                const chiEl = document.getElementById(`bt-${prefix}-chi`);
+                const napamEl = document.getElementById(`bt-${prefix}-napam`);
 
-                if (canEl) {{
+                if (canEl) {
                     canEl.textContent = String(can).toUpperCase();
                     const hanhCan = NGU_HANH_CAN[can];
                     canEl.style.color = MAU_NGU_HANH[hanhCan] || "#333";
-                }}
-                if (chiEl) {{
+                }
+                if (chiEl) {
                     chiEl.textContent = String(chi).toUpperCase();
                     const hanhChi = NGU_HANH_CHI[chi];
                     chiEl.style.color = MAU_NGU_HANH[hanhChi] || "#333";
-                }}
+                }
 
                 const napInfo = getNapAm(can, chi);
                 const napAm = napInfo[0];
@@ -376,83 +356,62 @@ def render_ui_battu_tietkhi(
                 const mauVien = MAU_NGU_HANH[hanhNa] || "#dddddd";
                 const mauNen = MAU_NEN_OMBRE[hanhNa] || "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)";
 
-                if (napamEl) {{
+                if (napamEl) {
                     napamEl.textContent = napAm;
                     napamEl.style.color = mauVien;
-                }}
-                if (cardEl) {{
+                }
+                if (cardEl) {
                     cardEl.style.background = mauNen;
-                    cardEl.style.border = `1px solid ${{mauVien}}55`;
-                }}
-            }}
-            updateThapThanAll();
-            function solarToOrdinal(y, m, d) {{
+                    cardEl.style.border = `1px solid ${mauVien}55`;
+                }
+            }
+            // Code giữ nguyên phần Update thời gian Real-time...
+            function solarToOrdinal(y, m, d) {
                 const a = Math.floor((14 - m) / 12);
                 const y1 = y + 4800 - a;
                 const m1 = m + 12 * a - 3;
                 const jdn = d + Math.floor((153 * m1 + 2) / 5) + 365 * y1 + Math.floor(y1 / 4) - Math.floor(y1 / 100) + Math.floor(y1 / 400) - 32045;
                 return jdn - 1721425;
-            }}
-
-            function getDayCanChiByAppRule(now) {{
+            }
+            function getDayCanChiByAppRule(now) {
                 const ordinal = solarToOrdinal(now.getFullYear(), now.getMonth() + 1, now.getDate());
                 const canIdx = (ordinal + 4) % 10;
                 const chiIdx = (ordinal + 2) % 12;
-                return {{ can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx], canIdx: canIdx }};
-            }}
-
-            function getHourChiIndex(hour24) {{
-                return Math.floor((hour24 + 1) / 2) % 12;
-            }}
-
-            function getHourCanChiByAppRule(now, dayCanIdx) {{
+                return { can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx], canIdx: canIdx };
+            }
+            function getHourChiIndex(hour24) { return Math.floor((hour24 + 1) / 2) % 12; }
+            function getHourCanChiByAppRule(now, dayCanIdx) {
                 const chiIdx = getHourChiIndex(now.getHours());
                 const canIdx = (dayCanIdx * 2 + chiIdx) % 10;
-                return {{ can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx] }};
-            }}
-
-            function solarObjToDate(solarObj) {{
-                return new Date(
-                    solarObj.getYear(),
-                    solarObj.getMonth() - 1,
-                    solarObj.getDay(),
-                    solarObj.getHour(),
-                    solarObj.getMinute(),
-                    solarObj.getSecond()
-                );
-            }}
-
-            function formatCountdown(ms) {{
+                return { can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx] };
+            }
+            function solarObjToDate(solarObj) {
+                return new Date(solarObj.getYear(), solarObj.getMonth() - 1, solarObj.getDay(), solarObj.getHour(), solarObj.getMinute(), solarObj.getSecond());
+            }
+            function formatCountdown(ms) {
                 if (ms < 0) ms = 0;
                 const totalSeconds = Math.floor(ms / 1000);
-                const days = Math.floor(totalSeconds / 86400);
-                const hours = Math.floor((totalSeconds % 86400) / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-                return {{ days, hours, minutes, seconds }};
-            }}
-            function resizeIframeToContent() {{
-                try {{
-                    const h = Math.max(
-                        document.body ? document.body.scrollHeight : 0,
-                        document.documentElement ? document.documentElement.scrollHeight : 0
-                    );
-                    if (window.frameElement && h > 0) {{
-                        window.frameElement.style.height = `${{h + 8}}px`;
-                    }}
-                }} catch (e) {{
-                    console.error("YLCT resize iframe error:", e);
-                }}
-            }}
-            function updateValuesFromDeviceOnly() {{
+                return { 
+                    days: Math.floor(totalSeconds / 86400),
+                    hours: Math.floor((totalSeconds % 86400) / 3600),
+                    minutes: Math.floor((totalSeconds % 3600) / 60),
+                    seconds: totalSeconds % 60 
+                };
+            }
+            function resizeIframeToContent() {
+                try {
+                    const h = Math.max(document.body ? document.body.scrollHeight : 0, document.documentElement ? document.documentElement.scrollHeight : 0);
+                    if (window.frameElement && h > 0) window.frameElement.style.height = `${h + 8}px`;
+                } catch (e) {}
+            }
+            function updateValuesFromDeviceOnly() {
                 const now = new Date();
                 setOnlyValue("year", String(now.getFullYear()));
                 setOnlyValue("month", pad2(now.getMonth() + 1));
                 setOnlyValue("day", pad2(now.getDate()));
-                setOnlyValue("hour", `${{pad2(now.getHours())}}:${{pad2(now.getMinutes())}}:${{pad2(now.getSeconds())}}`);
-            }}
-
-            function updateExactCanChi() {{
+                setOnlyValue("hour", `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`);
+            }
+            function updateExactCanChi() {
                 const now = new Date();
                 const dayInfo = getDayCanChiByAppRule(now);
                 const hourInfo = getHourCanChiByAppRule(now, dayInfo.canIdx);
@@ -461,433 +420,162 @@ def render_ui_battu_tietkhi(
                 applyPillarMeta("hour", hourInfo.can, hourInfo.chi);
 
                 if (typeof window.Solar === "undefined") return false;
-
-                const solar = window.Solar.fromYmdHms(
-                    now.getFullYear(),
-                    now.getMonth() + 1,
-                    now.getDate(),
-                    now.getHours(),
-                    now.getMinutes(),
-                    now.getSeconds()
-                );
+                const solar = window.Solar.fromYmdHms(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
                 const lunar = solar.getLunar();
-
-                const yearCan = mapCn(lunar.getYearGanExact());
-                const yearChi = mapCn(lunar.getYearZhiExact());
-                const monthCan = mapCn(lunar.getMonthGanExact());
-                const monthChi = mapCn(lunar.getMonthZhiExact());
-
-                applyPillarMeta("year", yearCan, yearChi);
-                applyPillarMeta("month", monthCan, monthChi);
+                applyPillarMeta("year", mapCn(lunar.getYearGanExact()), mapCn(lunar.getYearZhiExact()));
+                applyPillarMeta("month", mapCn(lunar.getMonthGanExact()), mapCn(lunar.getMonthZhiExact()));
+                updateThapThanAll();
                 return true;
-            }}
-
-            function getJieQiByTable(lunar, now) {{
-                if (typeof lunar.getJieQiTable !== "function") return null;
-                const table = lunar.getJieQiTable();
-                const items = [];
-                for (const name in table) {{
-                    const solarObj = table[name];
-                    if (!solarObj || typeof solarObj.getYear !== "function") continue;
-                    items.push({{ name, date: solarObjToDate(solarObj) }});
-                }}
-                items.sort((a, b) => a.date - b.date);
-
-                let current = null;
-                let next = null;
-
-                for (const item of items) {{
-                    if (item.date <= now) current = item;
-                    if (item.date > now) {{
-                        next = item;
-                        break;
-                    }}
-                }}
-                return {{ current, next }};
-            }}
-
-            function updateJieQiInfo() {{
+            }
+            function updateJieQiInfo() {
                 const currentEl = document.getElementById("bt-current-term");
                 const countdownEl = document.getElementById("bt-next-term-countdown");
                 if (!currentEl || !countdownEl) return false;
-
                 let currentName = INITIAL_CURRENT_TERM || "—";
                 let nextName = INITIAL_NEXT_TERM || "—";
                 let nextDate = INITIAL_NEXT_TERM_ISO ? new Date(INITIAL_NEXT_TERM_ISO) : null;
 
-                // Nếu JS lunar load được thì dùng kết quả exact realtime để override
-                if (typeof window.Solar !== "undefined") {{
-                    try {{
+                if (typeof window.Solar !== "undefined") {
+                    try {
                         const now = new Date();
-                        const solar = window.Solar.fromYmdHms(
-                            now.getFullYear(),
-                            now.getMonth() + 1,
-                            now.getDate(),
-                            now.getHours(),
-                            now.getMinutes(),
-                            now.getSeconds()
-                        );
-                        const lunar = solar.getLunar();
-
-                        if (typeof lunar.getPrevJieQi === "function" && typeof lunar.getNextJieQi === "function") {{
-                            const prev = lunar.getPrevJieQi(false);
-                            const next = lunar.getNextJieQi(false);
-
-                            if (prev) currentName = prev.getName();
-                            if (next) {{
-                                nextName = next.getName();
-                                nextDate = solarObjToDate(next.getSolar());
-                            }}
-                        }} else {{
-                            const data = getJieQiByTable(lunar, now);
-                            if (data) {{
-                                if (data.current) currentName = data.current.name;
-                                if (data.next) {{
-                                    nextName = data.next.name;
-                                    nextDate = data.next.date;
-                                }}
-                            }}
-                        }}
-                    }} catch (e) {{
-                        console.error("YLCT JieQi exact update error:", e);
-                    }}
-                }}
-
-                currentName = mapJieQiName(currentName);
-                nextName = mapJieQiName(nextName);
-
-                currentEl.textContent = `Tiết Khí : ${{currentName}}`;
-
-                if (!nextDate || isNaN(nextDate.getTime())) {{
+                        const lunar = window.Solar.fromYmdHms(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()).getLunar();
+                        const prev = lunar.getPrevJieQi(false);
+                        const next = lunar.getNextJieQi(false);
+                        if (prev) currentName = prev.getName();
+                        if (next) { nextName = next.getName(); nextDate = solarObjToDate(next.getSolar()); }
+                    } catch (e) {}
+                }
+                currentEl.textContent = `Tiết Khí : ${mapJieQiName(currentName)}`;
+                if (!nextDate || isNaN(nextDate.getTime())) {
                     countdownEl.textContent = "Không tìm thấy tiết khí tiếp theo";
-                    resizeIframeToContent();
-                    return true;
-                }}
-
-                const now = new Date();
-                const diff = nextDate.getTime() - now.getTime();
+                    resizeIframeToContent(); return true;
+                }
+                const diff = nextDate.getTime() - new Date().getTime();
                 const t = formatCountdown(diff);
-
-                countdownEl.textContent =
-                    `Còn ${{t.days}} ngày ${{t.hours}} giờ ${{t.minutes}} phút ${{t.seconds}} giây sang tiết khí tiếp theo : ${{nextName}}`;
-
-                resizeIframeToContent();
-                return true;
-            }}
-
-            function loadScript(src, onload, onerror) {{
+                countdownEl.textContent = `Còn ${t.days} ngày ${t.hours} giờ ${t.minutes} phút ${t.seconds} giây sang tiết khí tiếp theo : ${mapJieQiName(nextName)}`;
+                resizeIframeToContent(); return true;
+            }
+            function bootTopCards() {
+                updateValuesFromDeviceOnly(); updateExactCanChi(); updateJieQiInfo(); resizeIframeToContent();
+                if (window.__ylctBtTimer) clearInterval(window.__ylctBtTimer);
+                window.__ylctBtTimer = setInterval(() => { updateValuesFromDeviceOnly(); updateExactCanChi(); updateJieQiInfo(); resizeIframeToContent(); }, 1000);
+                if (typeof window.Solar !== "undefined") return;
                 const s = document.createElement("script");
-                s.src = src;
-                s.async = true;
-                s.onload = onload;
-                s.onerror = onerror;
+                s.src = "https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.5/lunar.min.js";
+                s.onload = () => { updateExactCanChi(); updateJieQiInfo(); resizeIframeToContent(); };
                 document.head.appendChild(s);
-            }}
-
-            function bootTopCards() {{
-                updateValuesFromDeviceOnly();
-                updateExactCanChi();
-                updateJieQiInfo();
-                resizeIframeToContent();
-
-                if (window.__ylctBtTimer) {{
-                    clearInterval(window.__ylctBtTimer);
-                }}
-
-                window.__ylctBtTimer = setInterval(() => {{
-                    try {{
-                        updateValuesFromDeviceOnly();
-                        updateExactCanChi();
-                        updateJieQiInfo();
-                        resizeIframeToContent();
-                    }} catch (e) {{
-                        console.error("YLCT top cards tick error:", e);
-                    }}
-                }}, 1000);
-
-                if (typeof window.Solar !== "undefined") {{
-                    return;
-                }}
-
-                loadScript(
-                    "https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.5/lunar.min.js",
-                    () => {{
-                        try {{
-                            updateExactCanChi();
-                            updateJieQiInfo();
-                            resizeIframeToContent();
-                        }} catch (e) {{
-                            console.error("YLCT primary CDN loaded but update failed:", e);
-                        }}
-                    }},
-                    () => {{
-                        loadScript(
-                            "https://cdn.staticfile.org/lunar-javascript/1.7.5/lunar.min.js",
-                            () => {{
-                                try {{
-                                    updateExactCanChi();
-                                    updateJieQiInfo();
-                                    resizeIframeToContent();
-                                }} catch (e) {{
-                                    console.error("YLCT fallback CDN loaded but update failed:", e);
-                                }}
-                            }},
-                            () => {{
-                                console.error("YLCT: failed to load lunar-javascript from both CDNs.");
-                            }}
-                        );
-                    }}
-                );
-            }}
-
+            }
             bootTopCards();
         </script>
         """
+        live_script = live_script_vars + live_script_logic
 
+    # CSS MỚI: TẬP TRUNG VÀO RESPONSIVE CHO CẤU TRÚC DỌC
     return f"""
     <html>
     <head>
     <style>
-        body {{
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            font-family: Arial, sans-serif;
-        }}
-        .bt-wrap {{
-            width: 100%;
-            padding: 2px 0 0 0;
-            box-sizing: border-box;
-        }}
+        body {{ margin: 0; padding: 0; font-family: "Times New Roman", serif; background: transparent; }}
         .bt-container {{
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: clamp(4px, 1vw, 12px);
-            width: 100%;
-            align-items: stretch;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 5px;
         }}
         .bt-card {{
-            min-height: clamp(150px, 12vw, 190px);
-            border-radius: clamp(12px, 1.8vw, 22px);
-            padding: clamp(8px, 1.2vw, 18px) clamp(4px, 0.8vw, 10px) clamp(8px, 1vw, 16px);
-            text-align: center;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            gap: clamp(4px, 0.7vw, 10px);
+            border-radius: 16px;
+            padding: 12px 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 1px solid #ddd;
+            text-align: center;
             box-sizing: border-box;
-            overflow: hidden;
+            background: #fff;
         }}
-        .bt-title {{
-            font-family: "Times New Roman", serif;
-            font-size: clamp(8px, 1.1vw, 15px);
-            font-weight: 700;
-            color: #8f7a6a;
-            letter-spacing: clamp(0px, 0.08vw, 1px);
-            margin-bottom: clamp(2px, 0.4vw, 4px);
-            white-space: nowrap;
+        
+        .bt-title {{ font-size: 16px; font-weight: bold; color: #777; margin-bottom: 4px; }}
+        .bt-val {{ font-size: 26px; font-weight: bold; color: #111; margin-bottom: 8px; font-family: Arial, sans-serif;}}
+        
+        /* Chỉnh hình ảnh Logo */
+        .bt-chutinh {{ min-height: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }}
+        .img-logo-chutinh {{
+            width: 80%;
+            max-width: 90px;
+            height: auto;
+            border-radius: 20px;
         }}
-        .bt-val {{
-            font-family: "Times New Roman", serif;
-            font-size: clamp(20px, 2.4vw, 42px);
-            font-weight: 700;
-            color: #444;
-            line-height: 1.02;
-            margin-bottom: clamp(4px, 0.7vw, 10px);
-            white-space: nowrap;
-        }}
-        .bt-canchi {{
-            font-family: "Times New Roman", serif;
-            font-size: clamp(14px, 1.8vw, 28px);
-            font-weight: 900;
-            line-height: 1.05;
-            margin-bottom: clamp(4px, 0.7vw, 10px);
-        }}
-        .bt-canchi span {{
-            white-space: nowrap;
-        }}
-        .bt-chutinh {{
-          font-size: clamp(10px, 1.05vw, 16px);
-          font-weight: 700;
-          line-height: 1.05;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 100%;
-        }}
+        .fallback-ct {{ font-size: 14px; font-weight: bold; background: #eee; padding: 2px 8px; border-radius: 12px; border: 1px solid #ccc; }}
 
-        .bt-tang, .bt-pho {{
-          font-size: clamp(9px, 0.95vw, 14px);
-          line-height: 1.05;
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          gap: clamp(6px, 1.2vw, 16px);
-        }}
-
-        .bt-inline {{
-          display: inline-block;
-          max-width: 48%;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }}
-
-        .bt-truongsinh {{
-          font-size: clamp(9px, 0.95vw, 14px);
-          font-weight: 700;
-          line-height: 1.05;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 100%;
-        }}
-        .bt-napam {{
-            font-size: clamp(6px, 0.9vw, 13px);
-            font-weight: 500;
+        /* Cấu trúc Can Chi dọc */
+        .bt-canchi-vert {{
+            display: flex;
+            flex-direction: column;
+            font-size: 38px;
             line-height: 1.1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            font-weight: 900;
+            margin-bottom: 12px;
         }}
-        .bt-term-wrap {{
-            width: 100%;
-            margin-top: 14px;
-            padding-top: 0px;
-            min-height: 54px;
+
+        /* Lưới hiển thị Tàng Ẩn và Phó tinh */
+        .bt-tang-pho-grid {{
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 12px;
+            gap: 4px;
         }}
-        .bt-term-current {{
-            font-size: clamp(11px, 1vw, 16px);
-            font-weight: 700;
-            color: #5b4636;
-            line-height: 1.25;
-            margin-bottom: 6px;
+        .bt-tang, .bt-pho {{
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            font-size: 15px;
+            font-weight: bold;
         }}
-        .bt-term-countdown {{
-            font-size: clamp(10px, 0.95vw, 14px);
-            font-weight: 500;
-            color: #6c6c6c;
-            line-height: 1.3;
-        }}
+        .bt-pho {{ font-weight: normal; font-family: Arial, sans-serif; font-size: 13px; color: #333; }}
+
+        .bt-truongsinh {{ font-size: 16px; font-weight: bold; color: #000; margin-bottom: 8px; }}
+        .bt-napam {{ font-size: 13px; font-weight: bold; font-family: Arial, sans-serif; }}
+
+        .bt-term-wrap {{ text-align: center; margin-top: 10px; font-family: Arial, sans-serif; }}
+        .bt-term-current {{ font-size: 16px; font-weight: bold; color: #5b4636; margin-bottom: 4px;}}
+        .bt-term-countdown {{ font-size: 14px; color: #6c6c6c; }}
+
+        /* RESPONSIVE CHO MOBILE */
         @media (max-width: 768px) {{
-            .bt-wrap {{
-                padding: 2px 0 0 0;
-            }}
-            .bt-container {{
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 6px;
-            }}
-            .bt-card {{
-                min-height: 132px;
-                border-radius: 14px;
-                padding: 8px 4px 8px 4px;
-            }}
-            .bt-title {{
-                font-size: 8px;
-                margin-bottom: 2px;
-            }}
-            .bt-val {{
-                font-size: 22px;
-                margin-bottom: 4px;
-            }}
-            .bt-canchi {{
-                font-size: 14px;
-                margin-bottom: 4px;
-            }}
-            .bt-napam {{
-                font-size: 7px;
-            }}
-            .bt-term-wrap {{
-                margin-top: 2px;
-                padding-top: 0px;
-            }}
-            .bt-term-current {{
-                font-size: 11px;
-                margin-bottom: 2px;
-            }}
-            .bt-term-countdown {{
-                font-size: 9px;
-                line-height: 1.2;
-            }}
-        }}
-        @media (max-width: 430px) {{
-            .bt-container {{
-                gap: 4px;
-            }}
-            .bt-card {{
-                min-height: 120px;
-                border-radius: 12px;
-                padding: 6px 3px 6px 3px;
-            }}
-            .bt-title {{
-                font-size: 7px;
-            }}
-            .bt-val {{
-                font-size: 18px;
-            }}
-            .bt-canchi {{
-                font-size: 11px;
-                line-height: 1.02;
-            }}
-            .bt-napam {{
-                font-size: 6px;
-            }}
-            .bt-term-current {{
-                font-size: 10px;
-            }}
-            .bt-term-countdown {{
-                font-size: 8px;
-            }}
+            .bt-container {{ gap: 6px; padding: 2px; }}
+            .bt-card {{ padding: 8px 2px; border-radius: 10px; }}
+            .bt-title {{ font-size: 12px; margin-bottom: 2px; }}
+            .bt-val {{ font-size: 18px; margin-bottom: 4px; }}
+            .img-logo-chutinh {{ max-width: 55px; border-radius: 10px; }}
+            .bt-canchi-vert {{ font-size: 24px; margin-bottom: 8px; }}
+            .bt-tang {{ font-size: 12px; }}
+            .bt-pho {{ font-size: 10px; }}
+            .bt-truongsinh {{ font-size: 12px; margin-bottom: 4px; }}
+            .bt-napam {{ font-size: 9px; }}
+            .bt-term-current {{ font-size: 13px; }}
+            .bt-term-countdown {{ font-size: 11px; }}
         }}
     </style>
     </head>
     <body>
-        <div class="bt-wrap">
-            <div class="bt-container">{cards_html}</div>
-            <div class="bt-term-wrap">
-                <div class="bt-term-current" id="bt-current-term">Tiết Khí : Đang tải...</div>
-                <div class="bt-term-countdown" id="bt-next-term-countdown">Còn ... ngày ... giờ ... phút ... giây sang tiết khí tiếp theo</div>
-            </div>
+        <div class="bt-container">{cards_html}</div>
+        <div class="bt-term-wrap">
+            <div class="bt-term-current" id="bt-current-term">Tiết Khí : Đang tải...</div>
+            <div class="bt-term-countdown" id="bt-next-term-countdown">Còn ... sang tiết khí tiếp theo</div>
         </div>
         {live_script}
         <script>
         (function() {{
             function resizeBtFrame() {{
-                const h1 = document.documentElement.scrollHeight || 0;
-                const h2 = document.body.scrollHeight || 0;
-                const realHeight = Math.max(h1, h2);
-
-                if (window.frameElement) {{
-                    window.frameElement.style.height = (realHeight + 6) + "px";
-                }}
+                const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+                if (window.frameElement) window.frameElement.style.height = (h + 10) + "px";
             }}
-
             window.addEventListener("load", resizeBtFrame);
             window.addEventListener("resize", resizeBtFrame);
-
-            setTimeout(resizeBtFrame, 50);
-            setTimeout(resizeBtFrame, 200);
             setTimeout(resizeBtFrame, 500);
-
-            const observer = new MutationObserver(function() {{
-                resizeBtFrame();
-            }});
-
-            observer.observe(document.body, {{
-                childList: true,
-                subtree: true,
-                attributes: true,
-                characterData: true
-            }});
+            new MutationObserver(resizeBtFrame).observe(document.body, {{ childList: true, subtree: true }});
         }})();
         </script>
     </body>
