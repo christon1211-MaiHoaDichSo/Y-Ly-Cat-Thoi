@@ -1359,7 +1359,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=300, scrolling=False)
+components.html(battu_top_html, height=280, scrolling=False)
 
 st.markdown(
     "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
