@@ -19,16 +19,14 @@ NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "H
 NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
 
 MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
-def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name):
-    # Lấy giờ ở giữa Canh Giờ để tính chính xác (ví dụ Ngọ = 12h)
+def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None):
     h_val = CHI_TO_HOUR[gio_chi_name] + 1
-    if h_val >= 24: h_val = 0
-    
-    # Dùng lunar_python để tính Tiết Khí
+    if h_val >= 24:
+        h_val = 0
+
     solar_lp = lunar_python.Solar.fromYmdHms(int(nam), int(thang), int(ngay), h_val, 30, 0)
     lunar_lp = solar_lp.getLunar()
-    
-    # Quy đổi Bát Tự sang Tiếng Việt
+
     can_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearGanExact()]
     chi_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearZhiExact()]
     can_thang = TU_DIEN_CAN_CHI_LP[lunar_lp.getMonthGanExact()]
@@ -37,75 +35,125 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name):
     chi_ngay = TU_DIEN_CAN_CHI_LP[lunar_lp.getDayZhiExact()]
     can_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeGan()]
     chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
-    
+
+    if gio_display is None:
+        gio_display = f"{h_val:02d}h30"
+
     pillars = [
         {"title": "NĂM", "val": str(nam), "can": can_nam, "chi": chi_nam},
         {"title": "THÁNG", "val": f"{int(thang):02d}", "can": can_thang, "chi": chi_thang},
         {"title": "NGÀY", "val": f"{int(ngay):02d}", "can": can_ngay, "chi": chi_ngay},
-        {"title": "GIỜ", "val": f"Giờ {gio_chi_name}", "can": can_gio, "chi": chi_gio}
+        {"title": "GIỜ", "val": gio_display, "can": can_gio, "chi": chi_gio},
     ]
-    
-    html_cards = ""
+
+    cards = []
     for p in pillars:
-        # Nhặt màu Can & Chi theo ngũ hành
-        mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p['can']), "#333")
-        mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p['chi']), "#333")
-        
-        # Lấy Ngũ Hành Nạp Âm của Trụ đó để làm viền và đổ bóng ombre
+        mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p["can"]), "#333")
+        mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p["chi"]), "#333")
+
         nap_am, hanh_na = NA_AM_60.get(f"{p['can']} {p['chi']}", ("Chưa rõ", "Thổ"))
         mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
-        
-        html_cards += f"""
-        <div class="bt-card" style="background: {mau_ombre}; border: 1px solid {mau_vien}60;">
-            <div class="bt-title">{p['title']}</div>
-            <div class="bt-val">{p['val']}</div>
-            <div class="bt-canchi">
-                <span style="color: {mau_can}; display: block;">{p['can'].upper()}</span>
-                <span style="color: {mau_chi}; display: block;">{p['chi'].upper()}</span>
-            </div>
-            <div class="bt-napam" style="color: {mau_vien};">{nap_am}</div>
-        </div>
-        """
-        
-    css = """
+
+        cards.append(
+            f'<div class="bt-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">'
+            f'<div class="bt-title">{p["title"]}</div>'
+            f'<div class="bt-val">{p["val"]}</div>'
+            f'<div class="bt-canchi">'
+            f'<span style="color:{mau_can}; display:block;">{p["can"].upper()}</span>'
+            f'<span style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>'
+            f'</div>'
+            f'<div class="bt-napam" style="color:{mau_vien};">{nap_am}</div>'
+            f'</div>'
+        )
+
+    cards_html = "".join(cards)
+
+    return f"""
+    <html>
+    <head>
     <style>
-    .bt-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        width: 100%;
-        margin-bottom: 25px;
-    }
-    .bt-card {
-        flex: 1;
-        border-radius: 15px;
-        padding: 20px 5px;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        transition: transform 0.2s ease;
-    }
-    .bt-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-    .bt-title { font-family: 'Times New Roman', serif; font-size: 13px; font-weight: bold; color: #999; letter-spacing: 1px; margin-bottom: 5px;}
-    .bt-val { font-size: 28px; font-weight: bold; color: #444; margin-bottom: 15px; font-family: 'Times New Roman', serif; }
-    .bt-canchi { font-size: 26px; font-weight: 900; line-height: 1.3; margin-bottom: 20px; font-family: 'Times New Roman', serif; }
-    .bt-napam { font-size: 14px; font-weight: 600; font-family: 'Arial', sans-serif;}
-    
-    /* Thiết kế riêng để lên di động không bị vỡ */
-    @media (max-width: 850px) {
-        .bt-container { gap: 10px; flex-wrap: wrap; }
-        .bt-card { min-width: 45%; flex: 1 1 45%; padding: 15px 5px; }
-        .bt-val { font-size: 22px; margin-bottom: 10px;}
-        .bt-canchi { font-size: 22px; margin-bottom: 15px;}
-        .bt-napam { font-size: 13px; }
-    }
+        body {{
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: Arial, sans-serif;
+        }}
+        .bt-wrap {{
+            width: 100%;
+            padding: 6px 0 2px 0;
+            box-sizing: border-box;
+        }}
+        .bt-container {{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            width: 100%;
+        }}
+        .bt-card {{
+            min-height: 235px;
+            border-radius: 22px;
+            padding: 18px 10px 16px 10px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }}
+        .bt-title {{
+            font-family: "Times New Roman", serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #8f7a6a;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }}
+        .bt-val {{
+            font-family: "Times New Roman", serif;
+            font-size: 52px;
+            font-weight: 700;
+            color: #444;
+            line-height: 1.05;
+            margin-bottom: 10px;
+        }}
+        .bt-canchi {{
+            font-family: "Times New Roman", serif;
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }}
+        .bt-napam {{
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.2;
+        }}
+
+        @media (max-width: 900px) {{
+            .bt-container {{
+                grid-template-columns: repeat(2, 1fr);
+            }}
+            .bt-card {{
+                min-height: 205px;
+            }}
+            .bt-val {{
+                font-size: 40px;
+            }}
+            .bt-canchi {{
+                font-size: 30px;
+            }}
+        }}
     </style>
+    </head>
+    <body>
+        <div class="bt-wrap">
+            <div class="bt-container">{cards_html}</div>
+        </div>
+    </body>
+    </html>
     """
-    
     return f"{css}<div class='bt-container'>{html_cards}</div>"
 
 # Hiệu ứng Ombre (chuyển màu từ trắng sang nhạt) dành cho nền các Thẻ
@@ -823,24 +871,22 @@ st.markdown(
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
-components.html("""
-<div style="text-align: center; font-family: sans-serif; padding: 15px; background-color: #1E2022; color: white; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
-    <div style="font-size: 16px;">Dương Lịch (Đồng bộ theo múi giờ thiết bị của bạn)</div>
-    <div id="clock" style="font-size: 24px; font-weight: bold; color: #D3A352; margin-top: 5px;">Đang tải thời gian...</div>
-</div>
-<script>
-    function updateTime() {
-        var now = new Date();
-        var days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-        var dayName = days[now.getDay()];
-        var dateStr = now.toLocaleDateString('vi-VN');
-        var timeStr = now.toLocaleTimeString('vi-VN');
-        document.getElementById('clock').innerHTML = "Hôm Nay Là : " + dayName + ", " + dateStr + " | " + timeStr;
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
-</script>
-""", height=110)
+now_top = datetime.datetime.now()
+
+nam_top = st.session_state.get("duong_nam", now_top.year)
+thang_top = st.session_state.get("duong_thang", now_top.month)
+ngay_top = st.session_state.get("duong_ngay", now_top.day)
+gio_top = st.session_state.get("gio_kham", CHI[((now_top.hour + 1) // 2) % 12])
+
+battu_top_html = render_ui_battu_tietkhi(
+    nam_top,
+    thang_top,
+    ngay_top,
+    gio_top,
+    gio_display=now_top.strftime("%Hh%M")
+)
+
+components.html(battu_top_html, height=285, scrolling=False)
 
 st.markdown("---")
 
@@ -967,9 +1013,6 @@ with col_trai:
     key="gio_kham"
 )
 
-    # Vẽ 4 ô Tứ Trụ theo lịch Tiết Khí, chỉ để HIỂN THỊ GIAO DIỆN
-    battu_html = render_ui_battu_tietkhi(nam_duong, thang_duong, ngay_duong, gio_kham)
-    st.markdown(battu_html, unsafe_allow_html=True)
 
     loai_hoat_dong = st.selectbox(
         "Loại hoạt động y khoa",
