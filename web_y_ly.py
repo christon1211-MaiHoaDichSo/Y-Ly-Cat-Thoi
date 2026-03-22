@@ -1321,7 +1321,7 @@ if bg_base64:
     .stApp {{
         /* Dùng linear-gradient phủ màu trắng đè lên hình để tạo hiệu ứng opacity */
         background-image: linear-gradient(rgba(255, 255, 255, {overlay_opacity}), rgba(255, 255, 255, {overlay_opacity})), url("data:image/png;base64,{bg_base64}");
-        background-size: 300px; /* Chỉnh kích thước lặp lại của monogram, bạn có thể tăng giảm số này */
+        background-size: 200px; /* Chỉnh kích thước lặp lại của monogram, bạn có thể tăng giảm số này */
         background-repeat: repeat;
         background-attachment: fixed;
         background-position: center;
