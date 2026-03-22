@@ -28,12 +28,36 @@ NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "H
 NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
 
 MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
-def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, live_from_device=False):
-    h_val = CHI_TO_HOUR[gio_chi_name] + 1
-    if h_val >= 24:
-        h_val = 0
+def render_ui_battu_tietkhi(
+    nam,
+    thang,
+    ngay,
+    gio_chi_name,
+    gio_display=None,
+    live_from_device=False,
+    actual_hour=None,
+    actual_minute=None,
+    actual_second=None
+):
+    if actual_hour is None:
+        h_val = CHI_TO_HOUR[gio_chi_name] + 1
+        if h_val >= 24:
+            h_val = 0
+        m_val = 30
+        s_val = 0
+    else:
+        h_val = int(actual_hour)
+        m_val = int(actual_minute or 0)
+        s_val = int(actual_second or 0)
 
-    solar_lp = lunar_python.Solar.fromYmdHms(int(nam), int(thang), int(ngay), h_val, 30, 0)
+    solar_lp = lunar_python.Solar.fromYmdHms(
+        int(nam),
+        int(thang),
+        int(ngay),
+        h_val,
+        m_val,
+        s_val
+    )
     lunar_lp = solar_lp.getLunar()
 
     can_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearGanExact()]
@@ -165,7 +189,16 @@ def render_ui_battu_tietkhi(nam, thang, ngay, gio_chi_name, gio_display=None, li
                 if (typeof window.Solar === "undefined") return false;
 
                 const now = new Date();
-                const solar = window.Solar.fromDate(now);
+
+                const solar = Solar.fromYmdHms(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    now.getDate(),
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds()
+                );
+
                 const lunar = solar.getLunar();
 
                 const yearCan = mapCn(lunar.getYearGanExact());
@@ -1087,7 +1120,10 @@ battu_top_html = render_ui_battu_tietkhi(
     now_top.day,
     gio_top,
     gio_display=now_top.strftime("%H:%M:%S"),
-    live_from_device=True
+    live_from_device=True,
+    actual_hour=now_top.hour,
+    actual_minute=now_top.minute,
+    actual_second=now_top.second
 )
 
 components.html(battu_top_html, height=300, scrolling=False)
