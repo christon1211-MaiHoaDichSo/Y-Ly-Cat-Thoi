@@ -28,6 +28,32 @@ NGU_HANH_CAN = {"Giáp": "Mộc", "Ất": "Mộc", "Bính": "Hỏa", "Đinh": "H
 NGU_HANH_CHI = {"Dần": "Mộc", "Mão": "Mộc", "Tỵ": "Hỏa", "Ngọ": "Hỏa", "Thìn": "Thổ", "Tuất": "Thổ", "Sửu": "Thổ", "Mùi": "Thổ", "Thân": "Kim", "Dậu": "Kim", "Hợi": "Thủy", "Tý": "Thủy"}
 
 MAU_NGU_HANH = {"Hỏa": "#d90000", "Thủy": "#0066d9", "Mộc": "#006c00", "Kim": "#7e7e7e", "Thổ": "#8b6200"}
+JIEQI_VIET = {
+    "立春": "Lập Xuân",
+    "雨水": "Vũ Thủy",
+    "惊蛰": "Kinh Trập",
+    "春分": "Xuân Phân",
+    "清明": "Thanh Minh",
+    "谷雨": "Cốc Vũ",
+    "立夏": "Lập Hạ",
+    "小满": "Tiểu Mãn",
+    "芒种": "Mang Chủng",
+    "夏至": "Hạ Chí",
+    "小暑": "Tiểu Thử",
+    "大暑": "Đại Thử",
+    "立秋": "Lập Thu",
+    "处暑": "Xử Thử",
+    "白露": "Bạch Lộ",
+    "秋分": "Thu Phân",
+    "寒露": "Hàn Lộ",
+    "霜降": "Sương Giáng",
+    "立冬": "Lập Đông",
+    "小雪": "Tiểu Tuyết",
+    "大雪": "Đại Tuyết",
+    "冬至": "Đông Chí",
+    "小寒": "Tiểu Hàn",
+    "大寒": "Đại Hàn"
+}
 def render_ui_battu_tietkhi(
     nam,
     thang,
@@ -129,7 +155,7 @@ def render_ui_battu_tietkhi(
         current_jq_name_json = json.dumps(current_jq_name, ensure_ascii=False)
         next_jq_name_json = json.dumps(next_jq_name, ensure_ascii=False)
         next_jq_iso_json = json.dumps(next_jq_iso, ensure_ascii=False)
-
+        jieqi_viet_json = json.dumps(JIEQI_VIET, ensure_ascii=False)
         live_script = f"""
         <script>
             const TU_DIEN = {tu_dien_json};
@@ -143,7 +169,7 @@ def render_ui_battu_tietkhi(
             const INITIAL_CURRENT_TERM = {current_jq_name_json};
             const INITIAL_NEXT_TERM = {next_jq_name_json};
             const INITIAL_NEXT_TERM_ISO = {next_jq_iso_json};
-
+            const JIEQI_VIET = {jieqi_viet_json};
             function pad2(n) {{
                 return String(n).padStart(2, "0");
             }}
@@ -162,6 +188,9 @@ def render_ui_battu_tietkhi(
                 return TU_DIEN[ch] || ch;
             }}
 
+            function mapJieQiName(name) {{
+                return JIEQI_VIET[name] || name || "—";
+            }}
             function applyPillarMeta(prefix, can, chi) {{
                 const cardEl = document.getElementById(`bt-${{prefix}}-card`);
                 const canEl = document.getElementById(`bt-${{prefix}}-can`);
@@ -247,7 +276,7 @@ def render_ui_battu_tietkhi(
                         document.documentElement ? document.documentElement.scrollHeight : 0
                     );
                     if (window.frameElement && h > 0) {{
-                        window.frameElement.style.height = `${{h + 4}}px`;
+                        window.frameElement.style.height = `${{h + 8}}px`;
                     }}
                 }} catch (e) {{
                     console.error("YLCT resize iframe error:", e);
@@ -361,6 +390,9 @@ def render_ui_battu_tietkhi(
                         console.error("YLCT JieQi exact update error:", e);
                     }}
                 }}
+
+                currentName = mapJieQiName(currentName);
+                nextName = mapJieQiName(nextName);
 
                 currentEl.textContent = `Tiết Khí : ${{currentName}}`;
 
@@ -1482,11 +1514,21 @@ with col_trai:
     )
 
     # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
-    data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
-    st.info(
-        f"Luận giải bên dưới vẫn dùng lịch âm cũ: "
-        f"Năm {data['nam']} | Tháng {data['thang']} | Ngày {data['ngay']}"
-    )
+        data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
+
+        solar_now_legacy = Solar(now.year, now.month, now.day)
+        gio_now_legacy = CHI_TO_HOUR[CHI[((now.hour + 1) // 2) % 12]]
+        data_now_legacy = tinh_can_chi_tu_ngay_duong(solar_now_legacy, gio_now_legacy)
+
+        st.info(
+            f"Âm Lịch Hôm Nay : "
+            f"Năm {data_now_legacy['nam']} | Tháng {data_now_legacy['thang']} | Ngày {data_now_legacy['ngay']}"
+        )
+
+        st.caption(
+            f"Phần luận giải bên dưới vẫn dùng ngày bạn chọn ở form: "
+            f"Năm {data['nam']} | Tháng {data['thang']} | Ngày {data['ngay']}"
+        )
 
 # 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
