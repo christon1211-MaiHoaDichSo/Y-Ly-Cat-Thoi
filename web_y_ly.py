@@ -1049,12 +1049,15 @@ st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
 now_top = get_device_now()
 
-gio_top = CHI[((now_top.hour + 1) // 2) % 12]
+nam_top = st.session_state.get("duong_nam", now_top.year)
+thang_top = st.session_state.get("duong_thang", now_top.month)
+ngay_top = st.session_state.get("duong_ngay", now_top.day)
+gio_top = st.session_state.get("gio_kham", CHI[((now_top.hour + 1) // 2) % 12])
 
 battu_top_html = render_ui_battu_tietkhi(
-    now_top.year,
-    now_top.month,
-    now_top.day,
+    nam_top,
+    thang_top,
+    ngay_top,
     gio_top,
     gio_display=now_top.strftime("%H:%M:%S"),
     live_from_device=True
