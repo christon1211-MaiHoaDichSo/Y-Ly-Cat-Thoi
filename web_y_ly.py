@@ -504,22 +504,28 @@ def render_ui_battu_tietkhi(
             line-height: 1;
         }}
         
-        /* CHỈNH ẢNH LOGO THẬP THẦN (Đã phóng to và căn giữa tuyệt đối) */
+        /* CHỈNH ẢNH LOGO THẬP THẦN: CẮT XÉN VIỀN TRONG SUỐT BẰNG OVERFLOW */
         .bt-chutinh {{ 
+            position: relative; /* Tạo mỏ neo cho ảnh */
+            height: 40px; /* Chiều cao an toàn, không đè chữ Can Chi */
+            width: 100%;
+            margin-bottom: 8px;
+            overflow: hidden; /* CỰC KỲ QUAN TRỌNG: Cắt gọt toàn bộ viền trong suốt bị tràn */
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 8px;
-            height: 35px; /* Tăng không gian hiển thị */
-            width: 100%;
         }}
+        
         .img-logo-chutinh {{
-            height: 10px; /* Phóng to để phá bỏ lớp viền trong suốt */
+            position: absolute; /* Rút ảnh khỏi bố cục HTML để không đẩy các chữ khác */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Neo chính giữa tuyệt đối tâm khung */
+            height: 350px; /* Ép kích thước ảnh thật to để logo bên trong to lên. BẠN TĂNG/GIẢM SỐ NÀY ĐỂ CHỈNH ĐỘ TO */
             width: auto;
-            transform: scale(12.5); /* Phóng to logo lên cho rõ nét */
-            transform-origin: center center; /* Khóa tâm, chống lệch */
+            max-width: none; /* Gỡ bỏ giới hạn chiều rộng */
+            pointer-events: none; /* Chống lỗi click nhầm */
         }}
-        .fallback-ct {{ font-size: 12px; font-weight: bold; background: #fff; padding: 3px 12px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; }}
 
         /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
         /* Thu nhỏ chữ BÍNH NGỌ... (Giảm từ 32px xuống 26px) */
@@ -567,9 +573,9 @@ def render_ui_battu_tietkhi(
             .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
             .bt-val {{ font-size: 26px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 4px; height: 30px; }}
-            .img-logo-chutinh {{ height: 10px; transform: scale(5.5); }}
-            .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
+            .bt-chutinh {{ margin-bottom: 6px; height: 30px; }}
+            .img-logo-chutinh {{ height: 260px }}
+
 
             .bt-canchi-vert {{ font-size: 20px; margin-bottom: 10px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
             
