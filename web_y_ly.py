@@ -514,8 +514,8 @@ def render_ui_battu_tietkhi(
         
         .img-logo-chutinh {{
             position: absolute;
-            top: 50%;
-            left: 60%;
+            top: 100%;
+            left: 63%;
             /* BỘ ĐIỀU KHIỂN HOÀN HẢO: 
                - translate(-50%, -50%) ép nó vào đúng tâm điểm 100%. 
                - scale(1.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
