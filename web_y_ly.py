@@ -17,6 +17,12 @@ def get_device_now():
             pass
     return datetime.datetime.now()
 
+def get_client_layout():
+    raw = st.query_params.get("client_layout")
+    if raw:
+        return str(raw).strip().lower()
+    return "desktop"
+
 # THÊM DÒNG NÀY ĐỂ DÙNG LỊCH TIẾT KHÍ:
 import lunar_python
 # ==============================================================================
@@ -1254,50 +1260,31 @@ components.html("""
     const stamp = `${dateKey}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
     const tz = String(now.getTimezoneOffset());
 
+    const vw = Math.max(
+        window.parent.innerWidth || 0,
+        window.innerWidth || 0,
+        document.documentElement.clientWidth || 0
+    );
+
+    const layout = vw <= 768 ? "mobile" : "desktop";
+
     const url = new URL(window.parent.location.href);
     const oldNow = url.searchParams.get("client_now");
     const oldDate = url.searchParams.get("client_date");
     const oldTz = url.searchParams.get("client_tz");
+    const oldLayout = url.searchParams.get("client_layout");
 
-    // Chỉ ép rerun khi:
-    // 1) chưa có dữ liệu client,
-    // 2) đổi ngày trên thiết bị,
-    // 3) đổi timezone / thiết bị
-    if (!oldNow || !oldDate || oldDate !== dateKey || oldTz !== tz) {
+    if (!oldNow || !oldDate || oldDate !== dateKey || oldTz !== tz || oldLayout !== layout) {
         url.searchParams.set("client_now", stamp);
         url.searchParams.set("client_date", dateKey);
         url.searchParams.set("client_tz", tz);
+        url.searchParams.set("client_layout", layout);
         window.parent.location.replace(url.toString());
     }
 })();
 </script>
 """, height=0)
 st.set_option("client.toolbarMode", "minimal")
-components.html("""
-<script>
-(function () {
-    function pad2(n) { return String(n).padStart(2, "0"); }
-
-    const now = new Date();
-    const dateKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
-    const stamp = `${dateKey}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
-    const tz = String(now.getTimezoneOffset());
-
-    const url = new URL(window.parent.location.href);
-    const oldNow = url.searchParams.get("client_now");
-    const oldDate = url.searchParams.get("client_date");
-    const oldTz = url.searchParams.get("client_tz");
-
-    if (!oldNow || !oldDate || oldDate !== dateKey || oldTz !== tz) {
-        url.searchParams.set("client_now", stamp);
-        url.searchParams.set("client_date", dateKey);
-        url.searchParams.set("client_tz", tz);
-        window.parent.location.replace(url.toString());
-    }
-})();
-</script>
-""", height=0)
-
 
 # --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
@@ -1383,6 +1370,7 @@ st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
 now_top = get_device_now()
 gio_top = CHI[((now_top.hour + 1) // 2) % 12]
+client_layout = get_client_layout()
 
 battu_top_html = render_ui_battu_tietkhi(
     now_top.year,
@@ -1396,7 +1384,8 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=260, scrolling=False)
+top_cards_height = 200 if client_layout == "mobile" else 260
+components.html(battu_top_html, height=top_cards_height, scrolling=False)
 
 st.markdown(
     "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
