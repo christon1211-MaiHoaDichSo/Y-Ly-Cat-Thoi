@@ -960,18 +960,17 @@ with col_trai:
     # 3.3 Nhóm các công cụ thao tác (Đã cấp key="gio_kham" để cách ly CSS)
 
     gio_kham = st.selectbox(
-        "Giờ Khám (Địa Chi)", 
-        CHI, 
-        index=((now.hour + 1) // 2) % 12,
-        format_func=lambda x: GIO_HIENTHI[x],
-        key="gio_kham"
-    )
-    # GỌI HÀM VẼ TỨ TRỤ TIẾT KHÍ NGAY SAU KHI ĐÃ CÓ BIẾN DỮ LIỆU
-    # -------------------------------------------------------------
+    "Giờ Khám (Địa Chi)", 
+    CHI, 
+    index=((now.hour + 1) // 2) % 12,
+    format_func=lambda x: GIO_HIENTHI[x],
+    key="gio_kham"
+)
+
+    # Vẽ 4 ô Tứ Trụ theo lịch Tiết Khí, chỉ để HIỂN THỊ GIAO DIỆN
     battu_html = render_ui_battu_tietkhi(nam_duong, thang_duong, ngay_duong, gio_kham)
-    battu_placeholder.markdown(battu_html, unsafe_allow_html=True)
-    
-    
+    st.markdown(battu_html, unsafe_allow_html=True)
+
     loai_hoat_dong = st.selectbox(
         "Loại hoạt động y khoa",
         [
@@ -1021,7 +1020,10 @@ with col_trai:
 
     # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
     data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
-    st.info(f"**Năm:** {data['nam']} | **Tháng:** {data['thang']} | **Ngày:** {data['ngay']}")
+    st.info(
+        f"Luận giải bên dưới vẫn dùng lịch âm cũ: "
+        f"Năm {data['nam']} | Tháng {data['thang']} | Ngày {data['ngay']}"
+    )
 
 # 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
@@ -1247,7 +1249,7 @@ if btn_phan_tich:
             st.warning("""
             Hệ thống phát hiện dấu hiệu nguy hiểm liên quan đến tính mạng. 
             Tuyệt đối không dùng thuốc Nam hay chờ đợi giờ tốt lúc này.
-            **YÊU CẦU:** Gọi ngay cấp cứu 115 hoặc đến bệnh viện gần nhất ngay lập tức!
+            **YÊU CẦU:** Gọi ngay cấp cứu  hoặc đến bệnh viện gần nhất ngay lập tức!
             """)
         else:
             # Nếu an toàn, tiếp tục phân tích Dịch Lý và gọi AI
