@@ -518,9 +518,9 @@ def render_ui_battu_tietkhi(
             left: 62.5%;
             /* BỘ ĐIỀU KHIỂN HOÀN HẢO: 
                - translate(-50%, -50%) ép nó vào đúng tâm điểm 100%. 
-               - scale(2.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
+               - scale(5.8) sẽ phóng nó to đùng. (Hãy tăng lên 2.0 hoặc 2.5 nếu chưa đủ đô!) 
             */
-            transform: translate(-50%, -50%) scale(1.8); 
+            transform: translate(-50%, -50%) scale(5.8); 
             height: 280px; /* Ép cái khung ảo to ra */
             width: auto;
             pointer-events: none; /* Cực kỳ quan trọng: Làm cho viền trong suốt trở nên "xuyên thấu", không chặn chuột của bạn */
