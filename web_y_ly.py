@@ -489,36 +489,43 @@ def render_ui_battu_tietkhi(
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             text-align: center;
             box-sizing: border-box;
-            min-height: max-content; /* Không cho phép ép lùn Card */
+            min-height: max-content; 
         }}
         
-        /* CHỈNH ẢNH LOGO THẬP THẦN (BÙ TRỪ PHẦN TRONG SUỐT BỊ DƯ) */
+        /* Chữ Năm, Tháng, Ngày, Giờ (Đã phóng to) */
+        .bt-title {{ font-size: 18px; font-weight: bold; color: #777; margin-bottom: 2px; text-transform: capitalize;}}
+        .bt-val {{ font-size: 28px; font-weight: bold; color: #111; margin-bottom: 12px; font-family: Arial, sans-serif; line-height: 1;}}
+        
+        /* CHỈNH ẢNH LOGO THẬP THẦN (Đã phóng to và căn giữa tuyệt đối) */
         .bt-chutinh {{ 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 8px;
-            height: 35px; /* Khung hiển thị an toàn */
+            margin-bottom: 10px;
+            height: 45px; /* Tăng không gian hiển thị */
+            width: 100%;
         }}
         .img-logo-chutinh {{
-            height: 140px; /* Phóng to ảnh gấp 6 lần để phá bỏ lớp viền trong suốt */
+            height: 160px; /* Phóng to để phá bỏ lớp viền trong suốt */
             width: auto;
             object-fit: contain;
-            margin: -50px 0; /* Cắt gọt rìa trong suốt thừa ở trên và dưới */
-            transform: scale(1.3); /* Phóng to logo lên cho rõ nét */
+            margin: -55px 0; /* Cắt gọt rìa trong suốt thừa */
+            transform: scale(1.4); /* Phóng to logo lên cho rõ nét */
+            transform-origin: center center; /* Khóa tâm, chống lệch */
         }}
+        .fallback-ct {{ font-size: 12px; font-weight: bold; background: #fff; padding: 3px 12px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; }}
 
-        /* Cấu trúc Can Chi dọc */
+        /* Cấu trúc Can Chi dọc (Đã thu nhỏ lại cho cân đối) */
         .bt-canchi-vert {{
             display: flex;
             flex-direction: column;
-            font-size: 42px;
+            font-size: 32px; /* Đã thu nhỏ từ 42px xuống 32px */
             line-height: 1.15;
             font-weight: 900;
             margin-bottom: 16px;
             letter-spacing: 1px;
-            flex-shrink: 0; /* QUAN TRỌNG: Khóa cứng, không cho phép ép dẹp đè chữ */
-            gap: 4px; /* Tách khoảng cách giữa Can và Chi ra một chút */
+            flex-shrink: 0; 
+            gap: 4px; 
         }}
 
         /* Lưới hiển thị Tàng Ẩn và Phó tinh */
@@ -545,18 +552,19 @@ def render_ui_battu_tietkhi(
         .bt-term-current {{ font-size: 16px; font-weight: bold; color: #5b4636; margin-bottom: 4px;}}
         .bt-term-countdown {{ font-size: 14px; color: #6c6c6c; }}
 
-        /* RESPONSIVE CHO ĐIỆN THOẠI - THU GỌN VỪA VẶN MÀ KHÔNG TRÀN */
+        /* RESPONSIVE CHO ĐIỆN THOẠI */
         @media (max-width: 768px) {{
             .bt-container {{ gap: 6px; padding: 2px; }}
             .bt-card {{ padding: 10px 4px; border-radius: 14px; }}
-            .bt-title {{ font-size: 12px; margin-bottom: 2px; }}
+            
+            .bt-title {{ font-size: 14px; margin-bottom: 2px; }} /* Phóng to trên Mobile */
             .bt-val {{ font-size: 20px; margin-bottom: 8px; }}
             
-            .bt-chutinh {{ margin-bottom: 8px; height: 25px; }}
-            .img-logo-chutinh {{ height: 100px; margin: -35px 0; transform: scale(1.2); }}
+            .bt-chutinh {{ margin-bottom: 8px; height: 30px; }}
+            .img-logo-chutinh {{ height: 120px; margin: -45px 0; transform: scale(1.3); }}
             .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
 
-            .bt-canchi-vert {{ font-size: 26px; margin-bottom: 12px; flex-shrink: 0; }}
+            .bt-canchi-vert {{ font-size: 24px; margin-bottom: 12px; flex-shrink: 0; }} /* Thu nhỏ trên mobile */
             
             .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
             .bt-tang {{ font-size: 13px; }}
