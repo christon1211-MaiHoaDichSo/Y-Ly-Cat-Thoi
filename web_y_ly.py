@@ -50,14 +50,7 @@ def render_ui_battu_tietkhi(
         m_val = int(actual_minute or 0)
         s_val = int(actual_second or 0)
 
-    solar_lp = lunar_python.Solar.fromYmdHms(
-        int(nam),
-        int(thang),
-        int(ngay),
-        h_val,
-        m_val,
-        s_val
-    )
+    solar_lp = lunar_python.Solar.fromYmdHms(int(nam), int(thang), int(ngay), h_val, m_val, s_val)
     lunar_lp = solar_lp.getLunar()
 
     can_nam = TU_DIEN_CAN_CHI_LP[lunar_lp.getYearGanExact()]
@@ -70,7 +63,7 @@ def render_ui_battu_tietkhi(
     chi_gio = TU_DIEN_CAN_CHI_LP[lunar_lp.getTimeZhi()]
 
     if gio_display is None:
-        gio_display = f"{h_val:02d}:30:00"
+        gio_display = f"{h_val:02d}:{m_val:02d}:{s_val:02d}"
 
     pillars = [
         {"key": "year",  "title": "NĂM",   "val": str(nam),            "can": can_nam,   "chi": chi_nam},
@@ -83,25 +76,20 @@ def render_ui_battu_tietkhi(
     for p in pillars:
         mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p["can"]), "#333")
         mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p["chi"]), "#333")
-
         nap_am, hanh_na = NA_AM_60.get(f"{p['can']} {p['chi']}", ("Chưa rõ", "Thổ"))
         mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
-
         prefix = p["key"]
-
         cards.append(
-            f'''
-            <div class="bt-card" id="bt-{prefix}-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">
-                <div class="bt-title">{p["title"]}</div>
-                <div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>
-                <div class="bt-canchi">
-                    <span id="bt-{prefix}-can" style="color:{mau_can}; display:block;">{p["can"].upper()}</span>
-                    <span id="bt-{prefix}-chi" style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>
-                </div>
-                <div class="bt-napam" id="bt-{prefix}-napam" style="color:{mau_vien};">{nap_am}</div>
-            </div>
-            '''
+            f'<div class="bt-card" id="bt-{prefix}-card" style="background:{mau_ombre}; border:1px solid {mau_vien}55;">'
+            f'<div class="bt-title">{p["title"]}</div>'
+            f'<div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>'
+            f'<div class="bt-canchi">'
+            f'<span id="bt-{prefix}-can" style="color:{mau_can}; display:block;">{p["can"].upper()}</span>'
+            f'<span id="bt-{prefix}-chi" style="color:{mau_chi}; display:block;">{p["chi"].upper()}</span>'
+            f'</div>'
+            f'<div class="bt-napam" id="bt-{prefix}-napam" style="color:{mau_vien};">{nap_am}</div>'
+            f'</div>'
         )
 
     cards_html = "".join(cards)
@@ -126,55 +114,6 @@ def render_ui_battu_tietkhi(
             const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
             const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
 
-            function solarToOrdinal(y, m, d) {{
-                const a = Math.floor((14 - m) / 12);
-                const y1 = y + 4800 - a;
-                const m1 = m + 12 * a - 3;
-                const jdn =
-                    d +
-                    Math.floor((153 * m1 + 2) / 5) +
-                    365 * y1 +
-                    Math.floor(y1 / 4) -
-                    Math.floor(y1 / 100) +
-                    Math.floor(y1 / 400) -
-                    32045;
-
-                // Python date.toordinal(): 0001-01-01 = 1
-                return jdn - 1721425;
-            }}
-
-            function getDayCanChiByAppRule(now) {{
-                const ordinal = solarToOrdinal(
-                    now.getFullYear(),
-                    now.getMonth() + 1,
-                    now.getDate()
-                );
-
-                const canIdx = (ordinal + 4) % 10;
-                const chiIdx = (ordinal + 2) % 12;
-
-                return {{
-                    can: CAN_ORDER[canIdx],
-                    chi: CHI_ORDER[chiIdx],
-                    canIdx: canIdx,
-                    chiIdx: chiIdx
-                }};
-            }}
-
-            function getHourChiIndex(hour24) {{
-                return Math.floor((hour24 + 1) / 2) % 12;
-            }}
-
-            function getHourCanChiByAppRule(now, dayCanIdx) {{
-                const chiIdx = getHourChiIndex(now.getHours());
-                const canIdx = (dayCanIdx * 2 + chiIdx) % 10;
-
-                return {{
-                    can: CAN_ORDER[canIdx],
-                    chi: CHI_ORDER[chiIdx]
-                }};
-            }}
-
             function pad2(n) {{
                 return String(n).padStart(2, "0");
             }}
@@ -193,74 +132,6 @@ def render_ui_battu_tietkhi(
                 return TU_DIEN[ch] || ch;
             }}
 
-            function solarObjToDate(solarObj) {
-                return new Date(
-                    solarObj.getYear(),
-                    solarObj.getMonth() - 1,
-                    solarObj.getDay(),
-                    solarObj.getHour(),
-                    solarObj.getMinute(),
-                    solarObj.getSecond()
-                );
-            }
-
-            function formatCountdown(ms) {
-                if (ms < 0) ms = 0;
-
-                const totalSeconds = Math.floor(ms / 1000);
-                const days = Math.floor(totalSeconds / 86400);
-                const hours = Math.floor((totalSeconds % 86400) / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-
-                return { days, hours, minutes, seconds };
-            }
-
-            function updateJieQiInfo() {
-                const currentEl = document.getElementById("bt-current-term");
-                const countdownEl = document.getElementById("bt-next-term-countdown");
-
-                if (!currentEl || !countdownEl) return false;
-                if (typeof window.Solar === "undefined") return false;
-
-                const now = new Date();
-
-                const solar = window.Solar.fromYmdHms(
-                    now.getFullYear(),
-                    now.getMonth() + 1,
-                    now.getDate(),
-                    now.getHours(),
-                    now.getMinutes(),
-                    now.getSeconds()
-                );
-
-                const lunar = solar.getLunar();
-
-                const currentExact = lunar.getCurrentJieQi ? lunar.getCurrentJieQi() : null;
-                const prevJieQi = lunar.getPrevJieQi(false);
-                const nextJieQi = lunar.getNextJieQi(false);
-
-                const currentName = currentExact
-                    ? currentExact.getName()
-                    : (prevJieQi ? prevJieQi.getName() : "—");
-
-                currentEl.textContent = `Tiết Khí : ${currentName}`;
-
-                if (!nextJieQi) {
-                    countdownEl.textContent = "Không tìm thấy tiết khí tiếp theo";
-                    return true;
-                }
-
-    const nextName = nextJieQi.getName();
-    const nextDate = solarObjToDate(nextJieQi.getSolar());
-    const diff = nextDate.getTime() - now.getTime();
-    const t = formatCountdown(diff);
-
-    countdownEl.textContent =
-        `Còn ${t.days} ngày ${t.hours} giờ ${t.minutes} phút ${t.seconds} giây sang tiết khí ${nextName}`;
-
-    return true;
-}
             function applyPillarMeta(prefix, can, chi) {{
                 const cardEl = document.getElementById(`bt-${{prefix}}-card`);
                 const canEl = document.getElementById(`bt-${{prefix}}-can`);
@@ -272,7 +143,6 @@ def render_ui_battu_tietkhi(
                     const hanhCan = NGU_HANH_CAN[can];
                     canEl.style.color = MAU_NGU_HANH[hanhCan] || "#333";
                 }}
-
                 if (chiEl) {{
                     chiEl.textContent = String(chi).toUpperCase();
                     const hanhChi = NGU_HANH_CHI[chi];
@@ -289,11 +159,56 @@ def render_ui_battu_tietkhi(
                     napamEl.textContent = napAm;
                     napamEl.style.color = mauVien;
                 }}
-
                 if (cardEl) {{
                     cardEl.style.background = mauNen;
                     cardEl.style.border = `1px solid ${{mauVien}}55`;
                 }}
+            }}
+
+            function solarToOrdinal(y, m, d) {{
+                const a = Math.floor((14 - m) / 12);
+                const y1 = y + 4800 - a;
+                const m1 = m + 12 * a - 3;
+                const jdn = d + Math.floor((153 * m1 + 2) / 5) + 365 * y1 + Math.floor(y1 / 4) - Math.floor(y1 / 100) + Math.floor(y1 / 400) - 32045;
+                return jdn - 1721425;
+            }}
+
+            function getDayCanChiByAppRule(now) {{
+                const ordinal = solarToOrdinal(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                const canIdx = (ordinal + 4) % 10;
+                const chiIdx = (ordinal + 2) % 12;
+                return {{ can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx], canIdx: canIdx }};
+            }}
+
+            function getHourChiIndex(hour24) {{
+                return Math.floor((hour24 + 1) / 2) % 12;
+            }}
+
+            function getHourCanChiByAppRule(now, dayCanIdx) {{
+                const chiIdx = getHourChiIndex(now.getHours());
+                const canIdx = (dayCanIdx * 2 + chiIdx) % 10;
+                return {{ can: CAN_ORDER[canIdx], chi: CHI_ORDER[chiIdx] }};
+            }}
+
+            function solarObjToDate(solarObj) {{
+                return new Date(
+                    solarObj.getYear(),
+                    solarObj.getMonth() - 1,
+                    solarObj.getDay(),
+                    solarObj.getHour(),
+                    solarObj.getMinute(),
+                    solarObj.getSecond()
+                );
+            }}
+
+            function formatCountdown(ms) {{
+                if (ms < 0) ms = 0;
+                const totalSeconds = Math.floor(ms / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                return {{ days, hours, minutes, seconds }};
             }}
 
             function updateValuesFromDeviceOnly() {{
@@ -306,15 +221,12 @@ def render_ui_battu_tietkhi(
 
             function updateExactCanChi() {{
                 const now = new Date();
-
-                // DAY / HOUR dùng đúng công thức gốc của app
                 const dayInfo = getDayCanChiByAppRule(now);
                 const hourInfo = getHourCanChiByAppRule(now, dayInfo.canIdx);
 
                 applyPillarMeta("day", dayInfo.can, dayInfo.chi);
                 applyPillarMeta("hour", hourInfo.can, hourInfo.chi);
 
-                // YEAR / MONTH vẫn giữ theo tiết khí exact nếu 6tail load được
                 if (typeof window.Solar === "undefined") return false;
 
                 const solar = window.Solar.fromYmdHms(
@@ -325,18 +237,94 @@ def render_ui_battu_tietkhi(
                     now.getMinutes(),
                     now.getSeconds()
                 );
-
                 const lunar = solar.getLunar();
 
                 const yearCan = mapCn(lunar.getYearGanExact());
                 const yearChi = mapCn(lunar.getYearZhiExact());
-
                 const monthCan = mapCn(lunar.getMonthGanExact());
                 const monthChi = mapCn(lunar.getMonthZhiExact());
 
                 applyPillarMeta("year", yearCan, yearChi);
                 applyPillarMeta("month", monthCan, monthChi);
+                return true;
+            }}
 
+            function getJieQiByTable(lunar, now) {{
+                if (typeof lunar.getJieQiTable !== "function") return null;
+                const table = lunar.getJieQiTable();
+                const items = [];
+                for (const name in table) {{
+                    const solarObj = table[name];
+                    if (!solarObj || typeof solarObj.getYear !== "function") continue;
+                    items.push({{ name, date: solarObjToDate(solarObj) }});
+                }}
+                items.sort((a, b) => a.date - b.date);
+
+                let current = null;
+                let next = null;
+
+                for (const item of items) {{
+                    if (item.date <= now) current = item;
+                    if (item.date > now) {{
+                        next = item;
+                        break;
+                    }}
+                }}
+                return {{ current, next }};
+            }}
+
+            function updateJieQiInfo() {{
+                const currentEl = document.getElementById("bt-current-term");
+                const countdownEl = document.getElementById("bt-next-term-countdown");
+                if (!currentEl || !countdownEl) return false;
+                if (typeof window.Solar === "undefined") return false;
+
+                const now = new Date();
+                const solar = window.Solar.fromYmdHms(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    now.getDate(),
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds()
+                );
+                const lunar = solar.getLunar();
+
+                let currentName = "—";
+                let nextName = "—";
+                let nextDate = null;
+
+                if (typeof lunar.getPrevJieQi === "function" && typeof lunar.getNextJieQi === "function") {{
+                    const prev = lunar.getPrevJieQi(false);
+                    const next = lunar.getNextJieQi(false);
+
+                    if (prev) currentName = prev.getName();
+                    if (next) {{
+                        nextName = next.getName();
+                        nextDate = solarObjToDate(next.getSolar());
+                    }}
+                }} else {{
+                    const data = getJieQiByTable(lunar, now);
+                    if (data) {{
+                        if (data.current) currentName = data.current.name;
+                        if (data.next) {{
+                            nextName = data.next.name;
+                            nextDate = data.next.date;
+                        }}
+                    }}
+                }}
+
+                currentEl.textContent = `Tiết Khí : ${{currentName}}`;
+
+                if (!nextDate) {{
+                    countdownEl.textContent = "Không tìm thấy tiết khí tiếp theo";
+                    return true;
+                }}
+
+                const diff = nextDate.getTime() - now.getTime();
+                const t = formatCountdown(diff);
+
+                countdownEl.textContent = `Còn ${{t.days}} ngày ${{t.hours}} giờ ${{t.minutes}} phút ${{t.seconds}} giây sang tiết khí ${{nextName}}`;
                 return true;
             }}
 
@@ -358,15 +346,15 @@ def render_ui_battu_tietkhi(
                     clearInterval(window.__ylctBtTimer);
                 }}
 
-                window.__ylctBtTimer = setInterval(() => {
-                    try {
+                window.__ylctBtTimer = setInterval(() => {{
+                    try {{
                         updateValuesFromDeviceOnly();
                         updateExactCanChi();
                         updateJieQiInfo();
-                    } catch (e) {
+                    }} catch (e) {{
                         console.error("YLCT top cards tick error:", e);
-                    }
-                }, 1000);
+                    }}
+                }}, 1000);
 
                 if (typeof window.Solar !== "undefined") {{
                     return;
@@ -377,8 +365,9 @@ def render_ui_battu_tietkhi(
                     () => {{
                         try {{
                             updateExactCanChi();
+                            updateJieQiInfo();
                         }} catch (e) {{
-                            console.error("YLCT primary CDN loaded but exact update failed:", e);
+                            console.error("YLCT primary CDN loaded but update failed:", e);
                         }}
                     }},
                     () => {{
@@ -387,8 +376,9 @@ def render_ui_battu_tietkhi(
                             () => {{
                                 try {{
                                     updateExactCanChi();
+                                    updateJieQiInfo();
                                 }} catch (e) {{
-                                    console.error("YLCT fallback CDN loaded but exact update failed:", e);
+                                    console.error("YLCT fallback CDN loaded but update failed:", e);
                                 }}
                             }},
                             () => {{
@@ -413,28 +403,18 @@ def render_ui_battu_tietkhi(
             background: transparent;
             font-family: Arial, sans-serif;
         }}
-    <style>
-        body {{
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            font-family: Arial, sans-serif;
-        }}
-
         .bt-wrap {{
             width: 100%;
-            padding: 4px 0 2px 0;
+            padding: 2px 0 0 0;
             box-sizing: border-box;
         }}
-
         .bt-container {{
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: clamp(4px, 1vw, 14px);
+            gap: clamp(4px, 1vw, 12px);
             width: 100%;
             align-items: stretch;
         }}
-
         .bt-card {{
             min-height: clamp(128px, 17vw, 235px);
             border-radius: clamp(12px, 1.8vw, 22px);
@@ -448,7 +428,6 @@ def render_ui_battu_tietkhi(
             box-sizing: border-box;
             overflow: hidden;
         }}
-
         .bt-title {{
             font-family: "Times New Roman", serif;
             font-size: clamp(8px, 1.1vw, 15px);
@@ -458,7 +437,6 @@ def render_ui_battu_tietkhi(
             margin-bottom: clamp(2px, 0.4vw, 4px);
             white-space: nowrap;
         }}
-
         .bt-val {{
             font-family: "Times New Roman", serif;
             font-size: clamp(20px, 3.2vw, 52px);
@@ -468,7 +446,6 @@ def render_ui_battu_tietkhi(
             margin-bottom: clamp(4px, 0.7vw, 10px);
             white-space: nowrap;
         }}
-
         .bt-canchi {{
             font-family: "Times New Roman", serif;
             font-size: clamp(14px, 2.5vw, 38px);
@@ -476,11 +453,9 @@ def render_ui_battu_tietkhi(
             line-height: 1.05;
             margin-bottom: clamp(4px, 0.7vw, 10px);
         }}
-
         .bt-canchi span {{
             white-space: nowrap;
         }}
-
         .bt-napam {{
             font-size: clamp(6px, 0.9vw, 13px);
             font-weight: 500;
@@ -490,7 +465,6 @@ def render_ui_battu_tietkhi(
             text-overflow: ellipsis;
             max-width: 100%;
         }}
-
         .bt-term-wrap {{
             width: 100%;
             margin-top: 8px;
@@ -498,7 +472,6 @@ def render_ui_battu_tietkhi(
             text-align: center;
             box-sizing: border-box;
         }}
-
         .bt-term-current {{
             font-size: clamp(11px, 1vw, 16px);
             font-weight: 700;
@@ -506,114 +479,89 @@ def render_ui_battu_tietkhi(
             line-height: 1.25;
             margin-bottom: 4px;
         }}
-
         .bt-term-countdown {{
             font-size: clamp(10px, 0.95vw, 14px);
             font-weight: 500;
             color: #6c6c6c;
             line-height: 1.25;
         }}
-
         @media (max-width: 768px) {{
             .bt-wrap {{
                 padding: 2px 0 0 0;
             }}
-
             .bt-container {{
                 grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 6px;
             }}
-
             .bt-card {{
-                min-height: 150px;
+                min-height: 132px;
                 border-radius: 14px;
                 padding: 8px 4px 8px 4px;
             }}
-
             .bt-title {{
                 font-size: 8px;
                 margin-bottom: 2px;
             }}
-
             .bt-val {{
                 font-size: 22px;
                 margin-bottom: 4px;
             }}
-
             .bt-canchi {{
                 font-size: 14px;
                 margin-bottom: 4px;
             }}
-
             .bt-napam {{
                 font-size: 7px;
             }}
-        }}
-
-        @media (max-width: 430px) {{
-            .bt-container {{
-                gap: 4px;
-            }}
-
-            .bt-card {{
-                min-height: 132px;
-                border-radius: 12px;
-                padding: 6px 3px 6px 3px;
-            }}
-
-            .bt-title {{
-                font-size: 7px;
-            }}
-
-            .bt-val {{
-                font-size: 18px;
-            }}
-
-            .bt-canchi {{
-                font-size: 11px;
-                line-height: 1.02;
-            }}
-
-            .bt-napam {{
-                font-size: 6px;
-            }}
-        @media (max-width: 768px) {{
             .bt-term-wrap {{
                 margin-top: 6px;
                 padding-top: 2px;
             }}
-
             .bt-term-current {{
                 font-size: 11px;
                 margin-bottom: 3px;
             }}
-
             .bt-term-countdown {{
                 font-size: 9px;
             }}
         }}
-
         @media (max-width: 430px) {{
+            .bt-container {{
+                gap: 4px;
+            }}
+            .bt-card {{
+                min-height: 120px;
+                border-radius: 12px;
+                padding: 6px 3px 6px 3px;
+            }}
+            .bt-title {{
+                font-size: 7px;
+            }}
+            .bt-val {{
+                font-size: 18px;
+            }}
+            .bt-canchi {{
+                font-size: 11px;
+                line-height: 1.02;
+            }}
+            .bt-napam {{
+                font-size: 6px;
+            }}
             .bt-term-current {{
                 font-size: 10px;
             }}
-
             .bt-term-countdown {{
                 font-size: 8px;
             }}
         }}
-
     </style>
     </head>
     <body>
         <div class="bt-wrap">
             <div class="bt-container">{cards_html}</div>
-
             <div class="bt-term-wrap">
-                <div class="bt-term-current" id="bt-current-term">Tiết Khí: Đang tải...</div>
-                <div class="bt-term-countdown" id="bt-next-term-countdown">
-                    Còn ... ngày ... giờ ... phút ... giây sang tiết khí tiếp theo
-                </div>
+                <div class="bt-term-current" id="bt-current-term">Tiết Khí : Đang tải...</div>
+                <div class="bt-term-countdown" id="bt-next-term-countdown">Còn ... ngày ... giờ ... phút ... giây sang tiết khí tiếp theo</div>
             </div>
         </div>
         {live_script}
@@ -1199,85 +1147,7 @@ components.html("""
 </script>
 """, height=0)
 st.set_option("client.toolbarMode", "minimal")
-# --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
-# 1. Hàm đọc và mã hóa file logo của bạn (Giữ nguyên)
-def get_base64_of_bin_file(bin_file):
-    try:
-        with open(bin_file, 'rb') as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    except FileNotFoundError:
-        # Nếu không tìm thấy file, trả về chuỗi rỗng để không bị lỗi app
-        return "" 
-
-img_base64 = get_base64_of_bin_file('logo.png')
-
-st.markdown(f"""
-<style>
-/* Thanh logo + tiêu đề giả lập nằm trong vùng header trắng */
-.ylct-chrome-center {{
-    position: fixed;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 998;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    /* Không chặn bấm vào Share / 3 chấm / icon */
-    pointer-events: none;
-
-    /* Giữ vùng giữa, chừa chỗ cho icon bên phải */
-    max-width: min(56vw, 760px);
-    width: max-content;
-    padding: 0 8px;
-    box-sizing: border-box;
-}}
-
-.ylct-chrome-center img {{
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    flex-shrink: 0;
-}}
-
-.ylct-chrome-center .ylct-chrome-title {{
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1;
-    color: #1f2430;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}}
-
-/* Mobile: giữ 1 hàng nhỏ gọn */
-@media (max-width: 768px) {{
-    .ylct-chrome-center {{
-        top: 10px;
-        gap: 6px;
-        max-width: calc(100vw - 150px); /* chừa chỗ cho icon/menu */
-    }}
-
-    .ylct-chrome-center img {{
-        width: 24px;
-        height: 24px;
-    }}
-
-    .ylct-chrome-center .ylct-chrome-title {{
-        font-size: 13px;
-    }}
-}}
-</style>
-
-<div class="ylct-chrome-center">
-    <img src="data:image/png;base64,{img_base64}">
-    <div class="ylct-chrome-title">Y Lý Cát Thời Dân Gian</div>
-</div>
-""", unsafe_allow_html=True)
 
 # --- KHU VỰC TIÊU ĐỀ STICKY HEADER MỚI (CHỐNG TRÀN, PHÓNG TO LOGO, ĐỒNG NHẤT PC & MOBILE) ---
 
