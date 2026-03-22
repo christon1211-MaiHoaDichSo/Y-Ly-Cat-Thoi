@@ -505,7 +505,7 @@ def render_ui_battu_tietkhi(
             align-items: stretch;
         }}
         .bt-card {{
-            min-height: clamp(128px, 17vw, 235px);
+            min-height: clamp(150px, 12vw, 190px);
             border-radius: clamp(12px, 1.8vw, 22px);
             padding: clamp(8px, 1.2vw, 18px) clamp(4px, 0.8vw, 10px) clamp(8px, 1vw, 16px);
             text-align: center;
@@ -528,7 +528,7 @@ def render_ui_battu_tietkhi(
         }}
         .bt-val {{
             font-family: "Times New Roman", serif;
-            font-size: clamp(20px, 3.2vw, 52px);
+            font-size: clamp(20px, 2.4vw, 42px);
             font-weight: 700;
             color: #444;
             line-height: 1.02;
@@ -537,7 +537,7 @@ def render_ui_battu_tietkhi(
         }}
         .bt-canchi {{
             font-family: "Times New Roman", serif;
-            font-size: clamp(14px, 2.5vw, 38px);
+            font-size: clamp(14px, 1.8vw, 28px);
             font-weight: 900;
             line-height: 1.05;
             margin-bottom: clamp(4px, 0.7vw, 10px);
@@ -1359,7 +1359,7 @@ battu_top_html = render_ui_battu_tietkhi(
     actual_second=now_top.second
 )
 
-components.html(battu_top_html, height=150, scrolling=False)
+components.html(battu_top_html, height=300, scrolling=False)
 
 st.markdown(
     "<div style='height:8px;border-top:1px solid #d9d9d9;margin:4px 0 0 0;'></div>",
