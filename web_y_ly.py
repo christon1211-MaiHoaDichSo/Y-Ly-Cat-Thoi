@@ -502,7 +502,7 @@ def render_ui_battu_tietkhi(
             align-items: center; 
             justify-content: center; 
             margin-bottom: 10px;
-            height: 45px; /* Tăng không gian hiển thị */
+            height: 100px; /* Tăng không gian hiển thị */
             width: 100%;
         }}
         .img-logo-chutinh {{
