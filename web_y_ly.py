@@ -123,6 +123,57 @@ def render_ui_battu_tietkhi(
             const NGU_HANH_CAN = {ngu_hanh_can_json};
             const NGU_HANH_CHI = {ngu_hanh_chi_json};
             const MAU_NEN_OMBRE = {mau_nen_ombre_json};
+            const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
+            const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
+
+            function solarToOrdinal(y, m, d) {{
+                const a = Math.floor((14 - m) / 12);
+                const y1 = y + 4800 - a;
+                const m1 = m + 12 * a - 3;
+                const jdn =
+                    d +
+                    Math.floor((153 * m1 + 2) / 5) +
+                    365 * y1 +
+                    Math.floor(y1 / 4) -
+                    Math.floor(y1 / 100) +
+                    Math.floor(y1 / 400) -
+                    32045;
+
+                // Python date.toordinal(): 0001-01-01 = 1
+                return jdn - 1721425;
+            }}
+
+            function getDayCanChiByAppRule(now) {{
+                const ordinal = solarToOrdinal(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    now.getDate()
+                );
+
+                const canIdx = (ordinal + 4) % 10;
+                const chiIdx = (ordinal + 2) % 12;
+
+                return {{
+                    can: CAN_ORDER[canIdx],
+                    chi: CHI_ORDER[chiIdx],
+                    canIdx: canIdx,
+                    chiIdx: chiIdx
+                }};
+            }}
+
+            function getHourChiIndex(hour24) {{
+                return Math.floor((hour24 + 1) / 2) % 12;
+            }}
+
+            function getHourCanChiByAppRule(now, dayCanIdx) {{
+                const chiIdx = getHourChiIndex(now.getHours());
+                const canIdx = (dayCanIdx * 2 + chiIdx) % 10;
+
+                return {{
+                    can: CAN_ORDER[canIdx],
+                    chi: CHI_ORDER[chiIdx]
+                }};
+            }}
 
             function pad2(n) {{
                 return String(n).padStart(2, "0");
@@ -186,11 +237,19 @@ def render_ui_battu_tietkhi(
             }}
 
             function updateExactCanChi() {{
-                if (typeof window.Solar === "undefined") return false;
-
                 const now = new Date();
 
-                const solar = Solar.fromYmdHms(
+                // DAY / HOUR dùng đúng công thức gốc của app
+                const dayInfo = getDayCanChiByAppRule(now);
+                const hourInfo = getHourCanChiByAppRule(now, dayInfo.canIdx);
+
+                applyPillarMeta("day", dayInfo.can, dayInfo.chi);
+                applyPillarMeta("hour", hourInfo.can, hourInfo.chi);
+
+                // YEAR / MONTH vẫn giữ theo tiết khí exact nếu 6tail load được
+                if (typeof window.Solar === "undefined") return false;
+
+                const solar = window.Solar.fromYmdHms(
                     now.getFullYear(),
                     now.getMonth() + 1,
                     now.getDate(),
@@ -207,16 +266,8 @@ def render_ui_battu_tietkhi(
                 const monthCan = mapCn(lunar.getMonthGanExact());
                 const monthChi = mapCn(lunar.getMonthZhiExact());
 
-                const dayCan = mapCn(lunar.getDayGanExact());
-                const dayChi = mapCn(lunar.getDayZhiExact());
-
-                const hourCan = mapCn(lunar.getTimeGan());
-                const hourChi = mapCn(lunar.getTimeZhi());
-
                 applyPillarMeta("year", yearCan, yearChi);
                 applyPillarMeta("month", monthCan, monthChi);
-                applyPillarMeta("day", dayCan, dayChi);
-                applyPillarMeta("hour", hourCan, hourChi);
 
                 return true;
             }}
@@ -231,9 +282,8 @@ def render_ui_battu_tietkhi(
             }}
 
             function bootTopCards() {{
-                // Luôn cho số giờ/ngày/tháng/năm chạy theo device ngay lập tức,
-                // dù thư viện can-chi có load kịp hay không.
                 updateValuesFromDeviceOnly();
+                updateExactCanChi();
 
                 if (window.__ylctBtTimer) {{
                     clearInterval(window.__ylctBtTimer);
@@ -249,7 +299,6 @@ def render_ui_battu_tietkhi(
                 }}, 1000);
 
                 if (typeof window.Solar !== "undefined") {{
-                    updateExactCanChi();
                     return;
                 }}
 
