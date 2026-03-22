@@ -1513,22 +1513,23 @@ with col_trai:
         key="btn_phan_tich"
     )
 
+
     # 4. Tính toán Dịch Lý và thanh hiển thị Tứ Trụ
-        data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
+    data = tinh_can_chi_tu_ngay_duong(solar_date, CHI_TO_HOUR[gio_kham])
 
-        solar_now_legacy = Solar(now.year, now.month, now.day)
-        gio_now_legacy = CHI_TO_HOUR[CHI[((now.hour + 1) // 2) % 12]]
-        data_now_legacy = tinh_can_chi_tu_ngay_duong(solar_now_legacy, gio_now_legacy)
+    solar_now_legacy = Solar(now.year, now.month, now.day)
+    gio_now_legacy = CHI_TO_HOUR[CHI[((now.hour + 1) // 2) % 12]]
+    data_now_legacy = tinh_can_chi_tu_ngay_duong(solar_now_legacy, gio_now_legacy)
 
-        st.info(
-            f"Âm Lịch Hôm Nay : "
-            f"Năm {data_now_legacy['nam']} | Tháng {data_now_legacy['thang']} | Ngày {data_now_legacy['ngay']}"
-        )
+    st.info(
+        f"Âm Lịch Hôm Nay : "
+        f"Năm {data_now_legacy['nam']} | Tháng {data_now_legacy['thang']} | Ngày {data_now_legacy['ngay']}"
+    )
 
-        st.caption(
-            f"Phần luận giải bên dưới vẫn dùng ngày bạn chọn ở form: "
-            f"Năm {data['nam']} | Tháng {data['thang']} | Ngày {data['ngay']}"
-        )
+    st.caption(
+        f"Phần luận giải bên dưới vẫn dùng ngày bạn chọn ở form: "
+        f"Năm {data['nam']} | Tháng {data['thang']} | Ngày {data['ngay']}"
+    )
 
 # 5. Khung Cột Phải (Bảng 12 Giờ)
 with col_phai:
