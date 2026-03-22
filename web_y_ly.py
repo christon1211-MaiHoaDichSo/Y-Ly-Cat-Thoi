@@ -556,8 +556,13 @@ def render_ui_battu_tietkhi(
         }}
         .bt-term-wrap {{
             width: 100%;
-            margin-top: 4px;
-            padding-top: 1px;
+            margin-top: 14px;
+            padding-top: 0px;
+            min-height: 54px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
             box-sizing: border-box;
         }}
@@ -566,13 +571,13 @@ def render_ui_battu_tietkhi(
             font-weight: 700;
             color: #5b4636;
             line-height: 1.25;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }}
         .bt-term-countdown {{
             font-size: clamp(10px, 0.95vw, 14px);
             font-weight: 500;
             color: #6c6c6c;
-            line-height: 1.25;
+            line-height: 1.3;
         }}
         @media (max-width: 768px) {{
             .bt-wrap {{
