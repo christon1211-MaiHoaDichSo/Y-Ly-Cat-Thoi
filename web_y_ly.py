@@ -178,18 +178,21 @@ def render_ui_battu_tietkhi(
     cards = []
     for p in pillars:
         nap_am, hanh_na = NA_AM_60.get(f"{p['can']} {p['chi']}", ("Chưa rõ", "Thổ"))
+        mau_can = MAU_NGU_HANH.get(NGU_HANH_CAN.get(p["can"]), "#333")
+        mau_chi = MAU_NGU_HANH.get(NGU_HANH_CHI.get(p["chi"]), "#333")
+        mau_ombre = MAU_NEN_OMBRE.get(hanh_na, "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)")
         mau_vien = MAU_NGU_HANH.get(hanh_na, "#dddddd")
         prefix = p["key"]
         
-        # HTML Cấu trúc thẻ dọc giống ảnh thiết kế của bạn
+        # BƠM MÀU TRỰC TIẾP TỪ PYTHON ĐỂ KHÔNG BAO GIỜ BỊ TRẮNG XÓA
         cards.append(
-            f'<div class="bt-card" id="bt-{prefix}-card">'
+            f'<div class="bt-card" id="bt-{prefix}-card" style="background:{mau_ombre}; border: 1.5px solid {mau_vien}88;">'
             f'  <div class="bt-title">{p["title"]}</div>'
             f'  <div class="bt-val" id="bt-{prefix}-val">{p["val"]}</div>'
             f'  <div class="bt-chutinh" id="bt-{prefix}-ct"></div>'
             f'  <div class="bt-canchi-vert">'
-            f'      <div id="bt-{prefix}-can" class="bt-can">{p["can"].upper()}</div>'
-            f'      <div id="bt-{prefix}-chi" class="bt-chi">{p["chi"].upper()}</div>'
+            f'      <div id="bt-{prefix}-can" class="bt-can" style="color:{mau_can};">{p["can"].upper()}</div>'
+            f'      <div id="bt-{prefix}-chi" class="bt-chi" style="color:{mau_chi};">{p["chi"].upper()}</div>'
             f'  </div>'
             f'  <div class="bt-tang-pho-grid">'
             f'      <div class="bt-tang" id="bt-{prefix}-tang"></div>'
@@ -204,7 +207,7 @@ def render_ui_battu_tietkhi(
     
     live_script = ""
     if live_from_device:
-        # PHẦN 1: DÙNG F-STRING ĐỂ BƠM BIẾN VÀO JS MÀ KHÔNG GÂY LỖI LOGIC
+        # PHẦN 1: BƠM BIẾN (F-STRING)
         live_script_vars = f"""
         <script>
             const TU_DIEN = {json.dumps(TU_DIEN_CAN_CHI_LP, ensure_ascii=False)};
@@ -224,12 +227,12 @@ def render_ui_battu_tietkhi(
             const CAN_ORDER = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
             const CHI_ORDER = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
             
-            // MAP HÌNH ẢNH LOGO VÀO JS
-            const CHU_TINH_IMAGES = {json.dumps(DICT_HINH_CHU_TINH, ensure_ascii=False)};
+            // MAP HÌNH ẢNH LOGO (Bạn nhớ giữ hàm load_chutinh_images() ở trên nhé)
+            const CHU_TINH_IMAGES = {json.dumps(DICT_HINH_CHU_TINH, ensure_ascii=False) if 'DICT_HINH_CHU_TINH' in globals() else "{}"};
         </script>
         """
 
-        # PHẦN 2: CHUỖI RAW STRING BÌNH THƯỜNG DÀNH CHO LOGIC (KHÔNG BỊ LỖI DẤU NGOẶC)
+        # PHẦN 2: LOGIC JS (CHUỖI RAW THÔNG THƯỜNG - KHÔNG SỢ LỖI { })
         live_script_logic = """
         <script>
             function pad2(n) { return String(n).padStart(2, "0"); }
@@ -254,7 +257,6 @@ def render_ui_battu_tietkhi(
             const KHAC = {"Mộc":"Thổ","Thổ":"Thủy","Thủy":"Hỏa","Hỏa":"Kim","Kim":"Mộc"};
             function sameYinYang(a,b) { return (AM_DUONG_CAN[a]||"") === (AM_DUONG_CAN[b]||""); }
 
-            // ĐÃ CẬP NHẬT TÊN VIẾT TẮT PHÓ TINH MỚI
             function getTenGod(dayCan, otherCan){
               const eDay = NGU_HANH_CAN[dayCan];
               const eOther = NGU_HANH_CAN[otherCan];
@@ -281,7 +283,6 @@ def render_ui_battu_tietkhi(
               return TRUONG_SINH_STAGES[k] || "—";
             }
 
-            // GÁN HÌNH ẢNH LOGO VÀ RENDER TÀNG ẨN MÀU SẮC
             function updatePillarTenGod(prefix, dayCan){
               const canEl = document.getElementById("bt-"+prefix+"-can");
               const chiEl = document.getElementById("bt-"+prefix+"-chi");
@@ -291,21 +292,23 @@ def render_ui_battu_tietkhi(
               const tsEl  = document.getElementById("bt-"+prefix+"-ts");
               if(!canEl || !chiEl) return;
 
-              const can = normCanText(canEl.innerText);
-              const chi = normChiText(chiEl.innerText);
+              // Lấy textContent để an toàn 100%
+              const can = normCanText(canEl.textContent);
+              const chi = normChiText(chiEl.textContent);
 
-              // Render Hình Ảnh Chủ Tinh
+              // 1. Chèn Logo Chủ Tinh
               if(ctEl){
                 const godName = (prefix === "day") ? "Nhật Chủ" : getTenGod(dayCan, can).full;
                 const imgSrc = CHU_TINH_IMAGES[godName];
-                if(imgSrc) {
+                if(imgSrc && imgSrc.length > 10) {
                     ctEl.innerHTML = `<img src="${imgSrc}" class="img-logo-chutinh" alt="${godName}">`;
                 } else {
-                    ctEl.innerHTML = `<div class="fallback-ct">${godName}</div>`;
+                    // Fallback cực đẹp nếu bạn lỡ xóa file png
+                    ctEl.innerHTML = `<div class="fallback-ct">${godName.toUpperCase()}</div>`;
                 }
               }
 
-              // Render Tàng Ẩn & Phó Tinh song song
+              // 2. Chèn Tàng Ẩn (có màu) & Phó Tinh (viết tắt)
               const meta = CHI_TANG_CAN_META[chi] || {chu:[], kiem:[]};
               const tangList = (meta.chu||[]).concat(meta.kiem||[]);
               
@@ -321,15 +324,14 @@ def render_ui_battu_tietkhi(
               if(tangEl) tangEl.innerHTML = tangHTML;
               if(phoEl) phoEl.innerHTML = phoHTML;
 
-              if(tsEl){
-                tsEl.textContent = getTruongSinh(dayCan, chi);
-              }
+              // 3. Trường Sinh
+              if(tsEl) tsEl.textContent = getTruongSinh(dayCan, chi);
             }
 
             function updateThapThanAll(){
               const dayCanEl = document.getElementById("bt-day-can");
               if(!dayCanEl) return;
-              const dayCan = normCanText(dayCanEl.innerText);
+              const dayCan = normCanText(dayCanEl.textContent);
               ["year","month","day","hour"].forEach(p => updatePillarTenGod(p, dayCan));
             }
 
@@ -341,31 +343,26 @@ def render_ui_battu_tietkhi(
 
                 if (canEl) {
                     canEl.textContent = String(can).toUpperCase();
-                    const hanhCan = NGU_HANH_CAN[can];
-                    canEl.style.color = MAU_NGU_HANH[hanhCan] || "#333";
+                    canEl.style.color = MAU_NGU_HANH[NGU_HANH_CAN[can]] || "#333";
                 }
                 if (chiEl) {
                     chiEl.textContent = String(chi).toUpperCase();
-                    const hanhChi = NGU_HANH_CHI[chi];
-                    chiEl.style.color = MAU_NGU_HANH[hanhChi] || "#333";
+                    chiEl.style.color = MAU_NGU_HANH[NGU_HANH_CHI[chi]] || "#333";
                 }
 
                 const napInfo = getNapAm(can, chi);
-                const napAm = napInfo[0];
-                const hanhNa = napInfo[1];
-                const mauVien = MAU_NGU_HANH[hanhNa] || "#dddddd";
-                const mauNen = MAU_NEN_OMBRE[hanhNa] || "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)";
+                const mauVien = MAU_NGU_HANH[napInfo[1]] || "#dddddd";
 
                 if (napamEl) {
-                    napamEl.textContent = napAm;
+                    napamEl.textContent = napInfo[0];
                     napamEl.style.color = mauVien;
                 }
                 if (cardEl) {
-                    cardEl.style.background = mauNen;
-                    cardEl.style.border = `1px solid ${mauVien}55`;
+                    cardEl.style.background = MAU_NEN_OMBRE[napInfo[1]] || "linear-gradient(180deg, #fff 0%, #f0f0f0 100%)";
+                    cardEl.style.border = `1.5px solid ${mauVien}88`;
                 }
             }
-            // Code giữ nguyên phần Update thời gian Real-time...
+
             function solarToOrdinal(y, m, d) {
                 const a = Math.floor((14 - m) / 12);
                 const y1 = y + 4800 - a;
@@ -391,12 +388,7 @@ def render_ui_battu_tietkhi(
             function formatCountdown(ms) {
                 if (ms < 0) ms = 0;
                 const totalSeconds = Math.floor(ms / 1000);
-                return { 
-                    days: Math.floor(totalSeconds / 86400),
-                    hours: Math.floor((totalSeconds % 86400) / 3600),
-                    minutes: Math.floor((totalSeconds % 3600) / 60),
-                    seconds: totalSeconds % 60 
-                };
+                return { days: Math.floor(totalSeconds / 86400), hours: Math.floor((totalSeconds % 86400) / 3600), minutes: Math.floor((totalSeconds % 3600) / 60), seconds: totalSeconds % 60 };
             }
             function resizeIframeToContent() {
                 try {
@@ -411,6 +403,7 @@ def render_ui_battu_tietkhi(
                 setOnlyValue("day", pad2(now.getDate()));
                 setOnlyValue("hour", `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`);
             }
+
             function updateExactCanChi() {
                 const now = new Date();
                 const dayInfo = getDayCanChiByAppRule(now);
@@ -419,14 +412,18 @@ def render_ui_battu_tietkhi(
                 applyPillarMeta("day", dayInfo.can, dayInfo.chi);
                 applyPillarMeta("hour", hourInfo.can, hourInfo.chi);
 
-                if (typeof window.Solar === "undefined") return false;
-                const solar = window.Solar.fromYmdHms(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
-                const lunar = solar.getLunar();
-                applyPillarMeta("year", mapCn(lunar.getYearGanExact()), mapCn(lunar.getYearZhiExact()));
-                applyPillarMeta("month", mapCn(lunar.getMonthGanExact()), mapCn(lunar.getMonthZhiExact()));
-                updateThapThanAll();
+                if (typeof window.Solar !== "undefined") {
+                    const solar = window.Solar.fromYmdHms(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+                    const lunar = solar.getLunar();
+                    applyPillarMeta("year", mapCn(lunar.getYearGanExact()), mapCn(lunar.getYearZhiExact()));
+                    applyPillarMeta("month", mapCn(lunar.getMonthGanExact()), mapCn(lunar.getMonthZhiExact()));
+                }
+                
+                // ĐÂY LÀ CHÌA KHÓA: Gọi hàm tính thập thần luôn luôn chạy dù Lịch Âm tải xong hay chưa
+                updateThapThanAll(); 
                 return true;
             }
+
             function updateJieQiInfo() {
                 const currentEl = document.getElementById("bt-current-term");
                 const countdownEl = document.getElementById("bt-next-term-countdown");
@@ -455,6 +452,7 @@ def render_ui_battu_tietkhi(
                 countdownEl.textContent = `Còn ${t.days} ngày ${t.hours} giờ ${t.minutes} phút ${t.seconds} giây sang tiết khí tiếp theo : ${mapJieQiName(nextName)}`;
                 resizeIframeToContent(); return true;
             }
+
             function bootTopCards() {
                 updateValuesFromDeviceOnly(); updateExactCanChi(); updateJieQiInfo(); resizeIframeToContent();
                 if (window.__ylctBtTimer) clearInterval(window.__ylctBtTimer);
@@ -470,7 +468,7 @@ def render_ui_battu_tietkhi(
         """
         live_script = live_script_vars + live_script_logic
 
-    # CSS MỚI: TẬP TRUNG VÀO RESPONSIVE CHO CẤU TRÚC DỌC
+    # CSS MỚI: BÁM SÁT ẢNH THIẾT KẾ BO GÓC CỦA BẠN (CẢ PC VÀ MOBILE)
     return f"""
     <html>
     <head>
@@ -486,74 +484,81 @@ def render_ui_battu_tietkhi(
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-radius: 16px;
-            padding: 12px 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            border: 1px solid #ddd;
+            border-radius: 20px; /* Bo góc cong đẹp như hình */
+            padding: 16px 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             text-align: center;
             box-sizing: border-box;
-            background: #fff;
         }}
         
-        .bt-title {{ font-size: 16px; font-weight: bold; color: #777; margin-bottom: 4px; }}
-        .bt-val {{ font-size: 26px; font-weight: bold; color: #111; margin-bottom: 8px; font-family: Arial, sans-serif;}}
+        .bt-title {{ font-size: 16px; font-weight: bold; color: #777; margin-bottom: 2px; text-transform: capitalize;}}
+        .bt-val {{ font-size: 32px; font-weight: bold; color: #111; margin-bottom: 12px; font-family: Arial, sans-serif; line-height: 1;}}
         
-        /* Chỉnh hình ảnh Logo */
-        .bt-chutinh {{ min-height: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }}
+        /* CHỈNH ẢNH LOGO THẬP THẦN */
+        .bt-chutinh {{ min-height: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }}
         .img-logo-chutinh {{
-            width: 80%;
-            max-width: 90px;
-            height: auto;
-            border-radius: 20px;
+            height: 22px; /* Gắn cứng chiều cao để các thẻ đồng đều */
+            width: auto;
+            object-fit: contain;
         }}
-        .fallback-ct {{ font-size: 14px; font-weight: bold; background: #eee; padding: 2px 8px; border-radius: 12px; border: 1px solid #ccc; }}
+        /* Chế độ dự phòng nếu load ảnh fail */
+        .fallback-ct {{ font-size: 11px; font-weight: bold; background: #fff; padding: 2px 10px; border-radius: 12px; border: 2px solid #aaa; color: #555; font-family: Arial, sans-serif; letter-spacing: 0.5px;}}
 
-        /* Cấu trúc Can Chi dọc */
+        /* Cấu trúc Can Chi dọc y hệt hình */
         .bt-canchi-vert {{
             display: flex;
             flex-direction: column;
-            font-size: 38px;
-            line-height: 1.1;
+            font-size: 42px;
+            line-height: 1.15;
             font-weight: 900;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
         }}
 
         /* Lưới hiển thị Tàng Ẩn và Phó tinh */
         .bt-tang-pho-grid {{
             display: flex;
             flex-direction: column;
-            width: 100%;
-            margin-bottom: 12px;
-            gap: 4px;
+            width: 80%;
+            margin-bottom: 16px;
+            gap: 6px;
         }}
         .bt-tang, .bt-pho {{
             display: flex;
-            justify-content: space-evenly;
+            justify-content: space-around;
             width: 100%;
-            font-size: 15px;
-            font-weight: bold;
         }}
-        .bt-pho {{ font-weight: normal; font-family: Arial, sans-serif; font-size: 13px; color: #333; }}
+        .bt-tang {{ font-size: 16px; font-weight: bold; }}
+        .bt-pho {{ font-size: 14px; font-family: Arial, sans-serif; color: #000; }}
 
-        .bt-truongsinh {{ font-size: 16px; font-weight: bold; color: #000; margin-bottom: 8px; }}
-        .bt-napam {{ font-size: 13px; font-weight: bold; font-family: Arial, sans-serif; }}
+        .bt-truongsinh {{ font-size: 18px; font-weight: bold; color: #000; margin-bottom: 12px; letter-spacing: 0.5px;}}
+        .bt-napam {{ font-size: 15px; font-weight: bold; font-family: Arial, sans-serif; }}
 
+        /* Khu vực đếm ngược Tiết Khí */
         .bt-term-wrap {{ text-align: center; margin-top: 10px; font-family: Arial, sans-serif; }}
         .bt-term-current {{ font-size: 16px; font-weight: bold; color: #5b4636; margin-bottom: 4px;}}
         .bt-term-countdown {{ font-size: 14px; color: #6c6c6c; }}
 
-        /* RESPONSIVE CHO MOBILE */
+        /* RESPONSIVE CHO ĐIỆN THOẠI - THU GỌN VỪA VẶN MÀ KHÔNG TRÀN */
         @media (max-width: 768px) {{
             .bt-container {{ gap: 6px; padding: 2px; }}
-            .bt-card {{ padding: 8px 2px; border-radius: 10px; }}
+            .bt-card {{ padding: 10px 4px; border-radius: 14px; }}
             .bt-title {{ font-size: 12px; margin-bottom: 2px; }}
-            .bt-val {{ font-size: 18px; margin-bottom: 4px; }}
-            .img-logo-chutinh {{ max-width: 55px; border-radius: 10px; }}
-            .bt-canchi-vert {{ font-size: 24px; margin-bottom: 8px; }}
-            .bt-tang {{ font-size: 12px; }}
-            .bt-pho {{ font-size: 10px; }}
-            .bt-truongsinh {{ font-size: 12px; margin-bottom: 4px; }}
-            .bt-napam {{ font-size: 9px; }}
+            .bt-val {{ font-size: 20px; margin-bottom: 8px; }}
+            
+            .bt-chutinh {{ margin-bottom: 8px; min-height: 18px; }}
+            .img-logo-chutinh {{ height: 16px; }}
+            .fallback-ct {{ font-size: 9px; padding: 2px 6px; border-width: 1px; }}
+
+            .bt-canchi-vert {{ font-size: 26px; margin-bottom: 12px; }}
+            
+            .bt-tang-pho-grid {{ width: 95%; margin-bottom: 12px; gap: 4px;}}
+            .bt-tang {{ font-size: 13px; }}
+            .bt-pho {{ font-size: 11px; }}
+            
+            .bt-truongsinh {{ font-size: 14px; margin-bottom: 8px; }}
+            .bt-napam {{ font-size: 10px; }}
+            
             .bt-term-current {{ font-size: 13px; }}
             .bt-term-countdown {{ font-size: 11px; }}
         }}
