@@ -343,21 +343,32 @@ def render_ui_battu_tietkhi(
             background: transparent;
             font-family: Arial, sans-serif;
         }}
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: Arial, sans-serif;
+        }}
+
         .bt-wrap {{
             width: 100%;
-            padding: 6px 0 2px 0;
+            padding: 4px 0 2px 0;
             box-sizing: border-box;
         }}
+
         .bt-container {{
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: clamp(4px, 1vw, 14px);
             width: 100%;
+            align-items: stretch;
         }}
+
         .bt-card {{
-            min-height: 235px;
-            border-radius: 22px;
-            padding: 18px 10px 16px 10px;
+            min-height: clamp(128px, 17vw, 235px);
+            border-radius: clamp(12px, 1.8vw, 22px);
+            padding: clamp(8px, 1.2vw, 18px) clamp(4px, 0.8vw, 10px) clamp(8px, 1vw, 16px);
             text-align: center;
             box-shadow: 0 6px 18px rgba(0,0,0,0.08);
             display: flex;
@@ -365,48 +376,113 @@ def render_ui_battu_tietkhi(
             align-items: center;
             justify-content: space-between;
             box-sizing: border-box;
-        }}
-        .bt-title {{
-            font-family: "Times New Roman", serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: #8f7a6a;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }}
-        .bt-val {{
-            font-family: "Times New Roman", serif;
-            font-size: 52px;
-            font-weight: 700;
-            color: #444;
-            line-height: 1.05;
-            margin-bottom: 10px;
-        }}
-        .bt-canchi {{
-            font-family: "Times New Roman", serif;
-            font-size: 38px;
-            font-weight: 900;
-            line-height: 1.15;
-            margin-bottom: 10px;
-        }}
-        .bt-napam {{
-            font-size: 13px;
-            font-weight: 500;
-            line-height: 1.2;
+            overflow: hidden;
         }}
 
-        @media (max-width: 900px) {{
+        .bt-title {{
+            font-family: "Times New Roman", serif;
+            font-size: clamp(8px, 1.1vw, 15px);
+            font-weight: 700;
+            color: #8f7a6a;
+            letter-spacing: clamp(0px, 0.08vw, 1px);
+            margin-bottom: clamp(2px, 0.4vw, 4px);
+            white-space: nowrap;
+        }}
+
+        .bt-val {{
+            font-family: "Times New Roman", serif;
+            font-size: clamp(20px, 3.2vw, 52px);
+            font-weight: 700;
+            color: #444;
+            line-height: 1.02;
+            margin-bottom: clamp(4px, 0.7vw, 10px);
+            white-space: nowrap;
+        }}
+
+        .bt-canchi {{
+            font-family: "Times New Roman", serif;
+            font-size: clamp(14px, 2.5vw, 38px);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: clamp(4px, 0.7vw, 10px);
+        }}
+
+        .bt-canchi span {{
+            white-space: nowrap;
+        }}
+
+        .bt-napam {{
+            font-size: clamp(6px, 0.9vw, 13px);
+            font-weight: 500;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }}
+
+        @media (max-width: 768px) {{
+            .bt-wrap {{
+                padding: 2px 0 0 0;
+            }}
+
             .bt-container {{
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 6px;
             }}
+
             .bt-card {{
-                min-height: 205px;
+                min-height: 150px;
+                border-radius: 14px;
+                padding: 8px 4px 8px 4px;
             }}
+
+            .bt-title {{
+                font-size: 8px;
+                margin-bottom: 2px;
+            }}
+
             .bt-val {{
-                font-size: 40px;
+                font-size: 22px;
+                margin-bottom: 4px;
             }}
+
             .bt-canchi {{
-                font-size: 30px;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }}
+
+            .bt-napam {{
+                font-size: 7px;
+            }}
+        }}
+
+        @media (max-width: 430px) {{
+            .bt-container {{
+                gap: 4px;
+            }}
+
+            .bt-card {{
+                min-height: 132px;
+                border-radius: 12px;
+                padding: 6px 3px 6px 3px;
+            }}
+
+            .bt-title {{
+                font-size: 7px;
+            }}
+
+            .bt-val {{
+                font-size: 18px;
+            }}
+
+            .bt-canchi {{
+                font-size: 11px;
+                line-height: 1.02;
+            }}
+
+            .bt-napam {{
+                font-size: 6px;
             }}
         }}
     </style>
