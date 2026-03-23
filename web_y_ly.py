@@ -588,7 +588,7 @@ def render_ui_battu_tietkhi(
                 /* BƯỚC 2: DÙNG PIXEL (PX) ĐỂ KÉO ẢNH BÙ TRỪ CHO CÁI VIỀN TRONG SUỐT BỊ LỆCH */
                 /* Đảm bảo không bao giờ bị thay đổi khi đổi điện thoại */
                 margin-left: 20px; /* Số dương đẩy sang phải, số âm đẩy sang trái */
-                margin-top: 40px;  /* Số dương đẩy xuống dưới, số âm đẩy lên trên */
+                margin-top: 60px;  /* Số dương đẩy xuống dưới, số âm đẩy lên trên */
             }}
 
             /* 4. Can Chi và Tàng Ẩn: Thu nhỏ một chút để 3 chữ (VD: Kỷ Đinh Ất) có thể đứng ngang hàng ngang */
