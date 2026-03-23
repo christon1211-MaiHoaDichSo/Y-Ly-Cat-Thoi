@@ -576,13 +576,19 @@ def render_ui_battu_tietkhi(
             
             /* 3. RESET TỌA ĐỘ LOGO: Đưa về tâm điểm tuyệt đối, xóa bỏ sai lệch từ PC */
             .bt-chutinh {{ margin-bottom: 4px; height: 20px; width: 100%; position: relative; }}
+            
             .img-logo-chutinh {{ 
                 position: absolute;
-                top: 345%; 
-                left: 104%; 
+                /* BƯỚC 1: LÚC NÀO CŨNG PHẢI LÀ 50% ĐỂ NEO CHÍNH XÁC VÀO TÂM CỦA CỘT */
+                top: 50%; 
+                left: 50%; 
                 height: 180px; 
-                /* Neo chính tâm, scale nhẹ nhàng để vừa vặn không lấn át chữ */
                 transform: translate(-50%, -50%) scale(1.7); 
+                
+                /* BƯỚC 2: DÙNG PIXEL (PX) ĐỂ KÉO ẢNH BÙ TRỪ CHO CÁI VIỀN TRONG SUỐT BỊ LỆCH */
+                /* Đảm bảo không bao giờ bị thay đổi khi đổi điện thoại */
+                margin-left: 20px; /* Số dương đẩy sang phải, số âm đẩy sang trái */
+                margin-top: 40px;  /* Số dương đẩy xuống dưới, số âm đẩy lên trên */
             }}
 
             /* 4. Can Chi và Tàng Ẩn: Thu nhỏ một chút để 3 chữ (VD: Kỷ Đinh Ất) có thể đứng ngang hàng ngang */
