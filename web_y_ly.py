@@ -496,11 +496,11 @@ def render_ui_battu_tietkhi(
         .bt-title {{ font-size: 18px; font-weight: bold; color: #777; margin-bottom: 2px; text-transform: capitalize;}}
         /* Phóng to số liệu 2026, 03, 22... (Tăng từ 28px lên 36px) */
         .bt-val {{ 
-            font-size: 36px; 
+            font-size: 35px; 
             font-weight: bold; 
             color: #111; 
             margin-bottom: 8px; 
-            font-family: Arial, sans-serif; 
+            font-family: "Times New Roman", serif; 
             line-height: 1;
         }}
         
