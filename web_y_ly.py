@@ -587,7 +587,7 @@ def render_ui_battu_tietkhi(
                 
                 /* BƯỚC 2: DÙNG PIXEL (PX) ĐỂ KÉO ẢNH BÙ TRỪ CHO CÁI VIỀN TRONG SUỐT BỊ LỆCH */
                 /* Đảm bảo không bao giờ bị thay đổi khi đổi điện thoại */
-                margin-left: 20px; /* Số dương đẩy sang phải, số âm đẩy sang trái */
+                margin-left: 30px; /* Số dương đẩy sang phải, số âm đẩy sang trái */
                 margin-top: 60px;  /* Số dương đẩy xuống dưới, số âm đẩy lên trên */
             }}
 
